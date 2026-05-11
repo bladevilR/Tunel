@@ -78,3 +78,12 @@ $env:NODE_PATH='C:\Users\R\.cache\codex-runtimes\codex-primary-runtime\dependenc
 & 'C:\Users\R\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe' .\verify_system.cjs
 & 'C:\Users\R\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe' .\tools\verify_model_led_ui.cjs
 ```
+
+## 远端部署包
+
+```powershell
+python .\tools\build_windows_server_package.py
+python .\tools\verify_windows_server_package.py
+```
+
+默认生成 `dist/interconnect-agent-server-*-with-key.zip`，包含 `start_server.bat`、内置 Python 运行时和当前 `.env.local`。该包内含模型访问密钥，只用于受控分发。
