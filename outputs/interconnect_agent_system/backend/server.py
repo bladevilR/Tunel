@@ -613,6 +613,14 @@ def evaluate_project(project: dict, research_options: dict | None = None) -> dic
         search_knowledge,
         research_options
     )
+    model_judgement = research_bundle.get("modelJudgement") or {}
+    model_rule_difference = research_bundle.get("modelRuleDifference") or {}
+    model_quality = research_bundle.get("modelQuality") or {}
+    diagram_brief = build_diagram_brief(project, {
+        "level": grade["level"],
+        "recommendation": recommendation_payload,
+    }, model_judgement)
+    report_modes = build_report_modes(model_judgement, model_rule_difference, model_quality)
     client_report_bundle = build_client_report(
         project,
         score,
@@ -661,6 +669,11 @@ def evaluate_project(project: dict, research_options: dict | None = None) -> dic
         "researchPlan": research_bundle["researchPlan"],
         "evidencePack": research_bundle["evidencePack"],
         "modelAssessment": research_bundle["modelAssessment"],
+        "modelJudgement": model_judgement,
+        "modelRuleDifference": model_rule_difference,
+        "modelQuality": model_quality,
+        "diagramBrief": diagram_brief,
+        "reportModes": report_modes,
         "capabilityStatus": research_bundle["capabilityStatus"],
         "clientReport": client_report_bundle["clientReport"],
         "clientReportMode": client_report_bundle["clientReportMode"],
@@ -774,6 +787,62 @@ def build_scheme_comparison(primary: dict, alternatives: list[dict], rule: dict)
     return comparison
 
 
+def build_diagram_brief(project: dict, result_facts: dict, judgement: dict) -> dict:
+    station = (project.get("station") or {}).get("name") or "轨道站点"
+    parcel = (project.get("parcel") or {}).get("name") or project.get("name") or "目标地块"
+    scheme = (
+        judgement.get("recommendedType")
+        or ((result_facts.get("recommendation") or {}).get("primary") or {}).get("name")
+        or "推荐联通方式"
+    )
+    return {
+        "diagramId": "D-001",
+        "diagramType": "recommended_connection_path",
+        "title": "推荐联通路径示意",
+        "summary": f"表达{station}与{parcel}之间的{scheme}关系，并标注主要风险与待复核界面。",
+        "nodes": [
+            {"id": "station", "label": station, "type": "station", "x": 110, "y": 160, "level": "B1"},
+            {"id": "parcel", "label": parcel, "type": "parcel", "x": 430, "y": 160, "level": "B1"},
+        ],
+        "edges": [
+            {"id": "path-1", "from": "station", "to": "parcel", "type": "recommended", "label": scheme}
+        ],
+        "annotations": [
+            {"id": "risk-1", "text": "接口标高、消防分区、产权界面需复核", "anchorTo": "path-1"}
+        ],
+        "exports": ["svg", "png", "docx"],
+    }
+
+
+def build_report_modes(judgement: dict, difference: dict, quality: dict) -> list[dict]:
+    return [
+        {
+            "id": "client_formal",
+            "name": "客户正式版",
+            "tone": "正式、稳健、可审阅",
+            "focus": "结论、依据、风险、补资和实施建议",
+            "sectionDensity": "medium",
+            "qualityLabels": quality.get("labels", []),
+        },
+        {
+            "id": "expert_appendix",
+            "name": "专家附录版",
+            "tone": "证据完整、规则透明、便于复核",
+            "focus": "规则基线、模型差异、证据引用和复核问题",
+            "sectionDensity": "high",
+            "qualityLabels": difference.get("reviewLabels", []),
+        },
+        {
+            "id": "leadership_brief",
+            "name": "领导汇报版",
+            "tone": "一页一结论、一页一风险、一页一行动",
+            "focus": "模型结论、推荐方案、关键风险和下一步动作",
+            "sectionDensity": "low",
+            "qualityLabels": ["可汇报", *quality.get("labels", [])[:2]],
+        },
+    ]
+
+
 def build_risk_points(project: dict, missing: list[dict], station_context: dict) -> list[dict]:
     operations = station_context.get("operations") or {}
     amenities = station_context.get("amenities") or {}
@@ -844,9 +913,9 @@ def build_llm_review_context(
     scheme_comparison = build_scheme_comparison(primary, alternatives, rule)
     risk_points = build_risk_points(project, missing, station_context)
     return {
-        "purpose": "供未来接入的LLM或人工专家在规则计算结果基础上做综合研判，不覆盖后端评分事实。",
+        "purpose": "供模型在规则基线、项目事实和证据材料基础上做最终综合研判，可在说明理由和复核标签后覆盖规则结论。",
         "guardrails": [
-            "不得修改后端评分、等级、推荐方式等结构化事实，只能给出解释、复核建议和方案深化意见。",
+            "可以覆盖规则等级或推荐方式，但必须保留规则基线、覆盖理由、证据引用和人工复核标签。",
             "正式地块资料缺失时必须标注预评估性质，不得把站点周边线索当作地块正式输入。",
             "引用资料应说明来源和用途；无法确认的工程条件应进入补齐项或风险项。",
             "输出需区分近期可实施措施、中期深化设计和远期一体化预留。"
@@ -936,6 +1005,8 @@ def build_report(
     research_plan = research_bundle.get("researchPlan") or {}
     evidence_pack = research_bundle.get("evidencePack") or {}
     model_assessment = research_bundle.get("modelAssessment") or {}
+    model_judgement = research_bundle.get("modelJudgement") or {}
+    model_rule_difference = research_bundle.get("modelRuleDifference") or {}
     capability_status = research_bundle.get("capabilityStatus") or {}
     reference_text = "；".join(
         f"{item.get('source')}（{item.get('use')}）"
@@ -1073,7 +1144,18 @@ def build_report(
                 f"动态维度研判包括：{model_dimension_text}。"
                 f"不确定性包括：{model_uncertainty_text or '暂无额外不确定性'}。"
                 f"人工复核问题包括：{model_review_text}。"
-                "上述模型导向研判不替代四维规则评分，不改写综合分、等级和推荐方式。"
+                "上述模型导向研判以模型为最终综合判断，规则评分作为基线和差异检查坐标保留。"
+            )
+        },
+        {
+            "title": "模型主导综合研判",
+            "content": (
+                f"模型主结论为：{model_judgement.get('level', grade['level'])}，推荐方式为"
+                f"{model_judgement.get('recommendedType', primary.get('name'))}。"
+                f"置信度约为{model_judgement.get('confidence', 0):.2f}。"
+                f"判断理由：{model_judgement.get('reason', '模型基于规则基线、站点上下文和资料证据形成综合判断。')}"
+                f"差异状态：{model_rule_difference.get('status', 'aligned')}；"
+                f"复核标签：{join_cn(model_rule_difference.get('reviewLabels') or [])}。"
             )
         },
         {
@@ -1094,9 +1176,10 @@ def build_report(
         {
             "title": "LLM综合判断框架",
             "content": (
-                "后续接入其他LLM时，建议把本次后端结果作为不可篡改事实输入，LLM只负责综合解释、方案复核和专家式建议。"
+                "后续接入其他LLM时，建议把本次后端结果作为规则基线、证据包和差异检查输入，LLM负责最终综合研判、方案复核和专家式建议。"
                 f"输入应包括项目事实、引用依据、四维评分拆解、推荐与备选方案、风险复核点和待补齐资料。建议输出结构为：{llm_schema_text}。"
-                "LLM不得自行改分、改等级或把缺失资料补成确定事实；所有新增判断应标注依据、置信度和需人工确认的问题。"
+                "模型可以在明确说明理由、证据和复核标签的前提下覆盖规则等级或推荐方案；规则评分作为基线和差异检查坐标保留。"
+                "模型不得把缺失资料补成确定事实；所有新增判断应标注依据、置信度和需人工确认的问题。"
             )
         }
     ]
