@@ -1,0 +1,514 @@
+{
+  "project": {
+    "name": "阳澄湖中路站周边互联互通预评估",
+    "projectCode": "STATION-阳澄湖中路",
+    "attachments": "",
+    "station": {
+      "name": "阳澄湖中路",
+      "district": "相城区",
+      "line": "2/8",
+      "todLevel": "城市级TOD",
+      "locationLevel": "city",
+      "stationType": "current_transfer",
+      "dailyInbound": 5493,
+      "nearbyExit": "1号出入口",
+      "interfaceCondition": "运营资料识别出入口3个、接口1个；联通形式：高架联通；问题记录1条。"
+    },
+    "parcel": {
+      "quadrant": "东南象限",
+      "location": "阳澄湖中路站周边",
+      "distanceBand": "200m核心开发区",
+      "landUse": "major_public_commercial",
+      "buildingArea": 25000,
+      "siteArea": 9000,
+      "developmentIntensity": "5k_30k",
+      "undergroundSpace": "commercial_public_pr",
+      "landUseText": "商业用地、商务金融用地",
+      "functionalFormat": "综合商业、商业步行街、金融办公",
+      "undergroundDescription": "有地下商业及地下停车场",
+      "planningIndicators": "",
+      "functionalDemand": "基于站点客流、TOD级别、出入口开放和周边配套先行预评估",
+      "constraints": "控规图则、规划条件、概念方案、接口标高、管线和权属边界待补齐"
+    },
+    "id": "station-阳澄湖中路"
+  },
+  "score": 3.0679,
+  "scorePercent": 75.2,
+  "scoreScale": {
+    "rawMax": 4.0795,
+    "normalizedMax": 100,
+    "gradingBasis": "scorePercent = rawScore / rawMax * 100; 20260507反馈暂按80分以上必连、60-80分尽连、60分以下可连",
+    "feedbackDate": "2026-05-07"
+  },
+  "level": "尽连地块",
+  "policy": "必要性次之，应尽量联通；优先推动接口条件、建设协同和方案比选。",
+  "stationContext": {
+    "dailyInbound": 5493.0,
+    "dailyInboundSource": "每站每月日均进站.xlsx：2025-11日均进站",
+    "ridership": {
+      "stationName": "阳澄湖中路",
+      "lines": "02、08",
+      "latestMonth": "2025-11",
+      "latestDailyInbound": 5492.73,
+      "averageDailyInbound": 5387.66,
+      "monthCount": 11,
+      "monthly": [
+        {
+          "month": "2025-01",
+          "inboundTotal": 153449.0,
+          "dailyInbound": 4949.97
+        },
+        {
+          "month": "2025-02",
+          "inboundTotal": 148098.0,
+          "dailyInbound": 5289.21
+        },
+        {
+          "month": "2025-03",
+          "inboundTotal": 179648.0,
+          "dailyInbound": 5795.1
+        },
+        {
+          "month": "2025-04",
+          "inboundTotal": 176271.0,
+          "dailyInbound": 5875.7
+        },
+        {
+          "month": "2025-05",
+          "inboundTotal": 173136.0,
+          "dailyInbound": 5585.03
+        },
+        {
+          "month": "2025-06",
+          "inboundTotal": 154660.0,
+          "dailyInbound": 5155.33
+        },
+        {
+          "month": "2025-07",
+          "inboundTotal": 171044.0,
+          "dailyInbound": 5517.55
+        },
+        {
+          "month": "2025-08",
+          "inboundTotal": 165771.0,
+          "dailyInbound": 5347.45
+        },
+        {
+          "month": "2025-09",
+          "inboundTotal": 153510.0,
+          "dailyInbound": 5117.0
+        },
+        {
+          "month": "2025-10",
+          "inboundTotal": 159315.0,
+          "dailyInbound": 5139.19
+        },
+        {
+          "month": "2025-11",
+          "inboundTotal": 164782.0,
+          "dailyInbound": 5492.73
+        }
+      ]
+    },
+    "operations": {
+      "name": "2号线车站部分",
+      "displayNames": [
+        "阳澄湖中路\n（2号线车站部分）"
+      ],
+      "aliases": [
+        "2号线车站部分",
+        "阳澄湖中路",
+        "阳澄湖中路\n（2号线车站部分）"
+      ],
+      "lines": [
+        "2/8号线"
+      ],
+      "districts": [
+        "相城区"
+      ],
+      "types": [
+        "车站出入口"
+      ],
+      "connectionForms": [
+        "高架联通"
+      ],
+      "statusCounts": {
+        "已开通": 2,
+        "建设中": 0,
+        "已建设未开通": 2,
+        "未建设未开通": 0
+      },
+      "issueCount": 1,
+      "priorityLabels": [
+        "追踪落实"
+      ],
+      "details": [
+        {
+          "line": "2/8号线",
+          "displayStationName": "阳澄湖中路\n（2号线车站部分）",
+          "district": "相城区",
+          "type": "车站出入口",
+          "part": "1号口",
+          "parcel": "嘉元花园",
+          "connectionForm": "/",
+          "developmentProgress": "已建地块",
+          "status": "已开通",
+          "problem": "",
+          "priority": ""
+        },
+        {
+          "line": "2/8号线",
+          "displayStationName": "阳澄湖中路\n（2号线车站部分）",
+          "district": "相城区",
+          "type": "车站出入口",
+          "part": "2a号口",
+          "parcel": "车站管理用房",
+          "connectionForm": "/",
+          "developmentProgress": "已建地块",
+          "status": "已开通",
+          "problem": "",
+          "priority": ""
+        },
+        {
+          "line": "2/8号线",
+          "displayStationName": "阳澄湖中路\n（2号线车站部分）",
+          "district": "相城区",
+          "type": "车站出入口",
+          "part": "2b号口",
+          "parcel": "车站管理用房",
+          "connectionForm": "/",
+          "developmentProgress": "已建地块",
+          "status": "已建设未开通",
+          "problem": "",
+          "priority": ""
+        },
+        {
+          "line": "2/8号线",
+          "displayStationName": "阳澄湖中路\n（2号线车站部分）",
+          "district": "相城区",
+          "type": "车站出入口",
+          "part": "",
+          "parcel": "繁花邻里",
+          "connectionForm": "高架联通",
+          "developmentProgress": "已建地块",
+          "status": "已建设未开通",
+          "problem": "繁华邻里未缴纳接口费，未签联通协议",
+          "priority": "追踪落实"
+        }
+      ],
+      "exitCount": 3,
+      "exitParts": [
+        "1号口",
+        "2a号口",
+        "2b号口"
+      ],
+      "interfaceCount": 1
+    },
+    "amenities": {
+      "name": "阳澄湖中路",
+      "displayNames": [
+        "阳澄湖中路站"
+      ],
+      "aliases": [
+        "阳澄湖中路",
+        "阳澄湖中路站"
+      ],
+      "lines": [
+        "2号线"
+      ],
+      "exitRows": 6,
+      "openExitCount": 5,
+      "closedExitCount": 1,
+      "managedExitCount": 5,
+      "owners": [
+        "建设公司",
+        "运营公司"
+      ],
+      "nearby": {
+        "schools": [
+          "陆慕中心幼儿园阳澄湖中路园区"
+        ],
+        "hubs": [],
+        "residential": [
+          "乐苑小区、澄和家园、天境澜庭",
+          "仁恒.溪云雅苑",
+          "嘉元花园南区",
+          "日益家园"
+        ],
+        "commercial": [
+          "中环百汇广场",
+          "繁花邻里"
+        ],
+        "other": []
+      },
+      "mobility": {
+        "publicBike": [],
+        "sharedBike": [],
+        "parkAndRide": [
+          "350；1；126；车型：小型车；收费标准：30分钟以内（含30分钟）免费；超过30分钟：5元/次，24小时为一个收费周期。；10；1；100；采莲路纪元路南\n纪元路采莲路东；20\n270；5\n3；86、887、885、878、夜4\n817、8001、夜4"
+        ],
+        "bikeAndRide": [],
+        "busTransfer": []
+      },
+      "sampleExits": [
+        {
+          "line": "2号线",
+          "exit": "1号出入口",
+          "isOpen": "是",
+          "owner": "运营公司",
+          "isManaged": "是"
+        },
+        {
+          "line": "2号线",
+          "exit": "2a号出入口",
+          "isOpen": "是",
+          "owner": "运营公司",
+          "isManaged": "是"
+        },
+        {
+          "line": "2号线",
+          "exit": "2b号出入口",
+          "isOpen": "否",
+          "owner": "建设公司",
+          "isManaged": "否"
+        },
+        {
+          "line": "2号线",
+          "exit": "3号出入口",
+          "isOpen": "是",
+          "owner": "运营公司",
+          "isManaged": "是"
+        },
+        {
+          "line": "2号线",
+          "exit": "5号出入口",
+          "isOpen": "是",
+          "owner": "运营公司",
+          "isManaged": "是"
+        },
+        {
+          "line": "2号线",
+          "exit": "6号出入口",
+          "isOpen": "是",
+          "owner": "运营公司",
+          "isManaged": "是"
+        }
+      ]
+    }
+  },
+  "provisional": false,
+  "dataCompleteness": {
+    "done": 6,
+    "total": 6,
+    "ratio": 1.0
+  },
+  "dimensions": [
+    {
+      "id": "function",
+      "name": "功能属性",
+      "weight": 0.4188,
+      "score": 0.9966,
+      "factors": [
+        {
+          "factorId": "land_use",
+          "name": "用地功能",
+          "value": "major_public_commercial",
+          "label": "重要医疗文体设施、综合商业、邻里中心",
+          "score": 4,
+          "weight": 0.0795,
+          "weightedScore": 0.318,
+          "assumed": false,
+          "source": "现有输入/预设数据"
+        },
+        {
+          "factorId": "development_intensity",
+          "name": "开发强度",
+          "value": "5k_30k",
+          "label": "建筑面积 5 千-3 万平方米",
+          "score": 2,
+          "weight": 0.3393,
+          "weightedScore": 0.6786,
+          "assumed": false,
+          "source": "现有输入/预设数据"
+        }
+      ]
+    },
+    {
+      "id": "location",
+      "name": "区位属性",
+      "weight": 0.1407,
+      "score": 0.5628,
+      "factors": [
+        {
+          "factorId": "location_level",
+          "name": "区位能级",
+          "value": "city",
+          "label": "城市级中心",
+          "score": 4,
+          "weight": 0.1407,
+          "weightedScore": 0.5628,
+          "assumed": false,
+          "source": "现有输入/预设数据"
+        }
+      ]
+    },
+    {
+      "id": "transport",
+      "name": "交通属性",
+      "weight": 0.2976,
+      "score": 0.9369,
+      "factors": [
+        {
+          "factorId": "ridership",
+          "name": "出行客流",
+          "value": "5000_9000",
+          "label": "日均进站量 5000-9000",
+          "score": 3,
+          "weight": 0.2535,
+          "weightedScore": 0.7605,
+          "assumed": false,
+          "source": "每站每月日均进站.xlsx：2025-11日均进站"
+        },
+        {
+          "factorId": "transfer",
+          "name": "高效换乘",
+          "value": "current_transfer",
+          "label": "现状换乘站",
+          "score": 4,
+          "weight": 0.0441,
+          "weightedScore": 0.1764,
+          "assumed": false,
+          "source": "现有输入/预设数据"
+        }
+      ]
+    },
+    {
+      "id": "underground",
+      "name": "地下属性",
+      "weight": 0.1429,
+      "score": 0.5716,
+      "factors": [
+        {
+          "factorId": "underground_space",
+          "name": "地下空间",
+          "value": "commercial_public_pr",
+          "label": "有，功能为商业、公共服务、文体、商业+停车或 P+R 停车",
+          "score": 4,
+          "weight": 0.1429,
+          "weightedScore": 0.5716,
+          "assumed": false,
+          "source": "现有输入/预设数据"
+        }
+      ]
+    }
+  ],
+  "missing": [],
+  "recommendation": {
+    "primary": {
+      "id": "underground_main",
+      "name": "地下主通道",
+      "category": "地下联通",
+      "priority": 1,
+      "bestFor": [
+        "必连地块",
+        "尽连地块",
+        "商业公服",
+        "交通枢纽",
+        "地下公共空间"
+      ],
+      "avoidWhen": [
+        "无地下空间",
+        "接口条件不足",
+        "历史保护或地下遗址限制未论证"
+      ],
+      "parameters": [
+        "通行功能净宽不小于 5.0m，净高不小于 3.0m。",
+        "通行兼休憩或商业功能净高不小于 3.5m。",
+        "路径宜短直，减少多次弯折，节点处设置集散空间。",
+        "与车站非付费区、地块地下公共空间、防火分隔和运营界面一体化设计。"
+      ]
+    },
+    "alternatives": [
+      {
+        "id": "underground_secondary",
+        "name": "地下次通道",
+        "category": "地下联通",
+        "priority": 2,
+        "bestFor": [
+          "尽连地块",
+          "可连地块",
+          "停车接驳",
+          "接口预留"
+        ],
+        "avoidWhen": [
+          "地下空间缺失",
+          "工程经济性明显不足"
+        ],
+        "parameters": [
+          "以通行为主，宜控制商业性植入。",
+          "优先衔接站厅非付费区和地块地下一层公共流线。",
+          "需同步落实防火、排烟、防水、无障碍和导向标识。"
+        ]
+      },
+      {
+        "id": "weather_corridor",
+        "name": "风雨连廊",
+        "category": "地面联通",
+        "priority": 2,
+        "bestFor": [
+          "居住类",
+          "学校医院",
+          "青年公寓",
+          "社区公服",
+          "无地下公共空间"
+        ],
+        "avoidWhen": [
+          "人行道净宽不足",
+          "风貌管控严格且未论证"
+        ],
+        "parameters": [
+          "适用于地面接驳需求强、地下连通工程经济性不足的场景。",
+          "应保障人行道剩余通行净宽和无障碍通行。",
+          "需与车站出入口集散空间、地块主入口和标识系统连续衔接。",
+          "结构、排水、照明和城市风貌应同步控制。"
+        ]
+      }
+    ],
+    "rule": {
+      "id": "priority_connect_public_underground",
+      "when": "尽连地块，且地下空间为公共开放或商业服务功能",
+      "primary": "underground_main",
+      "alternatives": [
+        "underground_secondary",
+        "weather_corridor"
+      ],
+      "reason": "地块公共属性较强且具备实施条件，优先推动地下通道连通。"
+    }
+  },
+  "report": [
+    {
+      "title": "项目概况",
+      "content": "阳澄湖中路站周边互联互通预评估对应站点为阳澄湖中路，所属区划为相城区，地块位置为阳澄湖中路站周边，圈层为200m核心开发区。地块业态为综合商业、商业步行街、金融办公，用地面积约9000平方米，建筑面积约25000平方米，规划指标为待补齐规划指标。邻近出入口为1号出入口，日均客流为5493 人次/日（每站每月日均进站.xlsx：2025-11日均进站）。站点侧已识别出入口 3 个，联通形式 高架联通，问题记录 1 条。运营公司202604资料显示，站点出入口开放 5/6 个，运营管理 5 个；周边配套包括学校：陆慕中心幼儿园阳澄湖中路园区；住宅：乐苑小区、澄和家园、天境澜庭、仁恒.溪云雅苑；商业景点：中环百汇广场、繁花邻里。"
+    },
+    {
+      "title": "联通必要性评估结论",
+      "content": "本次按功能、区位、交通、地下四个维度进行参数化试算，功能属性 0.9966 分；区位属性 0.5628 分；交通属性 0.9369 分；地下属性 0.5716 分，原始加权分为 3.0679/4.0795，折算百分制为 75.20 分，按 20260507 反馈的 80/60 阈值判定为尽连地块。必要性次之，应尽量联通；优先推动接口条件、建设协同和方案比选。客流记录覆盖至 2025-11，平均日均进站 5387.66 人次/日。"
+    },
+    {
+      "title": "联通方式比选与推荐方案",
+      "content": "系统推荐采用地下主通道，推荐理由为：地块公共属性较强且具备实施条件，优先推动地下通道连通。。备选方案包括地下次通道、风雨连廊，可根据接口条件、建设资金、交通组织和风貌管控要求进一步比选。"
+    },
+    {
+      "title": "方案设计核心技术要求",
+      "content": "地下主通道属于地下联通方式。核心技术要求包括：通行功能净宽不小于 5.0m，净高不小于 3.0m。；通行兼休憩或商业功能净高不小于 3.5m。；路径宜短直，减少多次弯折，节点处设置集散空间。；与车站非付费区、地块地下公共空间、防火分隔和运营界面一体化设计。"
+    },
+    {
+      "title": "合规性要求说明",
+      "content": "方案应落实防火疏散、无障碍、结构安全、防水抗变形、通风排烟、导向标识和运营管理界面等要求；强制性条文、推荐值和适用条件需在规则库中保留来源追溯。"
+    },
+    {
+      "title": "设计优化与实施建议",
+      "content": "资料完整性状态：当前核心评价字段完整。建议在方案深化前补齐站点客流、接口标高、出入口位置、地下空间功能、建设时序和特殊约束条件，并在报告中保留人工复核意见。"
+    }
+  ]
+}

@@ -1,0 +1,451 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>群力站通道示意图 - 确定性渲染</title>
+  <link rel="icon" href="data:," />
+  <style>
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      background: #eef2f0;
+      overflow: hidden;
+      font-family: "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
+    }
+
+    body {
+      display: grid;
+      place-items: center;
+    }
+
+    svg {
+      width: 100vw;
+      height: 100vh;
+      display: block;
+      background: #edf0ec;
+    }
+
+    .map-line {
+      stroke: rgba(79, 83, 80, 0.44);
+      stroke-width: 2;
+      fill: none;
+      vector-effect: non-scaling-stroke;
+    }
+
+    .thin-line {
+      stroke: rgba(93, 99, 96, 0.24);
+      stroke-width: 1.2;
+      fill: none;
+      vector-effect: non-scaling-stroke;
+    }
+
+    .road-label {
+      fill: rgba(33, 36, 34, 0.45);
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: 0;
+    }
+
+    .label-stroke {
+      paint-order: stroke;
+      stroke: rgba(255, 255, 255, 0.94);
+      stroke-width: 8px;
+      stroke-linejoin: round;
+    }
+  </style>
+</head>
+<body>
+  <svg id="scene" role="img" aria-label="群力站通道示意图"></svg>
+  <script src="./annotations.js"></script>
+  <script>
+    const NS = "http://www.w3.org/2000/svg";
+
+    function el(name, attrs = {}, parent) {
+      const node = document.createElementNS(NS, name);
+      for (const [key, value] of Object.entries(attrs)) {
+        if (value !== undefined && value !== null) {
+          node.setAttribute(key, String(value));
+        }
+      }
+      if (parent) parent.appendChild(node);
+      return node;
+    }
+
+    function points(value) {
+      return value.map((point) => point.join(",")).join(" ");
+    }
+
+    function pathFrom(pointsValue, close = true) {
+      const [first, ...rest] = pointsValue;
+      return `M ${first[0]} ${first[1]} ${rest.map((point) => `L ${point[0]} ${point[1]}`).join(" ")}${close ? " Z" : ""}`;
+    }
+
+    function midpoint(a, b, t = 0.5) {
+      return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
+    }
+
+    function offsetPoints(pointsValue, dx, dy) {
+      return pointsValue.map((point) => [point[0] + dx, point[1] + dy]);
+    }
+
+    function addFilterDefs(svg) {
+      const defs = el("defs", {}, svg);
+      const shadow = el("filter", {
+        id: "softShadow",
+        x: "-20%",
+        y: "-30%",
+        width: "150%",
+        height: "170%"
+      }, defs);
+      el("feDropShadow", {
+        dx: 18,
+        dy: 24,
+        stdDeviation: 10,
+        floodColor: "#1f2933",
+        floodOpacity: 0.18
+      }, shadow);
+
+      const fineShadow = el("filter", {
+        id: "fineShadow",
+        x: "-20%",
+        y: "-30%",
+        width: "150%",
+        height: "170%"
+      }, defs);
+      el("feDropShadow", {
+        dx: 6,
+        dy: 9,
+        stdDeviation: 4,
+        floodColor: "#111827",
+        floodOpacity: 0.18
+      }, fineShadow);
+
+      const water = el("linearGradient", {
+        id: "waterGradient",
+        x1: "0%",
+        y1: "0%",
+        x2: "100%",
+        y2: "100%"
+      }, defs);
+      el("stop", { offset: "0%", "stop-color": "#bfe6ee" }, water);
+      el("stop", { offset: "55%", "stop-color": "#8dccdb" }, water);
+      el("stop", { offset: "100%", "stop-color": "#70b6ca" }, water);
+
+      const land = el("linearGradient", {
+        id: "landGlow",
+        x1: "0%",
+        y1: "0%",
+        x2: "0%",
+        y2: "100%"
+      }, defs);
+      el("stop", { offset: "0%", "stop-color": "#f6f5ed" }, land);
+      el("stop", { offset: "100%", "stop-color": "#e9ede5" }, land);
+    }
+
+    function drawRoad(group, road) {
+      const isBridge = road.name === "跨河桥";
+      el("polygon", {
+        points: points(road.points),
+        fill: isBridge ? "#fafbf7" : "#e5e7e1",
+        stroke: isBridge ? "rgba(68,72,68,0.30)" : "rgba(67,72,68,0.24)",
+        "stroke-width": isBridge ? 2.5 : 2
+      }, group);
+
+      if (!isBridge) {
+        const center = road.points.map((point) => [point[0], point[1]]);
+        for (let i = 0; i < 3; i += 1) {
+          const yShift = i * 28 - 28;
+          el("path", {
+            d: `M ${center[0][0]} ${center[0][1] + 50 + yShift} L ${center[2][0]} ${center[2][1] + 50 + yShift} L ${center[3][0]} ${center[3][1] + 50 + yShift}`,
+            class: "thin-line",
+            stroke: "rgba(92,96,92,0.30)",
+            "stroke-width": 1.25
+          }, group);
+        }
+      }
+    }
+
+    function drawExtrudedPolygon(group, base, offset, options = {}) {
+      const top = offsetPoints(base, offset[0], offset[1]);
+      const shadow = offsetPoints(base, 24, 24);
+      el("polygon", {
+        points: points(shadow),
+        fill: options.shadow || "rgba(35, 42, 48, 0.14)"
+      }, group);
+
+      for (let i = 0; i < base.length; i += 1) {
+        const next = (i + 1) % base.length;
+        const face = [base[i], base[next], top[next], top[i]];
+        el("polygon", {
+          points: points(face),
+          fill: i % 2 ? options.sideB || "#cbd1d0" : options.sideA || "#dce1df",
+          stroke: options.stroke || "rgba(25,30,32,0.76)",
+          "stroke-width": options.strokeWidth || 2
+        }, group);
+      }
+
+      el("polygon", {
+        points: points(top),
+        fill: options.top || "#ffffff",
+        stroke: options.stroke || "rgba(25,30,32,0.84)",
+        "stroke-width": options.strokeWidth || 2.2
+      }, group);
+
+      if (options.floors) {
+        const count = options.floors;
+        for (let i = 1; i < count; i += 1) {
+          const t = i / count;
+          const floor = base.map((point, index) => midpoint(point, top[index], t));
+          el("path", {
+            d: pathFrom(floor),
+            fill: "none",
+            stroke: options.floorStroke || "rgba(31,36,38,0.42)",
+            "stroke-width": 1.4
+          }, group);
+        }
+      }
+    }
+
+    function drawExistingBuildings(group, buildings) {
+      for (const footprint of buildings) {
+        drawExtrudedPolygon(group, footprint, [-12, -42], {
+          top: "#fffefe",
+          sideA: "#d8ddd9",
+          sideB: "#c7ccc8",
+          stroke: "rgba(51,55,53,0.66)",
+          strokeWidth: 1.7,
+          shadow: "rgba(26,32,35,0.10)"
+        });
+      }
+    }
+
+    function drawDashedEnvelope(group, data) {
+      el("polygon", {
+        points: points(data.layers.undergroundEnvelope.points),
+        fill: "rgba(68, 152, 216, 0.12)",
+        stroke: "#1767c8",
+        "stroke-width": 4,
+        "stroke-dasharray": "14 12",
+        "stroke-linejoin": "round"
+      }, group);
+    }
+
+    function drawChannel(group, channel) {
+      drawExtrudedPolygon(group, channel.footprint, [-15, -24], {
+        top: "rgba(111, 194, 234, 0.74)",
+        sideA: "rgba(65, 151, 211, 0.56)",
+        sideB: "rgba(46, 133, 197, 0.48)",
+        stroke: "rgba(13, 91, 150, 0.76)",
+        strokeWidth: 2,
+        shadow: "rgba(14, 116, 144, 0.10)"
+      });
+      el("path", {
+        d: pathFrom(channel.centerline, false),
+        fill: "none",
+        stroke: "rgba(28, 77, 120, 0.70)",
+        "stroke-width": 4,
+        "stroke-dasharray": "12 10",
+        "stroke-linecap": "round",
+        "stroke-linejoin": "round"
+      }, group);
+    }
+
+    function drawStation(group, station) {
+      el("path", {
+        d: pathFrom(station.metroLine, false),
+        fill: "none",
+        stroke: "rgba(142, 76, 166, 0.22)",
+        "stroke-width": 18,
+        "stroke-linecap": "round"
+      }, group);
+      drawExtrudedPolygon(group, station.body, [-16, -38], {
+        top: "rgba(171, 112, 190, 0.42)",
+        sideA: "rgba(126, 71, 150, 0.28)",
+        sideB: "rgba(151, 89, 171, 0.24)",
+        stroke: "rgba(82, 43, 103, 0.52)",
+        strokeWidth: 1.8,
+        shadow: "rgba(82,43,103,0.04)"
+      });
+      el("circle", {
+        cx: station.exitPoint[0],
+        cy: station.exitPoint[1],
+        r: 12,
+        fill: "#215fa8",
+        stroke: "#ffffff",
+        "stroke-width": 5
+      }, group);
+    }
+
+    function drawProposedBuilding(group, building) {
+      drawExtrudedPolygon(group, building.footprint, [-52, -96], {
+        top: "#fefefe",
+        sideA: "#d9dedc",
+        sideB: "#c3c9c7",
+        stroke: "rgba(22,24,25,0.90)",
+        strokeWidth: 3,
+        floors: 5,
+        floorStroke: "rgba(21,26,28,0.45)",
+        shadow: "rgba(30,34,38,0.18)"
+      });
+
+      for (const volume of building.upperVolumes) {
+        drawExtrudedPolygon(group, volume, [-34, -64], {
+          top: "#ffffff",
+          sideA: "#e0e5e3",
+          sideB: "#cbd2cf",
+          stroke: "rgba(22,24,25,0.88)",
+          strokeWidth: 2.4,
+          floors: 3,
+          floorStroke: "rgba(21,26,28,0.38)",
+          shadow: "rgba(30,34,38,0.08)"
+        });
+      }
+    }
+
+    function drawArrow(group) {
+      el("path", {
+        d: "M 1088 475 C 1038 486, 1010 500, 980 535",
+        fill: "none",
+        stroke: "#d22d2a",
+        "stroke-width": 9,
+        "stroke-linecap": "round"
+      }, group);
+      el("path", {
+        d: "M 980 535 L 1000 492 L 1030 525 Z",
+        fill: "#d22d2a",
+        stroke: "#d22d2a",
+        "stroke-linejoin": "round"
+      }, group);
+    }
+
+    function addText(group, label) {
+      const text = el("text", {
+        x: label.x,
+        y: label.y,
+        fill: label.color || "#101010",
+        "font-size": label.size,
+        "font-weight": label.weight,
+        "text-anchor": label.align || "start",
+        class: "label-stroke",
+        transform: label.rotate ? `rotate(${label.rotate} ${label.x} ${label.y})` : undefined
+      }, group);
+      text.textContent = label.text;
+    }
+
+    function drawLegend(group) {
+      const x = 38;
+      const y = 804;
+      el("rect", {
+        x,
+        y,
+        width: 360,
+        height: 170,
+        rx: 3,
+        fill: "rgba(255,255,255,0.88)",
+        stroke: "rgba(40,42,43,0.45)",
+        "stroke-width": 1.5
+      }, group);
+      el("text", { x: x + 24, y: y + 42, fill: "#111", "font-size": 27, "font-weight": 700 }, group).textContent = "图例";
+      const rows = [
+        ["#e1262f", "地块红线", false],
+        ["#1767c8", "地下轮廓（地下1层）", true],
+        ["#5e5e5e", "地下通道", true]
+      ];
+      rows.forEach((row, index) => {
+        const yy = y + 74 + index * 38;
+        el("line", {
+          x1: x + 28,
+          y1: yy,
+          x2: x + 92,
+          y2: yy,
+          stroke: row[0],
+          "stroke-width": 5,
+          "stroke-dasharray": row[2] ? "12 9" : undefined
+        }, group);
+        el("text", { x: x + 116, y: yy + 9, fill: "#111", "font-size": 24, "font-weight": 650 }, group).textContent = row[1];
+      });
+    }
+
+    function drawScene(data) {
+      const svg = document.getElementById("scene");
+      svg.setAttribute("viewBox", `0 0 ${data.canvas.width} ${data.canvas.height}`);
+      addFilterDefs(svg);
+
+      el("rect", { x: 0, y: 0, width: data.canvas.width, height: data.canvas.height, fill: "url(#landGlow)" }, svg);
+
+      const base = el("g", { id: "base-map" }, svg);
+      el("polygon", {
+        points: points(data.layers.river.points),
+        fill: "url(#waterGradient)",
+        stroke: "rgba(55, 104, 118, 0.48)",
+        "stroke-width": 3
+      }, base);
+      el("path", {
+        d: "M 116 112 C 110 370, 122 580, 300 820 C 480 912, 715 878, 930 878 C 1055 880, 1128 950, 1200 970",
+        fill: "none",
+        stroke: "rgba(44, 72, 78, 0.55)",
+        "stroke-width": 4
+      }, base);
+
+      for (const block of data.layers.greenBlocks) {
+        el("polygon", {
+          points: points(block),
+          fill: "rgba(145, 218, 139, 0.58)",
+          stroke: "rgba(104, 174, 101, 0.26)",
+          "stroke-width": 2
+        }, base);
+      }
+
+      data.layers.roads.forEach((road) => drawRoad(base, road));
+      el("text", { x: 420, y: 405, class: "road-label", transform: "rotate(-3 420 405)" }, base).textContent = "星虹路";
+      el("text", { x: 1088, y: 870, class: "road-label", transform: "rotate(88 1088 870)" }, base).textContent = "群星路";
+
+      for (let i = 0; i < 12; i += 1) {
+        el("path", {
+          d: `M ${80 + i * 118} ${100 + (i % 2) * 18} L ${240 + i * 118} ${72 + (i % 2) * 18}`,
+          class: "thin-line"
+        }, base);
+        el("path", {
+          d: `M ${45 + i * 124} ${730 + (i % 2) * 18} L ${190 + i * 124} ${712 + (i % 2) * 18}`,
+          class: "thin-line"
+        }, base);
+      }
+
+      const existing = el("g", { id: "existing-buildings", filter: "url(#fineShadow)" }, svg);
+      drawExistingBuildings(existing, data.layers.existingBuildings);
+
+      const overlays = el("g", { id: "controlled-overlays" }, svg);
+      el("polygon", {
+        points: points(data.layers.parcel.points),
+        fill: "rgba(249, 241, 190, 0.40)",
+        stroke: "#e1262f",
+        "stroke-width": 8,
+        "stroke-linejoin": "round"
+      }, overlays);
+      drawDashedEnvelope(overlays, data);
+      drawStation(overlays, data.layers.station);
+      drawChannel(overlays, data.layers.channel);
+      drawProposedBuilding(overlays, data.layers.proposedBuilding);
+      drawArrow(overlays);
+
+      const labels = el("g", { id: "labels" }, svg);
+      data.labels.forEach((label) => addText(labels, label));
+
+      el("circle", { cx: 1072, cy: 386, r: 17, fill: "#ffffff", stroke: "#1b66b1", "stroke-width": 4 }, labels);
+      el("text", { x: 1072, y: 395, fill: "#1b66b1", "font-size": 23, "font-weight": 800, "text-anchor": "middle" }, labels).textContent = "1";
+
+      drawLegend(svg);
+      window.__SCHEMATIC_READY = true;
+    }
+
+    if (!window.SCHEMATIC_DATA) {
+      document.body.textContent = "缺少 annotations.js，请先运行 render_manual_schematic.cjs。";
+    } else {
+      drawScene(window.SCHEMATIC_DATA);
+    }
+  </script>
+</body>
+</html>

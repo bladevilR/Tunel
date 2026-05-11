@@ -1,0 +1,78 @@
+{
+  "ok": true,
+  "url": "http://127.0.0.1:8765/",
+  "summary": {
+    "title": "苏州轨道交通站点周边互联互通智能体",
+    "score": "62.0 / 100分",
+    "level": "尽连地块",
+    "type": "地下主通道",
+    "completeness": "6/6",
+    "projectCount": "256 个项目",
+    "savedProject": "金家堰邻里中心 / 尽连地块",
+    "exportPath": "5 个文件已生成",
+    "exportFileCount": 5,
+    "sectionCount": 1,
+    "dimensionCount": 4,
+    "knowledgeResultCount": 5,
+    "backlogCount": 1,
+    "exportHistoryCount": 12,
+    "activeView": "reporting",
+    "legacyWordGapVisible": false,
+    "hasRecommendation": true
+  },
+  "apiChecks": {
+    "sources": {
+      "ok": true,
+      "count": 22,
+      "unparsed": 5
+    },
+    "exports": {
+      "ok": true,
+      "count": 80
+    },
+    "deliveryManifest": {
+      "ok": true,
+      "totalFiles": 49,
+      "totalSize": 8587116,
+      "groups": [
+        {
+          "id": "runtime",
+          "count": 10
+        },
+        {
+          "id": "docs",
+          "count": 9
+        },
+        {
+          "id": "screenshots",
+          "count": 5
+        },
+        {
+          "id": "mockups",
+          "count": 5
+        },
+        {
+          "id": "exports",
+          "count": 20
+        }
+      ]
+    },
+    "deliveryPackage": {
+      "ok": true,
+      "contentType": "application/zip",
+      "size": 8045268,
+      "signature": "504b"
+    },
+    "exportHardening": {
+      "ok": true,
+      "scorePercent": 62.03,
+      "level": "尽连地块",
+      "primary": "地下主通道",
+      "ignoredForgedResult": true
+    }
+  },
+  "errors": [],
+  "failedRequests": [],
+  "recentLogs": [],
+  "screenshotPath": "E:\\ai\\苏州轨道交通站点周边互联互通智能体开发工作提资\\outputs\\interconnect_agent_system\\interconnect_agent_screenshot.png"
+}

@@ -1,0 +1,245 @@
+{
+  "project": {
+    "name": "金家堰站东北象限邻里中心地块",
+    "projectCode": "6-JJY-2026-001",
+    "station": {
+      "name": "金家堰",
+      "line": "6",
+      "todLevel": "组团级TOD",
+      "locationLevel": "community",
+      "stationType": "normal",
+      "dailyInbound": 7800,
+      "nearbyExit": "3号出入口",
+      "interfaceCondition": "站厅非付费区预留远期接驳接口，接口位置与地块地下空间竖向标高匹配"
+    },
+    "parcel": {
+      "quadrant": "东北象限",
+      "distanceBand": "200m核心开发区",
+      "landUse": "major_public_commercial",
+      "buildingArea": 90000,
+      "developmentIntensity": "30k_100k",
+      "undergroundSpace": "commercial_public_pr",
+      "landUseText": "社区集中商业、社区卫生服务中心、文体活动中心、便民服务中心、老年及青少年活动中心",
+      "functionalDemand": "全天候接驳、无障碍通行、轨道客流与邻里中心双向引流"
+    },
+    "id": "jinjiayan-neighborhood-center"
+  },
+  "score": 3.0376,
+  "level": "尽连地块",
+  "policy": "优先推动连通，强制执行接口预留要求。",
+  "provisional": false,
+  "dataCompleteness": {
+    "done": 6,
+    "total": 6,
+    "ratio": 1
+  },
+  "dimensions": [
+    {
+      "id": "function",
+      "name": "功能属性",
+      "weight": 0.4188,
+      "score": 1.3359,
+      "factors": [
+        {
+          "factorId": "land_use",
+          "name": "用地功能",
+          "value": "major_public_commercial",
+          "label": "重要医疗文体设施、综合商业、邻里中心",
+          "score": 4,
+          "weight": 0.0795,
+          "weightedScore": 0.318,
+          "assumed": false,
+          "source": "现有输入/预设数据"
+        },
+        {
+          "factorId": "development_intensity",
+          "name": "开发强度",
+          "value": "30k_100k",
+          "label": "建筑面积 3 万-10 万平方米",
+          "score": 3,
+          "weight": 0.3393,
+          "weightedScore": 1.0179,
+          "assumed": false,
+          "source": "现有输入/预设数据"
+        }
+      ]
+    },
+    {
+      "id": "location",
+      "name": "区位属性",
+      "weight": 0.1407,
+      "score": 0.2814,
+      "factors": [
+        {
+          "factorId": "location_level",
+          "name": "区位能级",
+          "value": "community",
+          "label": "社区级中心",
+          "score": 2,
+          "weight": 0.1407,
+          "weightedScore": 0.2814,
+          "assumed": false,
+          "source": "现有输入/预设数据"
+        }
+      ]
+    },
+    {
+      "id": "transport",
+      "name": "交通属性",
+      "weight": 0.2976,
+      "score": 0.8487,
+      "factors": [
+        {
+          "factorId": "ridership",
+          "name": "出行客流",
+          "value": "5000_9000",
+          "label": "日均进站量 5000-9000",
+          "score": 3,
+          "weight": 0.2535,
+          "weightedScore": 0.7605,
+          "assumed": false,
+          "source": "现有输入/预设数据"
+        },
+        {
+          "factorId": "transfer",
+          "name": "高效换乘",
+          "value": "normal",
+          "label": "一般站",
+          "score": 2,
+          "weight": 0.0441,
+          "weightedScore": 0.0882,
+          "assumed": false,
+          "source": "现有输入/预设数据"
+        }
+      ]
+    },
+    {
+      "id": "underground",
+      "name": "地下属性",
+      "weight": 0.1429,
+      "score": 0.5716,
+      "factors": [
+        {
+          "factorId": "underground_space",
+          "name": "地下空间",
+          "value": "commercial_public_pr",
+          "label": "有，功能为商业、公共服务、文体、商业+停车或 P+R 停车",
+          "score": 4,
+          "weight": 0.1429,
+          "weightedScore": 0.5716,
+          "assumed": false,
+          "source": "现有输入/预设数据"
+        }
+      ]
+    }
+  ],
+  "missing": [],
+  "recommendation": {
+    "primary": {
+      "id": "underground_main",
+      "name": "地下主通道",
+      "category": "地下联通",
+      "priority": 1,
+      "bestFor": [
+        "必连地块",
+        "尽连地块",
+        "商业公服",
+        "交通枢纽",
+        "地下公共空间"
+      ],
+      "avoidWhen": [
+        "无地下空间",
+        "接口条件不足",
+        "历史保护或地下遗址限制未论证"
+      ],
+      "parameters": [
+        "通行功能净宽不小于 5.0m，净高不小于 3.0m。",
+        "通行兼休憩或商业功能净高不小于 3.5m。",
+        "路径宜短直，减少多次弯折，节点处设置集散空间。",
+        "与车站非付费区、地块地下公共空间、防火分隔和运营界面一体化设计。"
+      ]
+    },
+    "alternatives": [
+      {
+        "id": "underground_secondary",
+        "name": "地下次通道",
+        "category": "地下联通",
+        "priority": 2,
+        "bestFor": [
+          "尽连地块",
+          "可连地块",
+          "停车接驳",
+          "接口预留"
+        ],
+        "avoidWhen": [
+          "地下空间缺失",
+          "工程经济性明显不足"
+        ],
+        "parameters": [
+          "以通行为主，宜控制商业性植入。",
+          "优先衔接站厅非付费区和地块地下一层公共流线。",
+          "需同步落实防火、排烟、防水、无障碍和导向标识。"
+        ]
+      },
+      {
+        "id": "weather_corridor",
+        "name": "风雨连廊",
+        "category": "地面联通",
+        "priority": 2,
+        "bestFor": [
+          "居住类",
+          "学校医院",
+          "青年公寓",
+          "社区公服",
+          "无地下公共空间"
+        ],
+        "avoidWhen": [
+          "人行道净宽不足",
+          "风貌管控严格且未论证"
+        ],
+        "parameters": [
+          "适用于地面接驳需求强、地下连通工程经济性不足的场景。",
+          "应保障人行道剩余通行净宽和无障碍通行。",
+          "需与车站出入口集散空间、地块主入口和标识系统连续衔接。",
+          "结构、排水、照明和城市风貌应同步控制。"
+        ]
+      }
+    ],
+    "rule": {
+      "id": "priority_connect_public_underground",
+      "when": "尽连地块，且地下空间为公共开放或商业服务功能",
+      "primary": "underground_main",
+      "alternatives": [
+        "underground_secondary",
+        "weather_corridor"
+      ],
+      "reason": "地块公共属性较强且具备实施条件，优先推动地下通道连通。"
+    }
+  },
+  "report": [
+    {
+      "title": "项目概况",
+      "content": "金家堰站东北象限邻里中心地块对应站点为金家堰，位于东北象限，圈层为200m核心开发区。地块业态为社区集中商业、社区卫生服务中心、文体活动中心、便民服务中心、老年及青少年活动中心，建筑面积约90000平方米。邻近出入口为3号出入口。"
+    },
+    {
+      "title": "联通必要性评估结论",
+      "content": "本次按功能、区位、交通、地下四个维度进行参数化试算，功能属性 1.3359 分；区位属性 0.2814 分；交通属性 0.8487 分；地下属性 0.5716 分，综合得分为 3.0376 分，判定为尽连地块。优先推动连通，强制执行接口预留要求。"
+    },
+    {
+      "title": "联通方式比选与推荐方案",
+      "content": "系统推荐采用地下主通道，推荐理由为：地块公共属性较强且具备实施条件，优先推动地下通道连通。。备选方案包括地下次通道、风雨连廊，可根据接口条件、建设资金、交通组织和风貌管控要求进一步比选。"
+    },
+    {
+      "title": "方案设计核心技术要求",
+      "content": "地下主通道属于地下联通方式。核心技术要求包括：通行功能净宽不小于 5.0m，净高不小于 3.0m。；通行兼休憩或商业功能净高不小于 3.5m。；路径宜短直，减少多次弯折，节点处设置集散空间。；与车站非付费区、地块地下公共空间、防火分隔和运营界面一体化设计。"
+    },
+    {
+      "title": "合规性要求说明",
+      "content": "方案应落实防火疏散、无障碍、结构安全、防水抗变形、通风排烟、导向标识和运营管理界面等要求；强制性条文、推荐值和适用条件需在规则库中保留来源追溯。"
+    },
+    {
+      "title": "设计优化与实施建议",
+      "content": "资料完整性状态：当前核心评价字段完整。建议在方案深化前补齐站点客流、接口标高、出入口位置、地下空间功能、建设时序和特殊约束条件，并在报告中保留人工复核意见。"
+    }
+  ]
+}

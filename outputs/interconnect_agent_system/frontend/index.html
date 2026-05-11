@@ -1,0 +1,404 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="/assets/images/logo-brand.png">
+  <title>苏州轨道交通站点周边互联互通智能体</title>
+  <link rel="stylesheet" href="/assets/styles.css?v=20260509m">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="主导航">
+      <div class="brand">
+        <img class="brand-mark" src="/assets/images/logo-brand.png" alt="苏州轨道交通">
+        <div>
+          <strong>互联互通智能体</strong>
+          <span>顾问报告版</span>
+        </div>
+      </div>
+
+      <nav class="nav-list">
+        <a href="#dashboard" class="nav-item active" data-view-link="dashboard"><span>总</span>成品工作台</a>
+        <a href="#assessment" class="nav-item" data-view-link="assessment"><span>录</span>项目录入</a>
+        <a href="#knowledge" class="nav-item" data-view-link="knowledge"><span>查</span>依据检索</a>
+        <a href="#reporting" class="nav-item" data-view-link="reporting"><span>报</span>报告输出</a>
+        <a id="schematicNavLink" href="/schematic/index.html" class="nav-item"><span>图</span>示意图出图</a>
+      </nav>
+
+      <div class="source-card">
+        <span>平台定位</span>
+        <strong>站城联通评估</strong>
+        <p>围绕项目条件、站点客流、接口条件和实施可行性形成方案建议。</p>
+      </div>
+    </aside>
+
+    <main class="workspace">
+      <header class="topbar">
+        <div>
+          <h1 id="pageTitle">总览工作台</h1>
+          <p id="pageSubtitle">面向项目研判、方案比选和顾问报告输出的统一工作台。</p>
+        </div>
+        <div class="toolbar">
+          <label class="toolbar-field">
+            <span>分析对象</span>
+            <select id="projectSelect" aria-label="选择站点预评估项目"></select>
+          </label>
+          <label class="toolbar-field">
+            <span>模板</span>
+            <select id="demoSelect" aria-label="选择示例或空白模板"></select>
+          </label>
+          <button id="loadDemoBtn" class="secondary-btn" type="button" title="载入右侧选择的示例或模板">载入模板</button>
+          <button id="saveProjectBtn" class="secondary-btn" type="button">保存</button>
+          <button id="deleteProjectBtn" class="secondary-btn danger-btn" type="button">删除</button>
+          <button id="evaluateBtn" class="primary-btn" type="button">运行评估</button>
+          <button id="exportBtn" class="secondary-btn" type="button">导出</button>
+        </div>
+        <div id="evaluationProgress" class="evaluation-progress" hidden>
+          <div>
+            <strong id="evaluationProgressTitle">正在生成顾问报告</strong>
+            <span id="evaluationProgressText">模型正在读取项目条件。</span>
+          </div>
+          <div class="progress-track"><i id="evaluationProgressBar"></i></div>
+        </div>
+      </header>
+
+      <section class="status-strip" aria-label="当前评估状态">
+        <div>
+          <span>数据完整度</span>
+          <strong id="completenessValue">待运行</strong>
+        </div>
+        <div>
+          <span>综合评分</span>
+          <strong id="scoreValue">--</strong>
+        </div>
+        <div>
+          <span>联通等级</span>
+          <strong id="levelValue">--</strong>
+        </div>
+        <div>
+          <span>推荐方式</span>
+          <strong id="typeValue">--</strong>
+        </div>
+      </section>
+
+      <section id="dashboard" class="view active product-page">
+        <section class="product-hero panel" aria-labelledby="currentProjectTitle">
+          <div>
+            <span class="command-eyebrow">当前项目</span>
+            <h2 id="currentProjectTitle">待选择项目</h2>
+            <p id="currentProjectMeta">载入示例或选择已保存项目后生成评估摘要。</p>
+          </div>
+          <div class="hero-decision" aria-label="当前评估结论">
+            <div>
+              <span>综合评分</span>
+              <strong id="dashboardScorePercent">--</strong>
+            </div>
+            <div>
+              <span>联通等级</span>
+              <strong id="dashboardLevel">--</strong>
+            </div>
+            <div>
+              <span>推荐方式</span>
+              <strong id="dashboardType">--</strong>
+            </div>
+          </div>
+        </section>
+
+        <div class="product-workflow">
+          <section class="panel step-card conclusion-card">
+            <div class="step-heading"><span>1</span><h2>评估结论</h2></div>
+            <span id="currentProjectBadge" class="pill muted">待运行</span>
+            <p id="dashboardPolicy" class="conclusion-copy">运行评估后展示联通等级、推荐方式与主要判断依据。</p>
+            <div id="dashboardInputSummary" class="input-summary-grid"></div>
+          </section>
+
+          <section class="panel step-card next-actions-card">
+            <div class="step-heading"><span>2</span><h2>下一步</h2></div>
+            <div class="next-action-list">
+              <a href="#assessment" data-view-link="assessment">完善项目录入</a>
+              <a href="#reporting" data-view-link="reporting">查看报告与导出</a>
+              <a id="dashboardSchematicLink" href="/schematic/index.html">出图校准</a>
+            </div>
+          </section>
+        </div>
+
+        <details class="dashboard-detail-drawer">
+          <summary>展开评分矩阵与报告大纲</summary>
+          <section class="panel step-card score-card">
+            <div class="step-heading"><span>3</span><h2>联通必要性评估</h2></div>
+            <div id="dashboardDimensionTable" class="dimension-table"></div>
+          </section>
+
+          <section class="panel report-outline-card">
+            <div class="step-heading"><span>4</span><h2>报告大纲预览</h2></div>
+            <div id="dashboardReportOutline" class="report-outline-grid"></div>
+          </section>
+
+          <div class="product-support-grid">
+          <section class="panel delivery-status-panel" aria-labelledby="deliveryStatusTitle">
+            <div class="panel-heading compact-heading">
+              <div>
+                <h2 id="deliveryStatusTitle">实施关注事项</h2>
+                <p>列出需要项目团队进一步确认的条件。</p>
+              </div>
+              <span id="deliveryStatusBadge" class="pill warn">待确认</span>
+            </div>
+            <div id="deliveryStatusBoard" class="delivery-status-board"></div>
+          </section>
+
+          <section class="panel readiness-panel customer-hidden" hidden>
+            <div class="panel-heading">
+              <div>
+                <h2>依据覆盖情况</h2>
+                <p>供实施团队维护资料覆盖范围。</p>
+              </div>
+            </div>
+            <div id="dataReadiness" class="readiness-list"></div>
+          </section>
+
+          <section class="panel backlog-panel customer-hidden" hidden>
+            <div class="panel-heading">
+              <div>
+                <h2>项目条件清单</h2>
+                <p>供实施团队维护项目字段和外部资料。</p>
+              </div>
+            </div>
+            <div id="completionBacklog" class="completion-list"></div>
+          </section>
+
+          <section class="panel export-history-panel">
+            <div class="panel-heading">
+              <div>
+                <h2>最近导出</h2>
+                <p>最近生成的报告文件。</p>
+              </div>
+            </div>
+            <div id="exportHistory" class="export-history"></div>
+          </section>
+
+          <section class="panel project-library-panel">
+            <div class="panel-heading">
+              <div>
+                <h2>项目库</h2>
+                <p>已保存项目，可快速切换并继续评估。</p>
+              </div>
+              <span id="projectCountValue" class="count-label">0 个项目</span>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>项目名称</th>
+                    <th>车站</th>
+                    <th>等级</th>
+                    <th>推荐方式</th>
+                    <th>最近更新</th>
+                  </tr>
+                </thead>
+              <tbody id="projectTableBody"></tbody>
+            </table>
+          </div>
+        </section>
+          </div>
+        </details>
+      </section>
+
+      <section id="assessment" class="view">
+        <div class="assessment-layout">
+          <section class="panel input-panel">
+            <div class="panel-heading">
+              <div>
+                <h2>项目录入</h2>
+                <p>字段来自标准输入要素；预设值会标注来源，人工录入可覆盖。</p>
+              </div>
+              <span class="pill">真实评估输入</span>
+            </div>
+            <form id="projectForm" class="form-grid">
+              <div class="form-section wide">
+                <h3>基础信息</h3>
+                <label>研究地块/项目名称<input name="name" type="text" placeholder="如：金家堰站东北象限邻里中心地块"></label>
+                <label>地块编号<input name="projectCode" type="text" placeholder="如：6-JJY-2026-001"></label>
+                <label class="wide">附件资料<textarea name="attachments" rows="2" placeholder="控规图则、规划条件、概念方案、附件目录"></textarea></label>
+              </div>
+
+              <div class="form-section wide">
+                <h3>车站信息</h3>
+                <label>车站名称<input name="station.name" type="text" list="stationList" placeholder="输入或选择车站"><datalist id="stationList"></datalist></label>
+                <label>所属区划<input name="station.district" type="text" placeholder="如：工业园区"></label>
+                <label>线路<input name="station.line" type="text" placeholder="如：6"></label>
+                <label>TOD级别<input name="station.todLevel" type="text" placeholder="由预设站点库补齐或人工录入"></label>
+                <label>区位能级<select name="station.locationLevel" data-factor="location_level"></select></label>
+                <label>站点类型<select name="station.stationType"><option value="">待补齐</option><option value="current_transfer">现状换乘站</option><option value="planned_transfer">规划换乘站</option><option value="normal">一般站</option></select></label>
+                <label>日均进站量<input name="station.dailyInbound" type="number" min="0" step="1" placeholder="如：7800"></label>
+                <label>邻近出入口<input name="station.nearbyExit" type="text" placeholder="如：3号出入口"></label>
+                <label class="wide">接口条件<textarea name="station.interfaceCondition" rows="2" placeholder="如：站厅非付费区预留远期接驳接口"></textarea></label>
+              </div>
+
+              <div class="form-section wide">
+                <h3>地块与规划条件</h3>
+                <label>地块象限<input name="parcel.quadrant" type="text" placeholder="如：东北象限"></label>
+                <label>地块位置<input name="parcel.location" type="text" placeholder="如：金堰路东、东宏路北"></label>
+                <label>圈层<select name="parcel.distanceBand"><option value="">待补齐</option><option value="200m核心开发区">200m核心开发区</option><option value="200-500m规划引导区">200-500m规划引导区</option></select></label>
+                <label>用地功能<select name="parcel.landUse" data-factor="land_use"></select></label>
+                <label>建筑面积（平方米）<input name="parcel.buildingArea" type="number" min="0" step="1" placeholder="如：90000"></label>
+                <label>用地面积（平方米）<input name="parcel.siteArea" type="number" min="0" step="1" placeholder="如：25000"></label>
+                <label>开发强度<select name="parcel.developmentIntensity" data-factor="development_intensity"></select></label>
+                <label>地下空间<select name="parcel.undergroundSpace" data-factor="underground_space"></select></label>
+                <label class="wide">用地性质<textarea name="parcel.landUseText" rows="2" placeholder="如：社区集中商业、社区卫生服务中心、文体活动中心"></textarea></label>
+                <label class="wide">功能业态<textarea name="parcel.functionalFormat" rows="2" placeholder="如：综合性社区邻里中心"></textarea></label>
+                <label class="wide">地下空间说明<textarea name="parcel.undergroundDescription" rows="2" placeholder="如：地下2层，含停车与公共服务空间"></textarea></label>
+                <label class="wide">规划指标<textarea name="parcel.planningIndicators" rows="2" placeholder="如：容积率、建筑密度、限高等"></textarea></label>
+                <label class="wide">功能需求<textarea name="parcel.functionalDemand" rows="2" placeholder="如：全天候接驳、无障碍通行、双向引流"></textarea></label>
+                <label class="wide">特殊约束<textarea name="parcel.constraints" rows="2" placeholder="建设时序、风貌管控、地下管线、既有接口标高等"></textarea></label>
+              </div>
+            </form>
+          </section>
+
+          <aside class="assessment-side">
+            <section class="panel result-panel">
+              <div class="panel-heading">
+                <div>
+                  <h2>评估结果</h2>
+                  <p>实时调用后端 `/api/evaluate`。</p>
+                </div>
+                <span id="provisionalBadge" class="pill muted">待运行</span>
+              </div>
+              <div id="resultSummary" class="result-summary"></div>
+            </section>
+
+            <section class="panel">
+              <div class="panel-heading">
+                <div>
+                  <h2>站点上下文</h2>
+                  <p>客流、出入口、接口和周边配套。</p>
+                </div>
+              </div>
+              <div id="stationContextPanel" class="context-grid"></div>
+            </section>
+
+            <section id="recommendation" class="panel">
+              <div class="panel-heading">
+                <div>
+                  <h2>推荐方案</h2>
+                  <p>按等级、业态和地下条件匹配。</p>
+                </div>
+              </div>
+              <div id="recommendationBody" class="recommendation-body empty-state">运行评估后生成。</div>
+            </section>
+          </aside>
+        </div>
+
+        <section id="score" class="panel">
+          <div class="panel-heading">
+            <div>
+              <h2>必要性评分矩阵</h2>
+              <p>每个因子的分值、权重、来源和是否临时试算均可追溯。</p>
+            </div>
+          </div>
+          <div id="scoreMatrix" class="score-matrix empty-state">等待评估结果。</div>
+        </section>
+      </section>
+
+      <section id="knowledge" class="view">
+        <section class="panel">
+          <div class="panel-heading">
+            <div>
+              <h2>依据资料检索</h2>
+              <p>检索站点、客流、出入口、周边配套和设计导则等支撑资料。</p>
+            </div>
+            <span id="knowledgeFreshness" class="pill blue">已构建</span>
+          </div>
+          <div class="knowledge-body">
+            <div id="knowledgeSummary" class="knowledge-summary"></div>
+            <div class="knowledge-search">
+              <label>关键词<input id="knowledgeSearchInput" type="search" placeholder="如：金家堰 出入口 / 清树湾 周边配套"></label>
+              <label>分类筛选<select id="knowledgeCategoryFilter"><option value="">全部范围</option></select></label>
+              <button id="knowledgeSearchBtn" class="primary-btn" type="button">检索</button>
+            </div>
+            <div id="knowledgeResults" class="knowledge-results empty-state">输入关键词后检索与项目研判相关的支撑内容。</div>
+          </div>
+        </section>
+
+        <div class="knowledge-grid customer-hidden" hidden>
+          <section class="panel">
+            <div class="panel-heading">
+              <div>
+                <h2>资料维护清单</h2>
+                <p>供实施团队维护资料覆盖情况。</p>
+              </div>
+            </div>
+            <div class="table-wrap source-table-wrap">
+              <table>
+                <thead><tr><th>文件</th><th>状态</th><th>价值</th><th>分类</th><th>切片</th></tr></thead>
+                <tbody id="sourceManifestBody"></tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-heading">
+              <div>
+                <h2>资料维护建议</h2>
+                <p>供实施团队后续完善资料内容。</p>
+              </div>
+            </div>
+            <div id="knowledgeGapList" class="completion-list"></div>
+          </section>
+        </div>
+      </section>
+
+      <section id="reporting" class="view">
+        <div class="reporting-layout">
+          <section id="report" class="panel report-main-panel">
+            <div class="panel-heading">
+              <div>
+                <h2>顾问报告</h2>
+                <p>运行评估后生成完整综合性报告正文。</p>
+              </div>
+            </div>
+            <div id="reportPreview" class="report-preview empty-state">报告将在运行评估后生成。</div>
+          </section>
+
+          <aside class="report-side report-side-compact">
+            <section class="panel">
+              <div class="panel-heading">
+                <div>
+                  <h2>导出文件</h2>
+                  <p>点击导出后展示真实文件链接。</p>
+                </div>
+              </div>
+              <div class="export-box">
+                <strong id="exportPathValue">运行评估后可生成报告文件</strong>
+                <div id="exportFiles" class="export-files"></div>
+              </div>
+            </section>
+
+            <section class="panel customer-hidden" hidden>
+              <div class="panel-heading">
+                <div>
+                  <h2>资料补充建议</h2>
+                  <p>列出影响方案深化或需人工复核的项目条件。</p>
+                </div>
+              </div>
+              <div id="missingList" class="completion-list"></div>
+            </section>
+
+            <section class="panel customer-hidden" hidden>
+              <div class="panel-heading">
+                <div>
+                  <h2>评估过程摘要</h2>
+                  <p>供实施团队核查评分过程。</p>
+                </div>
+              </div>
+              <div id="ruleSummary" class="rule-summary"></div>
+            </section>
+          </aside>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="/assets/app.js?v=20260509m"></script>
+</body>
+</html>

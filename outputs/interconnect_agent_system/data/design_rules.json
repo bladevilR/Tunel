@@ -1,0 +1,164 @@
+{
+  "version": "ppt-20260318-mvp",
+  "connectionTypes": [
+    {
+      "id": "underground_main",
+      "name": "地下主通道",
+      "category": "地下联通",
+      "priority": 1,
+      "bestFor": ["必连地块", "尽连地块", "商业公服", "交通枢纽", "地下公共空间"],
+      "avoidWhen": ["无地下空间", "接口条件不足", "历史保护或地下遗址限制未论证"],
+      "parameters": [
+        "通行功能净宽不小于 5.0m，净高不小于 3.0m。",
+        "通行兼休憩或商业功能净高不小于 3.5m。",
+        "路径宜短直，减少多次弯折，节点处设置集散空间。",
+        "与车站非付费区、地块地下公共空间、防火分隔和运营界面一体化设计。"
+      ]
+    },
+    {
+      "id": "underground_secondary",
+      "name": "地下次通道",
+      "category": "地下联通",
+      "priority": 2,
+      "bestFor": ["尽连地块", "可连地块", "停车接驳", "接口预留"],
+      "avoidWhen": ["地下空间缺失", "工程经济性明显不足"],
+      "parameters": [
+        "以通行为主，宜控制商业性植入。",
+        "优先衔接站厅非付费区和地块地下一层公共流线。",
+        "需同步落实防火、排烟、防水、无障碍和导向标识。"
+      ]
+    },
+    {
+      "id": "sunken_plaza",
+      "name": "下沉广场",
+      "category": "地下联通",
+      "priority": 3,
+      "bestFor": ["商业综合体", "公共服务设施", "集散需求强"],
+      "avoidWhen": ["用地紧张", "竖向条件不足", "雨洪组织困难"],
+      "parameters": [
+        "作为地下空间与地面城市空间的过渡节点。",
+        "应组织连续无障碍流线、采光通风和雨水排放。",
+        "宜与商业、公服或公共活动空间复合设置。"
+      ]
+    },
+    {
+      "id": "underground_atrium",
+      "name": "地下中庭",
+      "category": "地下联通",
+      "priority": 4,
+      "bestFor": ["多层地下开发", "商业公服复合", "大客流组织"],
+      "avoidWhen": ["地下层数不足", "消防分区难以协调"],
+      "parameters": [
+        "用于多层地下公共空间组织与竖向换乘。",
+        "需重点校核消防分区、排烟、疏散距离和运营管理界面。",
+        "宜作为报告中的增强方案或远期优化建议。"
+      ]
+    },
+    {
+      "id": "surface_walkway",
+      "name": "地面步行道",
+      "category": "地面联通",
+      "priority": 5,
+      "bestFor": ["可连地块", "低成本改造", "近期实施"],
+      "avoidWhen": ["跨越主干路", "全天候需求强但无遮蔽条件"],
+      "parameters": [
+        "保障连续、安全、清晰的步行流线。",
+        "完善防滑铺装、夜间照明、无障碍坡道和导向标识。",
+        "适合作为风雨连廊或地下联通的近期替代方案。"
+      ]
+    },
+    {
+      "id": "weather_corridor",
+      "name": "风雨连廊",
+      "category": "地面联通",
+      "priority": 2,
+      "bestFor": ["居住类", "学校医院", "青年公寓", "社区公服", "无地下公共空间"],
+      "avoidWhen": ["人行道净宽不足", "风貌管控严格且未论证"],
+      "parameters": [
+        "适用于地面接驳需求强、地下连通工程经济性不足的场景。",
+        "应保障人行道剩余通行净宽和无障碍通行。",
+        "需与车站出入口集散空间、地块主入口和标识系统连续衔接。",
+        "结构、排水、照明和城市风貌应同步控制。"
+      ]
+    },
+    {
+      "id": "sky_bridge",
+      "name": "高架连廊 / 天桥",
+      "category": "空中联通",
+      "priority": 6,
+      "bestFor": ["高架站点", "商业办公集群", "地面交通阻隔明显"],
+      "avoidWhen": ["地下站且无高差需求", "古城风貌敏感", "桥下净空不足"],
+      "parameters": [
+        "需校核桥下净高、跨度、结构安全和城市景观影响。",
+        "适合跨越道路或连通二层公共平台。",
+        "在地下站周边通常作为备选或特殊场景方案。"
+      ]
+    }
+  ],
+  "recommendationRules": [
+    {
+      "id": "must_connect_public_underground",
+      "when": "必连地块，且地块具备商业/公服/交通枢纽属性和地下公共空间",
+      "primary": "underground_main",
+      "alternatives": ["sunken_plaza", "underground_atrium"],
+      "reason": "必要性最高且具备地下接驳条件，应优先组织全地下直接连通。"
+    },
+    {
+      "id": "priority_connect_public_underground",
+      "when": "尽连地块，且地下空间为公共开放或商业服务功能",
+      "primary": "underground_main",
+      "alternatives": ["underground_secondary", "weather_corridor"],
+      "reason": "地块公共属性较强且具备实施条件，优先推动地下通道连通。"
+    },
+    {
+      "id": "residential_or_apartment_surface",
+      "when": "可连地块或居住/公寓/学校医院类地块，地下公共开放条件不足",
+      "primary": "weather_corridor",
+      "alternatives": ["surface_walkway", "underground_secondary"],
+      "reason": "以安全、全天候和经济可实施的地面接驳为主，降低运营管理风险。"
+    },
+    {
+      "id": "station_precheck_underground_main",
+      "when": "站点级预评估：城市级TOD、换乘站且客流强度高，但具体地块用地和地下空间资料待补齐",
+      "primary": "underground_main",
+      "alternatives": ["underground_secondary", "weather_corridor"],
+      "reason": "站点能级、换乘属性和客流强度均较高，预评估阶段应优先预控地下主通道接口；待地块用地性质、地下空间和权属边界补齐后复核。"
+    },
+    {
+      "id": "station_precheck_underground_secondary",
+      "when": "站点级预评估：中心区位、换乘或高客流特征明显，但地下公共空间条件尚未核实",
+      "primary": "underground_secondary",
+      "alternatives": ["underground_main", "weather_corridor"],
+      "reason": "具备较强站城联通需求，但具体地下开发条件尚未确认，预评估阶段建议预留地下次通道或接口条件，并在地块资料补齐后决定是否升级为主通道。"
+    },
+    {
+      "id": "station_precheck_weather_corridor",
+      "when": "站点级预评估：分区级TOD、客流中等或出入口服务面较多，地下实施条件待核实",
+      "primary": "weather_corridor",
+      "alternatives": ["surface_walkway", "underground_secondary"],
+      "reason": "站点周边存在稳定接驳需求，但地下空间和地块开发强度尚待确认，近期宜优先组织风雨连廊或连续遮蔽步行系统，并预留远期地下接口。"
+    },
+    {
+      "id": "station_precheck_sky_bridge",
+      "when": "站点级预评估：既有资料显示存在高架、天桥或空中联通条件",
+      "primary": "sky_bridge",
+      "alternatives": ["weather_corridor", "underground_secondary"],
+      "reason": "既有出入口及周边配套资料显示具备空中或高架联通线索，预评估阶段优先校核高架连廊/天桥的结构、净空和景观条件；待专项资料补齐后复核。"
+    },
+    {
+      "id": "fallback_surface",
+      "when": "数据不完整或接口条件尚未明确",
+      "primary": "surface_walkway",
+      "alternatives": ["weather_corridor", "underground_secondary"],
+      "reason": "先输出近期可实施的步行接驳与接口预留要求，待数据补齐后复核。"
+    }
+  ],
+  "reportSections": [
+    "项目概况",
+    "联通必要性评估结论",
+    "联通方式比选与推荐方案",
+    "方案设计核心技术要求",
+    "合规性要求说明",
+    "设计优化与实施建议"
+  ]
+}

@@ -1,0 +1,49 @@
+{
+  "ok": true,
+  "url": "http://127.0.0.1:8899/amap_3d_demo.html",
+  "readyState": "true",
+  "statusText": "加载完成：高德 3D 底图与矢量层已渲染；自定义建筑和通道由 Canvas 3D 覆盖层稳定绘制。",
+  "mapSummary": {
+    "hasAmap": true,
+    "hasMap": true,
+    "hasOverlay3d": true,
+    "hasObject3DPrism": false,
+    "hasObject3DLayer": false,
+    "center": [
+      120.66552,
+      31.27862
+    ],
+    "zoom": 16.82,
+    "pitch": 22,
+    "rotation": 0
+  },
+  "pageErrors": [],
+  "failedRequests": [],
+  "recentLogs": [
+    {
+      "type": "warning",
+      "text": "[.WebGL-0x108400151c00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels"
+    },
+    {
+      "type": "info",
+      "text": "[amap-demo] 加载完成：高德 3D 底图与矢量层已渲染；自定义建筑和通道由 Canvas 3D 覆盖层稳定绘制。"
+    },
+    {
+      "type": "warning",
+      "text": "[.WebGL-0x108400151c00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels"
+    },
+    {
+      "type": "warning",
+      "text": "[.WebGL-0x108400151c00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels"
+    },
+    {
+      "type": "warning",
+      "text": "[.WebGL-0x108400151c00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat)"
+    },
+    {
+      "type": "warning",
+      "text": "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently"
+    }
+  ],
+  "screenshotPath": "E:\\ai\\苏州轨道交通站点周边互联互通智能体开发工作提资\\outputs\\amap_js_3d\\amap_3d_demo_screenshot.png"
+}

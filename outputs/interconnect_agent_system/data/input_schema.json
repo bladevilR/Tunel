@@ -1,0 +1,94 @@
+{
+  "version": "feedback-20260507",
+  "source": "outputs\\feedback_20260507\\标准输入要素.docx",
+  "sections": {
+    "区位信息": [
+      "所属区划：工业园区",
+      "轨道站点：金家堰站",
+      "研究地块：金家堰邻里中心",
+      "地块位置：金堰路东、东宏路北",
+      "车站相邻出入口：3号口"
+    ],
+    "地块信息": [
+      "用地性质：商业用地",
+      "用地面积：25000平方米",
+      "功能业态：综合性社区邻里中心",
+      "地下空间：有地下室",
+      "规划指标：容积率≤2.5，建筑密度≤50%，建筑限高60m"
+    ],
+    "附件资料（非必须）": [],
+    "地块控制性详细规划图则": [],
+    "地块规划条件": [],
+    "地块概念设计方案": [],
+    "。。。。。。": []
+  },
+  "fields": [
+    {
+      "path": "station.district",
+      "label": "所属区划",
+      "required": true,
+      "example": "工业园区"
+    },
+    {
+      "path": "station.name",
+      "label": "轨道站点",
+      "required": true,
+      "example": "金家堰站"
+    },
+    {
+      "path": "name",
+      "label": "研究地块",
+      "required": true,
+      "example": "金家堰邻里中心"
+    },
+    {
+      "path": "parcel.location",
+      "label": "地块位置",
+      "required": true,
+      "example": "金堰路东、东宏路北"
+    },
+    {
+      "path": "station.nearbyExit",
+      "label": "车站相邻出入口",
+      "required": true,
+      "example": "3号口"
+    },
+    {
+      "path": "parcel.landUseText",
+      "label": "用地性质",
+      "required": true,
+      "example": "商业用地"
+    },
+    {
+      "path": "parcel.siteArea",
+      "label": "用地面积",
+      "required": false,
+      "unit": "平方米",
+      "example": "25000"
+    },
+    {
+      "path": "parcel.functionalFormat",
+      "label": "功能业态",
+      "required": true,
+      "example": "综合性社区邻里中心"
+    },
+    {
+      "path": "parcel.undergroundDescription",
+      "label": "地下空间",
+      "required": true,
+      "example": "有地下室"
+    },
+    {
+      "path": "parcel.planningIndicators",
+      "label": "规划指标",
+      "required": false,
+      "example": "容积率≤2.5，建筑密度≤50%，建筑限高60m"
+    },
+    {
+      "path": "attachments",
+      "label": "附件资料",
+      "required": false,
+      "example": "控规图则、规划条件、概念方案"
+    }
+  ]
+}

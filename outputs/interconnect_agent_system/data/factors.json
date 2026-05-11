@@ -1,0 +1,240 @@
+{
+  "version": "ppt-20260318-feedback-20260507",
+  "sourcePriority": [
+    "（核心工作思路，最优先）互联互通智能体研发工作方案0318.pptx",
+    "互联互通智能体资料缺项需求提报表-反馈版.xlsx / 20260507反馈",
+    "02预设数据资料/评价因子赋值明细表.xlsx",
+    "02预设数据资料/每站每月日均进站.xlsx",
+    "03智能体输出成果参考报告（早期文件，仅作章节与表达参考）"
+  ],
+  "grading": [
+    {
+      "level": "必连地块",
+      "min": 3.2636,
+      "max": null,
+      "percentMin": 80,
+      "percentMax": null,
+      "policy": "必要性最高，必须联通；明确联通方式、接口预留、建设时序与实施责任。"
+    },
+    {
+      "level": "尽连地块",
+      "min": 2.4477,
+      "max": 3.2636,
+      "percentMin": 60,
+      "percentMax": 80,
+      "policy": "必要性次之，应尽量联通；优先推动接口条件、建设协同和方案比选。"
+    },
+    {
+      "level": "可连地块",
+      "min": null,
+      "max": 2.4477,
+      "percentMin": null,
+      "percentMax": 60,
+      "policy": "鼓励、建议联通；结合项目诉求、建设条件和成本效益确定实施方式。"
+    }
+  ],
+  "dimensions": [
+    {
+      "id": "function",
+      "name": "功能属性",
+      "weight": 0.4188,
+      "factors": [
+        {
+          "id": "land_use",
+          "name": "用地功能",
+          "weight": 0.0795,
+          "description": "用地公共属性越高、开放程度越高，赋值越大。",
+          "options": [
+            {
+              "value": "transport_hub",
+              "label": "交通枢纽、铁路车站、汽车站等",
+              "score": 5
+            },
+            {
+              "value": "major_public_commercial",
+              "label": "重要医疗文体设施、综合商业、邻里中心",
+              "score": 4
+            },
+            {
+              "value": "general_public_commercial",
+              "label": "重要办公服务、一般商业、医院、公寓",
+              "score": 3
+            },
+            {
+              "value": "office_school_residential",
+              "label": "办公、学校、游览、住宅",
+              "score": 2
+            },
+            {
+              "value": "industrial_municipal",
+              "label": "工业、市政",
+              "score": 1
+            }
+          ]
+        },
+        {
+          "id": "development_intensity",
+          "name": "开发强度",
+          "weight": 0.3393,
+          "description": "用地开发强度越高、规模越大，赋值越大。",
+          "options": [
+            {
+              "value": "gt_100k",
+              "label": "建筑面积 10 万平方米以上",
+              "score": 4
+            },
+            {
+              "value": "30k_100k",
+              "label": "建筑面积 3 万-10 万平方米",
+              "score": 3
+            },
+            {
+              "value": "5k_30k",
+              "label": "建筑面积 5 千-3 万平方米",
+              "score": 2
+            },
+            {
+              "value": "lt_5k",
+              "label": "建筑面积小于 5 千平方米",
+              "score": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "location",
+      "name": "区位属性",
+      "weight": 0.1407,
+      "factors": [
+        {
+          "id": "location_level",
+          "name": "区位能级",
+          "weight": 0.1407,
+          "description": "站点在城市中心体系中的中心能级越大，连通必要性越高。",
+          "options": [
+            {
+              "value": "city",
+              "label": "城市级中心",
+              "score": 4
+            },
+            {
+              "value": "district",
+              "label": "片区级中心",
+              "score": 3
+            },
+            {
+              "value": "community",
+              "label": "社区级中心",
+              "score": 2
+            },
+            {
+              "value": "general",
+              "label": "一般地区",
+              "score": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "transport",
+      "name": "交通属性",
+      "weight": 0.2976,
+      "factors": [
+        {
+          "id": "ridership",
+          "name": "出行客流",
+          "weight": 0.2535,
+          "description": "城轨客流集聚效果影响地块连通必要性，客流量越大，赋值越大。",
+          "options": [
+            {
+              "value": "gt_9000",
+              "label": "日均进站量 9000 以上",
+              "score": 4
+            },
+            {
+              "value": "5000_9000",
+              "label": "日均进站量 5000-9000",
+              "score": 3
+            },
+            {
+              "value": "2500_5000",
+              "label": "日均进站量 2500-5000",
+              "score": 2
+            },
+            {
+              "value": "lt_2500",
+              "label": "日均进站量小于 2500",
+              "score": 1
+            }
+          ]
+        },
+        {
+          "id": "transfer",
+          "name": "高效换乘",
+          "weight": 0.0441,
+          "description": "站点在线网中的衔接性越高，换乘便捷性越高，赋值越大。",
+          "options": [
+            {
+              "value": "current_transfer",
+              "label": "现状换乘站",
+              "score": 4
+            },
+            {
+              "value": "planned_transfer",
+              "label": "规划换乘站",
+              "score": 3
+            },
+            {
+              "value": "normal",
+              "label": "一般站",
+              "score": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "underground",
+      "name": "地下属性",
+      "weight": 0.1429,
+      "factors": [
+        {
+          "id": "underground_space",
+          "name": "地下空间",
+          "weight": 0.1429,
+          "description": "地下空间有无及其功能影响站域连通性，公共开放功能赋值更高。",
+          "options": [
+            {
+              "value": "commercial_public_pr",
+              "label": "有，功能为商业、公共服务、文体、商业+停车或 P+R 停车",
+              "score": 4
+            },
+            {
+              "value": "parking",
+              "label": "有，功能为一般停车",
+              "score": 3
+            },
+            {
+              "value": "other",
+              "label": "有，其他功能（市政、物资、人防等）",
+              "score": 2
+            },
+            {
+              "value": "none",
+              "label": "无地下空间",
+              "score": 1
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "scoreScale": {
+    "rawMax": 4.0795,
+    "normalizedMax": 100,
+    "gradingBasis": "scorePercent = rawScore / rawMax * 100; 20260507反馈暂按80分以上必连、60-80分尽连、60分以下可连",
+    "feedbackDate": "2026-05-07"
+  }
+}

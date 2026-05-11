@@ -1,0 +1,1687 @@
+{
+  "version": "from-02-preset-tod-xlsx",
+  "source": "02预设数据资料（构建知识库用）\\车站TOD级别划分整理.xlsx",
+  "count": 240,
+  "stations": [
+    {
+      "name": "乐桥",
+      "todLevel": "城市级TOD",
+      "lines": "1/4",
+      "remark": "",
+      "locationLevel": "city"
+    },
+    {
+      "name": "三香广场",
+      "todLevel": "城市级TOD",
+      "lines": "2",
+      "remark": "",
+      "locationLevel": "city"
+    },
+    {
+      "name": "东方之门",
+      "todLevel": "城市级TOD",
+      "lines": "1/3",
+      "remark": "",
+      "locationLevel": "city"
+    },
+    {
+      "name": "时代广场",
+      "todLevel": "城市级TOD",
+      "lines": "1/8",
+      "remark": "",
+      "locationLevel": "city"
+    },
+    {
+      "name": "狮子山",
+      "todLevel": "城市级TOD",
+      "lines": "1/3",
+      "remark": "",
+      "locationLevel": "city"
+    },
+    {
+      "name": "阳澄湖中路",
+      "todLevel": "城市级TOD",
+      "lines": "2/8",
+      "remark": "",
+      "locationLevel": "city"
+    },
+    {
+      "name": "宝带路",
+      "todLevel": "城市级TOD",
+      "lines": "3/4",
+      "remark": "",
+      "locationLevel": "city"
+    },
+    {
+      "name": "高铁苏州北站",
+      "todLevel": "城市级TOD",
+      "lines": "2/7",
+      "remark": "7号线暂未开通",
+      "locationLevel": "city"
+    },
+    {
+      "name": "苏州湾北",
+      "todLevel": "城市级TOD",
+      "lines": "7",
+      "remark": "",
+      "locationLevel": "city"
+    },
+    {
+      "name": "花港",
+      "todLevel": "城市级TOD",
+      "lines": "4",
+      "remark": "",
+      "locationLevel": "city"
+    },
+    {
+      "name": "桑田岛",
+      "todLevel": "城市级TOD",
+      "lines": "2/6",
+      "remark": "",
+      "locationLevel": "city"
+    },
+    {
+      "name": "星海广场",
+      "todLevel": "分区级TOD",
+      "lines": "1",
+      "remark": "",
+      "locationLevel": "district"
+    },
+    {
+      "name": "石路",
+      "todLevel": "分区级TOD",
+      "lines": "2",
+      "remark": "",
+      "locationLevel": "district"
+    },
+    {
+      "name": "石湖东路",
+      "todLevel": "分区级TOD",
+      "lines": "2/4",
+      "remark": "",
+      "locationLevel": "district"
+    },
+    {
+      "name": "沙金桥",
+      "todLevel": "分区级TOD",
+      "lines": "3",
+      "remark": "",
+      "locationLevel": "district"
+    },
+    {
+      "name": "吴江人民广场",
+      "todLevel": "分区级TOD",
+      "lines": "4",
+      "remark": "",
+      "locationLevel": "district"
+    },
+    {
+      "name": "月亮湾",
+      "todLevel": "分区级TOD",
+      "lines": "2",
+      "remark": "",
+      "locationLevel": "district"
+    },
+    {
+      "name": "天鹅荡路",
+      "todLevel": "分区级TOD",
+      "lines": "7",
+      "remark": "",
+      "locationLevel": "district"
+    },
+    {
+      "name": "渎川桥",
+      "todLevel": "分区级TOD",
+      "lines": "5",
+      "remark": "",
+      "locationLevel": "district"
+    },
+    {
+      "name": "茅蓬路东",
+      "todLevel": "分区级TOD",
+      "lines": "5",
+      "remark": "",
+      "locationLevel": "district"
+    },
+    {
+      "name": "渭中路",
+      "todLevel": "分区级TOD",
+      "lines": "2",
+      "remark": "在建延伸线",
+      "locationLevel": "district"
+    },
+    {
+      "name": "夏圩",
+      "todLevel": "分区级TOD",
+      "lines": "8",
+      "remark": "",
+      "locationLevel": "district"
+    },
+    {
+      "name": "苏州湾东",
+      "todLevel": "分区级TOD",
+      "lines": "4",
+      "remark": "",
+      "locationLevel": "district"
+    },
+    {
+      "name": "苏州火车站",
+      "todLevel": "分区级TOD",
+      "lines": "2/4",
+      "remark": "",
+      "locationLevel": "district"
+    },
+    {
+      "name": "苏州新区火车站",
+      "todLevel": "分区级TOD",
+      "lines": "3/6",
+      "remark": "",
+      "locationLevel": "district"
+    },
+    {
+      "name": "苏州园区火车站",
+      "todLevel": "分区级TOD",
+      "lines": "3/8",
+      "remark": "",
+      "locationLevel": "district"
+    },
+    {
+      "name": "同里",
+      "todLevel": "分区级TOD",
+      "lines": "4",
+      "remark": "",
+      "locationLevel": "district"
+    },
+    {
+      "name": "北港路",
+      "todLevel": "分区级TOD",
+      "lines": "3",
+      "remark": "",
+      "locationLevel": "district"
+    },
+    {
+      "name": "苏州奥体中心",
+      "todLevel": "分区级TOD",
+      "lines": "5/6",
+      "remark": "",
+      "locationLevel": "district"
+    },
+    {
+      "name": "临顿路",
+      "todLevel": "分区级TOD",
+      "lines": "1/6",
+      "remark": "",
+      "locationLevel": "district"
+    },
+    {
+      "name": "察院场",
+      "todLevel": "分区级TOD",
+      "lines": "4",
+      "remark": "",
+      "locationLevel": "district"
+    },
+    {
+      "name": "悬桥巷",
+      "todLevel": "分区级TOD",
+      "lines": "6",
+      "remark": "",
+      "locationLevel": "district"
+    },
+    {
+      "name": "山塘街",
+      "todLevel": "分区级TOD",
+      "lines": "2",
+      "remark": "",
+      "locationLevel": "district"
+    },
+    {
+      "name": "虎丘",
+      "todLevel": "分区级TOD",
+      "lines": "6",
+      "remark": "",
+      "locationLevel": "district"
+    },
+    {
+      "name": "木渎",
+      "todLevel": "组团级TOD",
+      "lines": "1",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "金枫路",
+      "todLevel": "组团级TOD",
+      "lines": "1",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "汾湖路",
+      "todLevel": "组团级TOD",
+      "lines": "1",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "玉山路",
+      "todLevel": "组团级TOD",
+      "lines": "1",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "塔园路",
+      "todLevel": "组团级TOD",
+      "lines": "1",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "滨河路",
+      "todLevel": "组团级TOD",
+      "lines": "1",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "西环路",
+      "todLevel": "组团级TOD",
+      "lines": "1",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "桐泾北路",
+      "todLevel": "组团级TOD",
+      "lines": "1",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "广济南路",
+      "todLevel": "组团级TOD",
+      "lines": "1/2",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "养育巷",
+      "todLevel": "组团级TOD",
+      "lines": "1",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "相门",
+      "todLevel": "组团级TOD",
+      "lines": "1",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "东环路",
+      "todLevel": "组团级TOD",
+      "lines": "1",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "中央公园",
+      "todLevel": "组团级TOD",
+      "lines": "1/7",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "文化博览中心",
+      "todLevel": "组团级TOD",
+      "lines": "1",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "星湖街",
+      "todLevel": "组团级TOD",
+      "lines": "1",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "南施街",
+      "todLevel": "组团级TOD",
+      "lines": "1",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "星塘街",
+      "todLevel": "组团级TOD",
+      "lines": "1/5",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "钟南街",
+      "todLevel": "组团级TOD",
+      "lines": "1",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "骑河",
+      "todLevel": "组团级TOD",
+      "lines": "2",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "富翔路",
+      "todLevel": "组团级TOD",
+      "lines": "2",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "大湾",
+      "todLevel": "组团级TOD",
+      "lines": "2",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "富元路",
+      "todLevel": "组团级TOD",
+      "lines": "2",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "蠡口",
+      "todLevel": "组团级TOD",
+      "lines": "2",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "徐图港",
+      "todLevel": "组团级TOD",
+      "lines": "2",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "陆慕",
+      "todLevel": "组团级TOD",
+      "lines": "2",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "平泷路东",
+      "todLevel": "组团级TOD",
+      "lines": "2",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "平河路",
+      "todLevel": "组团级TOD",
+      "lines": "2/6",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "劳动路",
+      "todLevel": "组团级TOD",
+      "lines": "2/5",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "胥江路",
+      "todLevel": "组团级TOD",
+      "lines": "2",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "桐泾公园",
+      "todLevel": "组团级TOD",
+      "lines": "2",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "友联",
+      "todLevel": "组团级TOD",
+      "lines": "2",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "盘蠡路",
+      "todLevel": "组团级TOD",
+      "lines": "2/3",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "新家桥",
+      "todLevel": "组团级TOD",
+      "lines": "2",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "宝带桥南",
+      "todLevel": "组团级TOD",
+      "lines": "2",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "尹中路",
+      "todLevel": "组团级TOD",
+      "lines": "2",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "郭巷",
+      "todLevel": "组团级TOD",
+      "lines": "2/7",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "郭苑路",
+      "todLevel": "组团级TOD",
+      "lines": "2",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "尹山湖",
+      "todLevel": "组团级TOD",
+      "lines": "2",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "独墅湖南",
+      "todLevel": "组团级TOD",
+      "lines": "2",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "独墅湖邻里中心",
+      "todLevel": "组团级TOD",
+      "lines": "2",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "松涛街",
+      "todLevel": "组团级TOD",
+      "lines": "2/8",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "金谷路",
+      "todLevel": "组团级TOD",
+      "lines": "2",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "金尚路",
+      "todLevel": "组团级TOD",
+      "lines": "2/6",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "惠昌路",
+      "todLevel": "组团级TOD",
+      "lines": "3",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "文昌路",
+      "todLevel": "组团级TOD",
+      "lines": "3",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "长亭",
+      "todLevel": "组团级TOD",
+      "lines": "3",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "铜墩",
+      "todLevel": "组团级TOD",
+      "lines": "3",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "马运路",
+      "todLevel": "组团级TOD",
+      "lines": "3",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "西津桥",
+      "todLevel": "组团级TOD",
+      "lines": "3/8",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "何山",
+      "todLevel": "组团级TOD",
+      "lines": "3",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "狮山路",
+      "todLevel": "组团级TOD",
+      "lines": "3",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "索山桥西",
+      "todLevel": "组团级TOD",
+      "lines": "3/5",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "横山",
+      "todLevel": "组团级TOD",
+      "lines": "3",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "横塘",
+      "todLevel": "组团级TOD",
+      "lines": "3",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "石湖北",
+      "todLevel": "组团级TOD",
+      "lines": "3",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "新郭",
+      "todLevel": "组团级TOD",
+      "lines": "3",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "迎春路",
+      "todLevel": "组团级TOD",
+      "lines": "3",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "通园路南",
+      "todLevel": "组团级TOD",
+      "lines": "3/7",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "墅浦路北",
+      "todLevel": "组团级TOD",
+      "lines": "3",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "东振路",
+      "todLevel": "组团级TOD",
+      "lines": "3",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "金厍桥",
+      "todLevel": "组团级TOD",
+      "lines": "3/5",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "李公堤西",
+      "todLevel": "组团级TOD",
+      "lines": "3/6",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "烟雨桥",
+      "todLevel": "组团级TOD",
+      "lines": "3",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "倪浜",
+      "todLevel": "组团级TOD",
+      "lines": "3",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "唐庄",
+      "todLevel": "组团级TOD",
+      "lines": "3/8",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "跨塘",
+      "todLevel": "组团级TOD",
+      "lines": "3",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "方湾街",
+      "todLevel": "组团级TOD",
+      "lines": "3",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "丰和路",
+      "todLevel": "组团级TOD",
+      "lines": "3",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "双马街",
+      "todLevel": "组团级TOD",
+      "lines": "3",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "葑亭大道",
+      "todLevel": "组团级TOD",
+      "lines": "3/5",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "戈巷街",
+      "todLevel": "组团级TOD",
+      "lines": "3",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "唯亭",
+      "todLevel": "组团级TOD",
+      "lines": "3/11",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "龙道浜",
+      "todLevel": "组团级TOD",
+      "lines": "4",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "张庄",
+      "todLevel": "组团级TOD",
+      "lines": "4",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "姚祥",
+      "todLevel": "组团级TOD",
+      "lines": "4",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "活力岛",
+      "todLevel": "组团级TOD",
+      "lines": "4",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "孙武纪念园",
+      "todLevel": "组团级TOD",
+      "lines": "4/8",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "平泷路西",
+      "todLevel": "组团级TOD",
+      "lines": "4",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "苏锦",
+      "todLevel": "组团级TOD",
+      "lines": "4/6",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "北寺塔",
+      "todLevel": "组团级TOD",
+      "lines": "4",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "三元坊",
+      "todLevel": "组团级TOD",
+      "lines": "4",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "南门",
+      "todLevel": "组团级TOD",
+      "lines": "4/5",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "人民桥南",
+      "todLevel": "组团级TOD",
+      "lines": "4",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "团结桥",
+      "todLevel": "组团级TOD",
+      "lines": "4",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "红庄",
+      "todLevel": "组团级TOD",
+      "lines": "4/7",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "清树湾",
+      "todLevel": "组团级TOD",
+      "lines": "4",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "江陵西路",
+      "todLevel": "组团级TOD",
+      "lines": "4",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "江兴西路",
+      "todLevel": "组团级TOD",
+      "lines": "4",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "流虹路",
+      "todLevel": "组团级TOD",
+      "lines": "4",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "笠泽路",
+      "todLevel": "组团级TOD",
+      "lines": "4",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "顾家荡",
+      "todLevel": "组团级TOD",
+      "lines": "4",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "松陵大道",
+      "todLevel": "组团级TOD",
+      "lines": "4",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "吴江汽车站",
+      "todLevel": "组团级TOD",
+      "lines": "4",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "庞金路",
+      "todLevel": "组团级TOD",
+      "lines": "4",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "太湖香山",
+      "todLevel": "组团级TOD",
+      "lines": "5",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "花墩",
+      "todLevel": "组团级TOD",
+      "lines": "5",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "津桥",
+      "todLevel": "组团级TOD",
+      "lines": "5",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "胥口",
+      "todLevel": "组团级TOD",
+      "lines": "5",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "许家桥",
+      "todLevel": "组团级TOD",
+      "lines": "5",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "灵岩山",
+      "todLevel": "组团级TOD",
+      "lines": "5",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "大治桥",
+      "todLevel": "组团级TOD",
+      "lines": "5",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "西跨塘",
+      "todLevel": "组团级TOD",
+      "lines": "5",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "石城",
+      "todLevel": "组团级TOD",
+      "lines": "5",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "落星桥",
+      "todLevel": "组团级TOD",
+      "lines": "5",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "双桥",
+      "todLevel": "组团级TOD",
+      "lines": "5",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "新市桥",
+      "todLevel": "组团级TOD",
+      "lines": "5",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "南园北路",
+      "todLevel": "组团级TOD",
+      "lines": "5",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "竹辉桥",
+      "todLevel": "组团级TOD",
+      "lines": "5",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "荷花荡",
+      "todLevel": "组团级TOD",
+      "lines": "5",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "黄天荡",
+      "todLevel": "组团级TOD",
+      "lines": "5/7",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "星波街",
+      "todLevel": "组团级TOD",
+      "lines": "5",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "李公堤南",
+      "todLevel": "组团级TOD",
+      "lines": "5",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "金湖",
+      "todLevel": "组团级TOD",
+      "lines": "5",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "华莲",
+      "todLevel": "组团级TOD",
+      "lines": "5",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "斜塘",
+      "todLevel": "组团级TOD",
+      "lines": "5/8",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "方洲公园",
+      "todLevel": "组团级TOD",
+      "lines": "5",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "龙墩",
+      "todLevel": "组团级TOD",
+      "lines": "5",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "东沙湖",
+      "todLevel": "组团级TOD",
+      "lines": "5",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "阳澄湖南",
+      "todLevel": "组团级TOD",
+      "lines": "5",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "保丰",
+      "todLevel": "组团级TOD",
+      "lines": "6",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "富强",
+      "todLevel": "组团级TOD",
+      "lines": "6",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "长泾",
+      "todLevel": "组团级TOD",
+      "lines": "6",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "白洋湾公园",
+      "todLevel": "组团级TOD",
+      "lines": "6/8",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "金鸡墩",
+      "todLevel": "组团级TOD",
+      "lines": "6",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "青山桥浜",
+      "todLevel": "组团级TOD",
+      "lines": "6",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "江星桥南",
+      "todLevel": "组团级TOD",
+      "lines": "6",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "梅巷",
+      "todLevel": "组团级TOD",
+      "lines": "6",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "拙政园苏博",
+      "todLevel": "组团级TOD",
+      "lines": "6",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "望星桥苏大",
+      "todLevel": "组团级TOD",
+      "lines": "6",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "徐家浜",
+      "todLevel": "组团级TOD",
+      "lines": "6",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "惹云桥",
+      "todLevel": "组团级TOD",
+      "lines": "6/7",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "秋塘浜",
+      "todLevel": "组团级TOD",
+      "lines": "6",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "琼姬墩",
+      "todLevel": "组团级TOD",
+      "lines": "6/8",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "南施公园南",
+      "todLevel": "组团级TOD",
+      "lines": "6",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "儿童医院总院",
+      "todLevel": "组团级TOD",
+      "lines": "6",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "涵青桥",
+      "todLevel": "组团级TOD",
+      "lines": "6",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "金家堰",
+      "todLevel": "组团级TOD",
+      "lines": "6",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "北斜步",
+      "todLevel": "组团级TOD",
+      "lines": "6",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "南斜步",
+      "todLevel": "组团级TOD",
+      "lines": "6",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "华云",
+      "todLevel": "组团级TOD",
+      "lines": "6",
+      "remark": "暂未开通",
+      "locationLevel": "community"
+    },
+    {
+      "name": "莫阳",
+      "todLevel": "组团级TOD",
+      "lines": "7",
+      "remark": "暂未开通",
+      "locationLevel": "community"
+    },
+    {
+      "name": "朱泾",
+      "todLevel": "组团级TOD",
+      "lines": "7",
+      "remark": "暂未开通",
+      "locationLevel": "community"
+    },
+    {
+      "name": "雪南",
+      "todLevel": "组团级TOD",
+      "lines": "7",
+      "remark": "暂未开通",
+      "locationLevel": "community"
+    },
+    {
+      "name": "常楼",
+      "todLevel": "组团级TOD",
+      "lines": "7",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "登云",
+      "todLevel": "组团级TOD",
+      "lines": "7",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "蠡塘河路",
+      "todLevel": "组团级TOD",
+      "lines": "7",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "春申湖东路",
+      "todLevel": "组团级TOD",
+      "lines": "7",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "华元路东",
+      "todLevel": "组团级TOD",
+      "lines": "7",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "白荡北",
+      "todLevel": "组团级TOD",
+      "lines": "7/8",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "板泾",
+      "todLevel": "组团级TOD",
+      "lines": "7",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "洋泾",
+      "todLevel": "组团级TOD",
+      "lines": "7",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "积翠桥",
+      "todLevel": "组团级TOD",
+      "lines": "7",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "娄葑",
+      "todLevel": "组团级TOD",
+      "lines": "7",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "群里",
+      "todLevel": "组团级TOD",
+      "lines": "7",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "林家潭",
+      "todLevel": "组团级TOD",
+      "lines": "7",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "尹山",
+      "todLevel": "组团级TOD",
+      "lines": "7",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "金家桥南",
+      "todLevel": "组团级TOD",
+      "lines": "7",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "枫津路",
+      "todLevel": "组团级TOD",
+      "lines": "7",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "蠡墅",
+      "todLevel": "组团级TOD",
+      "lines": "7",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "石湖莫舍",
+      "todLevel": "组团级TOD",
+      "lines": "7",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "越溪",
+      "todLevel": "组团级TOD",
+      "lines": "7",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "文溪路",
+      "todLevel": "组团级TOD",
+      "lines": "7",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "木里",
+      "todLevel": "组团级TOD",
+      "lines": "7",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "新元",
+      "todLevel": "组团级TOD",
+      "lines": "8",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "时家桥",
+      "todLevel": "组团级TOD",
+      "lines": "8",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "虎北路",
+      "todLevel": "组团级TOD",
+      "lines": "8",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "虎丘湿地公园",
+      "todLevel": "组团级TOD",
+      "lines": "8",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "御窑",
+      "todLevel": "组团级TOD",
+      "lines": "8",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "陆慕古巷",
+      "todLevel": "组团级TOD",
+      "lines": "8",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "五潨泾",
+      "todLevel": "组团级TOD",
+      "lines": "8",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "古香圩",
+      "todLevel": "组团级TOD",
+      "lines": "8",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "南泽庄",
+      "todLevel": "组团级TOD",
+      "lines": "8",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "古楼",
+      "todLevel": "组团级TOD",
+      "lines": "8",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "华池浜",
+      "todLevel": "组团级TOD",
+      "lines": "8",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "苏州当代美术馆",
+      "todLevel": "组团级TOD",
+      "lines": "8",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "莲池桥",
+      "todLevel": "组团级TOD",
+      "lines": "8",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "仁爱路",
+      "todLevel": "组团级TOD",
+      "lines": "8",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "裕新路",
+      "todLevel": "组团级TOD",
+      "lines": "8",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "车坊",
+      "todLevel": "组团级TOD",
+      "lines": "8",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "草鞋山",
+      "todLevel": "组团级TOD",
+      "lines": "11",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "阳澄湖东",
+      "todLevel": "组团级TOD",
+      "lines": "11",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "正仪",
+      "todLevel": "组团级TOD",
+      "lines": "11",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "莲湖公园",
+      "todLevel": "组团级TOD",
+      "lines": "11",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "祖冲之公园",
+      "todLevel": "组团级TOD",
+      "lines": "11",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "昆山文化艺术中心",
+      "todLevel": "组团级TOD",
+      "lines": "11",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "共青",
+      "todLevel": "组团级TOD",
+      "lines": "11",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "江浦",
+      "todLevel": "组团级TOD",
+      "lines": "11",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "白马泾",
+      "todLevel": "组团级TOD",
+      "lines": "11",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "玉山广场",
+      "todLevel": "组团级TOD",
+      "lines": "11",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "绣衣",
+      "todLevel": "组团级TOD",
+      "lines": "11",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "昆山城市广场",
+      "todLevel": "组团级TOD",
+      "lines": "11",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "金浦大桥东",
+      "todLevel": "组团级TOD",
+      "lines": "11",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "顺帆北路",
+      "todLevel": "组团级TOD",
+      "lines": "11",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "鱼池泾",
+      "todLevel": "组团级TOD",
+      "lines": "11",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "白河潭",
+      "todLevel": "组团级TOD",
+      "lines": "11",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "兵希",
+      "todLevel": "组团级TOD",
+      "lines": "11",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "夏驾河公园",
+      "todLevel": "组团级TOD",
+      "lines": "11",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "盛庄",
+      "todLevel": "组团级TOD",
+      "lines": "11",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "章基路南",
+      "todLevel": "组团级TOD",
+      "lines": "11",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "夏桥",
+      "todLevel": "组团级TOD",
+      "lines": "11",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "神童泾",
+      "todLevel": "组团级TOD",
+      "lines": "11",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "菉葭",
+      "todLevel": "组团级TOD",
+      "lines": "11",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "花桥博览中心",
+      "todLevel": "组团级TOD",
+      "lines": "11",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "集善",
+      "todLevel": "组团级TOD",
+      "lines": "11",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "花溪公园",
+      "todLevel": "组团级TOD",
+      "lines": "11",
+      "remark": "",
+      "locationLevel": "community"
+    },
+    {
+      "name": "花桥",
+      "todLevel": "组团级TOD",
+      "lines": "11",
+      "remark": "",
+      "locationLevel": "community"
+    }
+  ]
+}

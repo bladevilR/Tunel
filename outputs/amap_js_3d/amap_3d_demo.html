@@ -1,0 +1,619 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="data:," />
+  <title>高德 3D 通道示意图 Demo</title>
+  <style>
+    :root {
+      --ink: #111827;
+      --muted: #5f6b7a;
+      --panel: rgba(255, 255, 255, 0.92);
+      --red: #e1262f;
+      --blue: #1d8ccf;
+      --purple: #8a58a5;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body,
+    #map {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+    }
+
+    body {
+      overflow: hidden;
+      color: var(--ink);
+      font-family: "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
+      background: #eef2f4;
+    }
+
+    #map {
+      position: absolute;
+      inset: 0;
+    }
+
+    #overlay3d {
+      position: absolute;
+      z-index: 10;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    .panel {
+      position: absolute;
+      z-index: 20;
+      left: 18px;
+      top: 18px;
+      width: min(410px, calc(100vw - 36px));
+      padding: 15px 16px 14px;
+      border: 1px solid rgba(17, 24, 39, 0.12);
+      border-radius: 8px;
+      background: var(--panel);
+      box-shadow: 0 14px 38px rgba(15, 23, 42, 0.18);
+      backdrop-filter: blur(8px);
+    }
+
+    .title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 8px;
+      font-size: 19px;
+      font-weight: 800;
+      letter-spacing: 0;
+    }
+
+    .badge {
+      flex: 0 0 auto;
+      padding: 4px 8px;
+      border: 1px solid rgba(29, 140, 207, 0.36);
+      border-radius: 999px;
+      color: #0b5f91;
+      background: rgba(29, 140, 207, 0.1);
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .meta {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .legend {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px 12px;
+      margin-top: 12px;
+      font-size: 13px;
+      color: #1f2937;
+    }
+
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      min-width: 0;
+      gap: 7px;
+      white-space: nowrap;
+    }
+
+    .swatch {
+      width: 26px;
+      height: 9px;
+      border-radius: 3px;
+      box-shadow: 0 0 0 1px rgba(17, 24, 39, 0.14) inset;
+    }
+
+    .swatch.red {
+      background: var(--red);
+    }
+
+    .swatch.blue {
+      background: rgba(29, 140, 207, 0.48);
+    }
+
+    .swatch.purple {
+      background: rgba(138, 88, 165, 0.5);
+    }
+
+    .swatch.white {
+      background: linear-gradient(#fff, #d7dde4);
+    }
+
+    .status {
+      position: absolute;
+      z-index: 20;
+      left: 18px;
+      bottom: 18px;
+      max-width: min(560px, calc(100vw - 36px));
+      padding: 9px 12px;
+      border-radius: 8px;
+      background: rgba(17, 24, 39, 0.82);
+      color: #fff;
+      font-size: 12px;
+      line-height: 1.45;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.22);
+    }
+
+    .label {
+      position: relative;
+      padding: 4px 7px;
+      border: 1px solid rgba(17, 24, 39, 0.22);
+      border-radius: 6px;
+      color: #111827;
+      background: rgba(255, 255, 255, 0.95);
+      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.16);
+      font-size: 13px;
+      font-weight: 800;
+      line-height: 1.2;
+      white-space: nowrap;
+    }
+
+    .label.exit {
+      border-color: rgba(29, 140, 207, 0.48);
+      color: #0b5f91;
+    }
+
+    .label.parcel {
+      border-color: rgba(225, 38, 47, 0.42);
+      color: #b91c1c;
+    }
+
+    .arrow-label {
+      padding: 0;
+      border: 0;
+      color: #df1d2d;
+      background: transparent;
+      box-shadow: none;
+      font-size: 36px;
+      font-weight: 900;
+      text-shadow: 0 2px 2px rgba(255, 255, 255, 0.95);
+      transform: rotate(8deg);
+    }
+
+    .amap-logo,
+    .amap-copyright {
+      opacity: 0.5;
+    }
+  </style>
+</head>
+<body>
+  <div id="map" aria-label="高德三维地图"></div>
+  <canvas id="overlay3d" aria-hidden="true"></canvas>
+
+  <section class="panel" aria-label="示意图信息">
+    <div class="title">
+      <span>群力站通道示意</span>
+      <span class="badge">高德 JS 3D</span>
+    </div>
+    <div class="meta">
+      底图、道路、既有建筑由高德渲染；红线、站体、站口、通道和拟建体块为工程侧可控图层。
+    </div>
+    <div class="legend" aria-label="图例">
+      <span><i class="swatch red"></i>地块红线</span>
+      <span><i class="swatch blue"></i>连通通道</span>
+      <span><i class="swatch purple"></i>站体范围</span>
+      <span><i class="swatch white"></i>拟建体块</span>
+    </div>
+  </section>
+
+  <div id="status" class="status">正在加载高德 3D 底图...</div>
+
+  <script>
+    window.AMAP_DEMO_CONFIG = {
+      key: "__AMAP_JS_KEY__",
+      securityJsCode: "__AMAP_SECURITY_CODE__"
+    };
+
+    const statusNode = document.getElementById("status");
+
+    function setStatus(text) {
+      statusNode.textContent = text;
+      console.info("[amap-demo]", text);
+    }
+
+    function makeLabel(text, className) {
+      return `<div class="label ${className || ""}">${text}</div>`;
+    }
+
+    function getPoint(pixelLike) {
+      if (Array.isArray(pixelLike)) {
+        return { x: pixelLike[0], y: pixelLike[1] };
+      }
+
+      return {
+        x: typeof pixelLike.getX === "function" ? pixelLike.getX() : pixelLike.x,
+        y: typeof pixelLike.getY === "function" ? pixelLike.getY() : pixelLike.y
+      };
+    }
+
+    function projectPath(map, path) {
+      return path.map((lngLat) => getPoint(map.lngLatToContainer(lngLat)));
+    }
+
+    function setupCanvas(canvas) {
+      const dpr = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = Math.max(1, Math.round(rect.width * dpr));
+      canvas.height = Math.max(1, Math.round(rect.height * dpr));
+      const ctx = canvas.getContext("2d");
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, rect.width, rect.height);
+      ctx.lineJoin = "round";
+      ctx.lineCap = "round";
+      return { ctx, width: rect.width, height: rect.height };
+    }
+
+    function path2d(points, offsetX = 0, offsetY = 0) {
+      const shape = new Path2D();
+      points.forEach((point, index) => {
+        const x = point.x + offsetX;
+        const y = point.y + offsetY;
+        if (index === 0) {
+          shape.moveTo(x, y);
+        } else {
+          shape.lineTo(x, y);
+        }
+      });
+      shape.closePath();
+      return shape;
+    }
+
+    function strokePolygon(ctx, points, style) {
+      ctx.save();
+      ctx.strokeStyle = style.stroke;
+      ctx.fillStyle = style.fill;
+      ctx.lineWidth = style.lineWidth;
+      ctx.globalAlpha = style.alpha || 1;
+      const shape = path2d(points);
+      ctx.fill(shape);
+      ctx.stroke(shape);
+      ctx.restore();
+    }
+
+    function drawPrism(ctx, points, options) {
+      const ox = options.offsetX;
+      const oy = options.offsetY;
+      const top = points.map((point) => ({ x: point.x + ox, y: point.y + oy }));
+
+      ctx.save();
+      for (let i = 0; i < points.length; i += 1) {
+        const next = (i + 1) % points.length;
+        const face = new Path2D();
+        face.moveTo(points[i].x, points[i].y);
+        face.lineTo(points[next].x, points[next].y);
+        face.lineTo(top[next].x, top[next].y);
+        face.lineTo(top[i].x, top[i].y);
+        face.closePath();
+        ctx.fillStyle = i % 2 === 0 ? options.sideA : options.sideB;
+        ctx.fill(face);
+        ctx.strokeStyle = options.stroke;
+        ctx.lineWidth = options.lineWidth || 2;
+        ctx.stroke(face);
+      }
+
+      const topShape = path2d(top);
+      ctx.fillStyle = options.top;
+      ctx.strokeStyle = options.stroke;
+      ctx.lineWidth = options.lineWidth || 2;
+      ctx.fill(topShape);
+      ctx.stroke(topShape);
+
+      if (options.floorLines) {
+        ctx.strokeStyle = options.floorStroke;
+        ctx.lineWidth = 1.25;
+        for (let step = 0.25; step < 1; step += 0.25) {
+          ctx.beginPath();
+          points.forEach((point, index) => {
+            const x = point.x + ox * step;
+            const y = point.y + oy * step;
+            if (index === 0) {
+              ctx.moveTo(x, y);
+            } else {
+              ctx.lineTo(x, y);
+            }
+          });
+          ctx.closePath();
+          ctx.stroke();
+        }
+      }
+
+      ctx.restore();
+    }
+
+    function renderOverlay3d(map, shapes) {
+      const canvas = document.getElementById("overlay3d");
+      const { ctx } = setupCanvas(canvas);
+
+      const parcelPixels = projectPath(map, shapes.parcel);
+      const stationPixels = projectPath(map, shapes.station);
+      const buildingPixels = projectPath(map, shapes.proposedBuilding);
+      const channelPixels = projectPath(map, shapes.channelFootprint);
+
+      strokePolygon(ctx, parcelPixels, {
+        fill: "rgba(249, 242, 199, 0.16)",
+        stroke: "#e1262f",
+        lineWidth: 5,
+        alpha: 1
+      });
+
+      drawPrism(ctx, stationPixels, {
+        offsetX: -8,
+        offsetY: -18,
+        top: "rgba(188, 143, 210, 0.44)",
+        sideA: "rgba(117, 68, 145, 0.34)",
+        sideB: "rgba(154, 101, 177, 0.30)",
+        stroke: "rgba(94, 48, 119, 0.66)",
+        lineWidth: 2
+      });
+
+      drawPrism(ctx, channelPixels, {
+        offsetX: -6,
+        offsetY: -9,
+        top: "rgba(108, 189, 235, 0.52)",
+        sideA: "rgba(29, 140, 207, 0.38)",
+        sideB: "rgba(11, 119, 189, 0.34)",
+        stroke: "rgba(10, 100, 166, 0.78)",
+        lineWidth: 2
+      });
+
+      drawPrism(ctx, buildingPixels, {
+        offsetX: -30,
+        offsetY: -42,
+        top: "rgba(255, 255, 255, 0.96)",
+        sideA: "rgba(214, 221, 228, 0.96)",
+        sideB: "rgba(184, 194, 204, 0.96)",
+        stroke: "rgba(17, 24, 39, 0.82)",
+        floorLines: true,
+        floorStroke: "rgba(17, 24, 39, 0.42)",
+        lineWidth: 2.3
+      });
+
+      document.body.dataset.overlay3d = "true";
+    }
+
+    function bindOverlayRenderer(map, shapes) {
+      let ticking = false;
+      const redraw = () => {
+        if (ticking) {
+          return;
+        }
+        ticking = true;
+        requestAnimationFrame(() => {
+          ticking = false;
+          renderOverlay3d(map, shapes);
+        });
+      };
+
+      ["complete", "moveend", "zoomend", "resize", "rotatechange", "pitchchange"].forEach((name) => {
+        map.on(name, redraw);
+      });
+      window.addEventListener("resize", redraw);
+      redraw();
+    }
+
+    function fail(message) {
+      setStatus(message);
+      document.body.dataset.ready = "failed";
+      console.error("[amap-demo]", message);
+    }
+
+    function loadAmap() {
+      const config = window.AMAP_DEMO_CONFIG || {};
+      if (!config.key || config.key.includes("__AMAP")) {
+        fail("缺少高德 JS API Key，无法加载 3D 底图。");
+        return;
+      }
+
+      window._AMapSecurityConfig = {
+        securityJsCode: config.securityJsCode || ""
+      };
+
+      const script = document.createElement("script");
+      const plugins = [
+        "AMap.Scale",
+        "AMap.ToolBar",
+        "AMap.ControlBar"
+      ].join(",");
+      script.src = `https://webapi.amap.com/maps?v=2.0&key=${encodeURIComponent(config.key)}&plugin=${plugins}`;
+      script.async = true;
+      script.onerror = () => fail("高德 JS API 加载失败，请检查 Key、Referer 白名单或网络。");
+      script.onload = initMap;
+      document.head.appendChild(script);
+    }
+
+    function addPrismLayer(map, data) {
+      if (!window.AMap || !AMap.Object3DLayer || !AMap.Object3D || !AMap.Object3D.Prism) {
+        return false;
+      }
+
+      const layer = new AMap.Object3DLayer({ zIndex: 160 });
+      map.add(layer);
+
+      data.forEach((item) => {
+        const prism = new AMap.Object3D.Prism({
+          path: item.path,
+          height: item.height,
+          color: item.color
+        });
+        prism.transparent = true;
+        prism.backOrFront = "both";
+        layer.add(prism);
+      });
+
+      return true;
+    }
+
+    function initMap() {
+      if (!window.AMap) {
+        fail("高德 JS API 未返回 AMap 对象。");
+        return;
+      }
+
+      const map = new AMap.Map("map", {
+        center: [120.665520, 31.278620],
+        zoom: 16.82,
+        pitch: 22,
+        rotation: 0,
+        viewMode: "3D",
+        resizeEnable: true,
+        mapStyle: "amap://styles/whitesmoke",
+        features: ["bg", "road", "building", "point"],
+        showBuildingBlock: true,
+        buildingAnimation: true
+      });
+
+      if (AMap.Buildings) {
+        const buildingLayer = new AMap.Buildings({
+          heightFactor: 1.15,
+          wallColor: "rgba(176, 184, 190, 0.54)",
+          roofColor: "rgba(255, 255, 255, 0.82)",
+          zIndex: 12
+        });
+        map.addLayer(buildingLayer);
+      }
+
+      map.addControl(new AMap.Scale());
+      map.addControl(new AMap.ToolBar({ position: { right: "18px", top: "112px" } }));
+      map.addControl(new AMap.ControlBar({ position: { right: "18px", top: "18px" } }));
+
+      const parcel = [
+        [120.66352, 31.27994],
+        [120.66588, 31.28006],
+        [120.66658, 31.27962],
+        [120.66642, 31.27892],
+        [120.66658, 31.27772],
+        [120.66408, 31.27735],
+        [120.66282, 31.27834]
+      ];
+      const station = [
+        [120.66706, 31.28042],
+        [120.66743, 31.28037],
+        [120.66727, 31.27788],
+        [120.66689, 31.27793]
+      ];
+      const proposedBuilding = [
+        [120.66448, 31.27914],
+        [120.66534, 31.27930],
+        [120.66582, 31.27883],
+        [120.66520, 31.27838],
+        [120.66436, 31.27857]
+      ];
+      const channelFootprint = [
+        [120.66533, 31.27907],
+        [120.66545, 31.27884],
+        [120.66618, 31.27888],
+        [120.66693, 31.27905],
+        [120.66690, 31.27929],
+        [120.66613, 31.27914]
+      ];
+      const exitPoint = [120.66693, 31.27918];
+      const shapes = {
+        parcel,
+        station,
+        proposedBuilding,
+        channelFootprint
+      };
+
+      const basePolygons = [
+        new AMap.Polygon({
+          path: parcel,
+          strokeColor: "#e1262f",
+          strokeWeight: 5,
+          strokeOpacity: 1,
+          fillColor: "#f9f2c7",
+          fillOpacity: 0.18,
+          zIndex: 90
+        }),
+        new AMap.Polygon({
+          path: station,
+          strokeColor: "#7d3f98",
+          strokeWeight: 2,
+          strokeOpacity: 0.72,
+          fillColor: "#8a58a5",
+          fillOpacity: 0.34,
+          zIndex: 98
+        }),
+        new AMap.Polygon({
+          path: channelFootprint,
+          strokeColor: "#0b77bd",
+          strokeWeight: 2,
+          strokeOpacity: 0.88,
+          fillColor: "#1d8ccf",
+          fillOpacity: 0.42,
+          zIndex: 110
+        }),
+        new AMap.Polygon({
+          path: proposedBuilding,
+          strokeColor: "#111827",
+          strokeWeight: 2,
+          strokeOpacity: 0.82,
+          fillColor: "#ffffff",
+          fillOpacity: 0.76,
+          zIndex: 120
+        })
+      ];
+      map.add(basePolygons);
+
+      const prismOk = addPrismLayer(map, [
+        { path: proposedBuilding, height: 44, color: "rgba(255,255,255,0.92)" },
+        { path: channelFootprint, height: 7, color: "rgba(29,140,207,0.42)" },
+        { path: station, height: 14, color: "rgba(138,88,165,0.36)" }
+      ]);
+
+      map.add([
+        new AMap.Marker({
+          position: exitPoint,
+          offset: new AMap.Pixel(-24, -38),
+          anchor: "bottom-center",
+          content: makeLabel("群力站 1号口", "exit"),
+          zIndex: 150
+        }),
+        new AMap.Marker({
+          position: [120.66508, 31.27880],
+          offset: new AMap.Pixel(-62, -70),
+          content: makeLabel("邻里中心<br>地上4层 / 地下1层", "parcel"),
+          zIndex: 150
+        }),
+        new AMap.Marker({
+          position: [120.66676, 31.27927],
+          offset: new AMap.Pixel(-32, -30),
+          content: `<div class="arrow-label">↘</div>`,
+          zIndex: 151
+        })
+      ]);
+
+      bindOverlayRenderer(map, shapes);
+
+      map.on("complete", () => {
+        document.body.dataset.ready = "true";
+        setStatus(prismOk
+          ? "加载完成：高德 3D 底图、建筑块、红线、通道、体块、站口标注均已渲染。"
+          : "加载完成：高德 3D 底图与矢量层已渲染；自定义建筑和通道由 Canvas 3D 覆盖层稳定绘制。"
+        );
+      });
+
+      window.__AMAP_DEMO_MAP__ = map;
+    }
+
+    window.addEventListener("error", (event) => {
+      if (document.body.dataset.ready !== "true") {
+        fail(`页面脚本异常：${event.message || "未知错误"}`);
+      }
+    });
+
+    loadAmap();
+  </script>
+</body>
+</html>

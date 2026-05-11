@@ -1,0 +1,67 @@
+{
+  "ok": true,
+  "url": "http://127.0.0.1:8898/index.html",
+  "readyState": "true",
+  "statusText": "加载完成：2D 与 3D 使用同一份 geometry.js，经纬度框线已同步投影。",
+  "summary": {
+    "geometryVersion": "2026-05-07-sync-a",
+    "sameParcelReference": 0,
+    "buildingCount": 0,
+    "selectedBuildingId": null,
+    "canDraw": true,
+    "hasManualTools": 6,
+    "drawLocked": false,
+    "map2d": {
+      "center": [
+        120.66618,
+        31.27908
+      ],
+      "zoom": 16.72,
+      "pitch": 0,
+      "rotation": 0
+    },
+    "map3d": {
+      "center": [
+        120.66618,
+        31.27908
+      ],
+      "zoom": 16.72,
+      "pitch": 38,
+      "rotation": 0
+    },
+    "overlay3d": true
+  },
+  "pageErrors": [],
+  "failedRequests": [],
+  "recentLogs": [
+    {
+      "type": "warning",
+      "text": "[.WebGL-0x10dc0012f200]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels"
+    },
+    {
+      "type": "warning",
+      "text": "[.WebGL-0x10dc0012fe00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels"
+    },
+    {
+      "type": "info",
+      "text": "[amap-sync] 加载完成：2D 与 3D 使用同一份 geometry.js，经纬度框线已同步投影。"
+    },
+    {
+      "type": "warning",
+      "text": "[.WebGL-0x10dc0012f200]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels"
+    },
+    {
+      "type": "warning",
+      "text": "[.WebGL-0x10dc0012fe00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat)"
+    },
+    {
+      "type": "warning",
+      "text": "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently"
+    },
+    {
+      "type": "warning",
+      "text": "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently"
+    }
+  ],
+  "screenshotPath": "E:\\ai\\苏州轨道交通站点周边互联互通智能体开发工作提资\\outputs\\amap_2d_3d_sync\\amap_2d_3d_sync_screenshot.png"
+}

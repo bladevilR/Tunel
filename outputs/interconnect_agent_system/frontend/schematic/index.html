@@ -1,0 +1,2346 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="data:," />
+  <title>高德 2D/3D 框线同源校准</title>
+  <style>
+    :root {
+      --ink: #111827;
+      --muted: #667085;
+      --panel: rgba(255, 255, 255, 0.94);
+      --red: #e1262f;
+      --blue: #1d8ccf;
+      --purple: #8a58a5;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      color: var(--ink);
+      font-family: "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
+      background: #edf2f4;
+    }
+
+    #app {
+      display: grid;
+      grid-template-rows: auto 1fr;
+      width: 100%;
+      height: 100%;
+    }
+
+    .topbar {
+      display: grid;
+      grid-template-columns: minmax(260px, 1fr) auto minmax(360px, auto) auto;
+      align-items: center;
+      gap: 12px;
+      min-height: 72px;
+      padding: 10px 18px;
+      border-bottom: 1px solid rgba(17, 24, 39, 0.10);
+      background: var(--panel);
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.10);
+      z-index: 20;
+    }
+
+    .title {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      min-width: 0;
+    }
+
+    .contextbar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      min-width: 280px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 20px;
+      line-height: 1.25;
+      letter-spacing: 0;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .searchbar {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+      gap: 7px;
+      min-width: 320px;
+    }
+
+    .viewbar {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+
+    .drawbar {
+      position: absolute;
+      z-index: 17;
+      top: 104px;
+      right: 18px;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 7px;
+      width: 312px;
+      max-width: calc(100% - 36px);
+      padding: 10px;
+      border: 1px solid rgba(17, 24, 39, 0.12);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.94);
+      box-shadow: 0 8px 28px rgba(15, 23, 42, 0.14);
+    }
+
+    .drawbar::before {
+      grid-column: 1 / -1;
+      color: #344054;
+      content: "绘图工具";
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .drawbar .wide-action {
+      grid-column: 1 / -1;
+    }
+
+    .drawbar select {
+      width: 100%;
+      max-width: none;
+    }
+
+    button {
+      min-width: 64px;
+      min-height: 36px;
+      padding: 7px 10px;
+      border: 1px solid rgba(17, 24, 39, 0.16);
+      border-radius: 6px;
+      color: #1f2937;
+      background: #fff;
+      font: inherit;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    button[aria-pressed="true"] {
+      border-color: rgba(29, 140, 207, 0.45);
+      color: #0b5f91;
+      background: rgba(29, 140, 207, 0.12);
+    }
+
+    button.primary {
+      border-color: rgba(29, 140, 207, 0.42);
+      color: #fff;
+      background: #1677b8;
+    }
+
+    button.danger {
+      color: #b42318;
+      border-color: rgba(217, 45, 32, 0.32);
+      background: rgba(254, 243, 242, 0.95);
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      min-height: 36px;
+      padding: 7px 11px;
+      border: 1px solid rgba(17, 24, 39, 0.16);
+      border-radius: 6px;
+      color: #0b5f91;
+      background: #fff;
+      font-size: 13px;
+      font-weight: 800;
+      text-decoration: none;
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      color: rgba(31, 41, 55, 0.42);
+      border-color: rgba(17, 24, 39, 0.10);
+      background: rgba(255, 255, 255, 0.62);
+    }
+
+    input,
+    select {
+      min-height: 36px;
+      max-width: 240px;
+      padding: 7px 9px;
+      border: 1px solid rgba(17, 24, 39, 0.16);
+      border-radius: 6px;
+      color: #1f2937;
+      background: #fff;
+      font: inherit;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    input {
+      width: 210px;
+      max-width: 240px;
+    }
+
+    .maps {
+      position: relative;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      min-height: 0;
+    }
+
+    body[data-mode="2d"] .maps,
+    body[data-mode="3d"] .maps {
+      grid-template-columns: 1fr;
+    }
+
+    body[data-mode="2d"] .map-wrap[data-view="3d"],
+    body[data-mode="3d"] .map-wrap[data-view="2d"] {
+      display: none;
+    }
+
+    .map-wrap {
+      position: relative;
+      min-width: 0;
+      min-height: 0;
+      overflow: hidden;
+      border-right: 1px solid rgba(17, 24, 39, 0.08);
+    }
+
+    .map {
+      position: absolute;
+      inset: 0;
+    }
+
+    body.is-drawing #map2d,
+    body.is-drawing #map2d * {
+      cursor: crosshair !important;
+    }
+
+    body.is-drawing #map2d {
+      touch-action: none;
+    }
+
+    canvas.overlay {
+      position: absolute;
+      z-index: 9;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    .view-badge {
+      position: absolute;
+      z-index: 14;
+      left: 14px;
+      top: 14px;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 9px 11px;
+      border: 1px solid rgba(17, 24, 39, 0.12);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.92);
+      box-shadow: 0 8px 28px rgba(15, 23, 42, 0.14);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .view-badge small {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .legend {
+      position: absolute;
+      z-index: 14;
+      left: 14px;
+      bottom: 14px;
+      width: min(390px, calc(100% - 28px));
+      padding: 12px;
+      border: 1px solid rgba(17, 24, 39, 0.12);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.92);
+      box-shadow: 0 8px 28px rgba(15, 23, 42, 0.14);
+      font-size: 13px;
+    }
+
+    .legend-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px 12px;
+      margin-top: 7px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      min-width: 0;
+      gap: 8px;
+      white-space: nowrap;
+    }
+
+    .swatch {
+      width: 28px;
+      height: 8px;
+      border-radius: 3px;
+      box-shadow: 0 0 0 1px rgba(17, 24, 39, 0.16) inset;
+      flex: 0 0 auto;
+    }
+
+    .swatch.red {
+      background: var(--red);
+    }
+
+    .swatch.blue {
+      background: rgba(29, 140, 207, 0.62);
+    }
+
+    .swatch.purple {
+      background: rgba(138, 88, 165, 0.56);
+    }
+
+    .swatch.black {
+      background: #111827;
+    }
+
+    .status {
+      position: absolute;
+      z-index: 16;
+      right: 14px;
+      bottom: 14px;
+      max-width: min(520px, calc(100% - 28px));
+      padding: 9px 11px;
+      border-radius: 7px;
+      color: #fff;
+      background: rgba(17, 24, 39, 0.82);
+      font-size: 12px;
+      line-height: 1.45;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.18);
+    }
+
+    .draw-panel {
+      position: absolute;
+      z-index: 16;
+      right: 14px;
+      top: 84px;
+      width: min(360px, calc(100% - 28px));
+      padding: 12px;
+      border: 1px solid rgba(17, 24, 39, 0.12);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.94);
+      box-shadow: 0 8px 28px rgba(15, 23, 42, 0.14);
+      color: #1f2937;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .draw-panel.is-collapsed {
+      width: auto;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      box-shadow: none;
+    }
+
+    .guide-toggle {
+      min-width: 58px;
+      min-height: 32px;
+      padding: 6px 10px;
+      color: #0b5f91;
+      border-color: rgba(29, 140, 207, 0.34);
+      background: rgba(255, 255, 255, 0.92);
+      box-shadow: 0 6px 18px rgba(15, 23, 42, 0.12);
+    }
+
+    .guide-content {
+      display: block;
+    }
+
+    .draw-panel:not(.is-collapsed) .guide-toggle {
+      margin-bottom: 8px;
+    }
+
+    .draw-panel.is-collapsed .guide-content {
+      display: none;
+    }
+
+    .draw-panel strong {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 14px;
+    }
+
+    .draw-panel code {
+      padding: 1px 4px;
+      border-radius: 4px;
+      background: rgba(17, 24, 39, 0.08);
+      font-family: Consolas, "Microsoft YaHei", monospace;
+      font-size: 12px;
+    }
+
+    .workflow-guide {
+      margin-top: 8px;
+      padding: 9px 10px;
+      border: 1px solid rgba(29, 140, 207, 0.20);
+      border-radius: 7px;
+      color: #164e63;
+      background: rgba(236, 254, 255, 0.88);
+      line-height: 1.55;
+    }
+
+    .export-result {
+      margin-top: 8px;
+      word-break: break-all;
+    }
+
+    .export-result a {
+      color: #0b5f91;
+      font-weight: 800;
+    }
+
+    .label {
+      position: relative;
+      padding: 4px 7px;
+      border: 1px solid rgba(17, 24, 39, 0.20);
+      border-radius: 6px;
+      color: #111827;
+      background: rgba(255, 255, 255, 0.95);
+      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.16);
+      font-size: 13px;
+      font-weight: 800;
+      line-height: 1.2;
+      white-space: nowrap;
+    }
+
+    .label.exit {
+      border-color: rgba(29, 140, 207, 0.50);
+      color: #0b5f91;
+    }
+
+    .label.parcel {
+      border-color: rgba(225, 38, 47, 0.42);
+      color: #b91c1c;
+    }
+
+    .vertex {
+      width: 22px;
+      height: 22px;
+      border: 2px solid #fff;
+      border-radius: 50%;
+      color: #fff;
+      background: #e1262f;
+      box-shadow: 0 3px 10px rgba(15, 23, 42, 0.28);
+      font-size: 11px;
+      font-weight: 900;
+      line-height: 18px;
+      text-align: center;
+    }
+
+    .amap-logo,
+    .amap-copyright {
+      opacity: 0.55;
+    }
+
+    body[data-export="true"] .topbar,
+    body[data-export="true"] .legend,
+    body[data-export="true"] .draw-panel,
+    body[data-export="true"] .view-badge,
+    body[data-export="true"] .status {
+      display: none;
+    }
+
+    body[data-export="true"] #app {
+      grid-template-rows: 1fr;
+    }
+
+    @media (max-width: 860px) {
+      .topbar {
+        align-items: flex-start;
+        grid-template-columns: 1fr;
+      }
+
+      .contextbar,
+      .viewbar,
+      .toolbar,
+      .searchbar,
+      .drawbar {
+        justify-content: flex-start;
+      }
+
+      .drawbar {
+        position: static;
+        max-width: none;
+        width: auto;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        margin: 8px;
+      }
+
+      .drawbar .wide-action {
+        grid-column: span 2;
+      }
+
+      .maps {
+        grid-template-columns: 1fr;
+        grid-template-rows: 1fr 1fr;
+      }
+    }
+  </style>
+</head>
+<body data-mode="split">
+  <div id="app">
+    <header class="topbar">
+      <div class="title">
+        <h1 id="schematicTitle">高德 2D / 3D 框线同源校准</h1>
+        <div id="schematicSubtitle" class="subtitle">左侧 2D 用于校准红线与道路、站口；右侧 3D 使用同一份经纬度数据出效果。</div>
+      </div>
+      <div class="contextbar" aria-label="项目关联">
+        <a class="back-link" href="/#dashboard">返回工作台</a>
+        <select id="linkedProjectSelect" aria-label="选择关联项目">
+          <option value="">选择关联项目</option>
+        </select>
+      </div>
+      <div class="searchbar" aria-label="地点搜索">
+        <input id="placeSearchInput" type="search" placeholder="搜索车站或地点，如：金家堰地铁站" />
+        <button type="button" id="placeSearchButton">搜索地点</button>
+        <select id="placeSearchResults" aria-label="地点搜索结果">
+          <option value="">搜索结果</option>
+        </select>
+      </div>
+      <div class="viewbar" aria-label="视图切换">
+        <button type="button" data-mode-button="split" aria-pressed="true">双视图</button>
+        <button type="button" data-mode-button="2d" aria-pressed="false">只看2D</button>
+        <button type="button" data-mode-button="3d" aria-pressed="false">只看3D</button>
+        <button type="button" id="fitButton">回到范围</button>
+      </div>
+    </header>
+    <div class="drawbar" aria-label="手动画线工具">
+      <button type="button" data-draw-tool="parcel">画红线</button>
+      <button type="button" data-draw-tool="underground">画地下轮廓</button>
+      <button type="button" data-draw-tool="channel">画通道线</button>
+      <button type="button" data-draw-tool="building">画建筑</button>
+      <button type="button" data-draw-tool="station">画站体</button>
+      <button type="button" data-draw-tool="exit">点1号口</button>
+      <button type="button" id="finishDrawButton">完成绘制</button>
+      <button type="button" id="undoDrawButton">撤销上一点</button>
+      <button type="button" id="cancelDrawButton">取消本次</button>
+      <button type="button" id="clearLayerButton">清空当前图层</button>
+      <select id="buildingSelect" aria-label="选择建筑"></select>
+      <button type="button" id="autoChannelButton">自动通道</button>
+      <button type="button" id="customModelToggle" aria-pressed="false">自建体块</button>
+      <button type="button" id="perspectiveDragButton" aria-pressed="false">拖拽透视</button>
+      <button type="button" id="saveGeometryButton" class="primary wide-action">保存草图</button>
+      <button type="button" id="exportPngButton" class="primary">导出PNG</button>
+      <button type="button" id="resetGeometryButton" class="danger">恢复默认</button>
+    </div>
+
+    <main class="maps">
+      <section class="map-wrap" data-view="2d">
+        <div id="map2d" class="map" aria-label="高德2D校准图"></div>
+        <div class="view-badge">2D 校准 <small>pitch 0 / rotation 0</small></div>
+        <div id="drawPanel" class="draw-panel is-collapsed">
+          <button type="button" id="toggleGuideButton" class="guide-toggle" aria-expanded="false">提示</button>
+          <div class="guide-content">
+            <strong>手动采集</strong>
+            选择上方工具后在 2D 地图上点击绘制；双击结束多边形/线。保存后会写入 <code>user_geometry.json</code>，导出 PNG 会截右侧 3D 视图。
+            <div id="workflowGuide" class="workflow-guide">先选择一个工具，例如画红线；在左侧 2D 地图上逐点点击。</div>
+            <div id="exportResult" class="export-result"></div>
+          </div>
+        </div>
+        <div class="legend">
+          <strong>空间关系</strong>
+          <div class="legend-grid">
+            <span class="legend-item"><i class="swatch red"></i>目标地块</span>
+            <span class="legend-item"><i class="swatch blue"></i>联通路径</span>
+            <span class="legend-item"><i class="swatch purple"></i>车站范围</span>
+            <span class="legend-item"><i class="swatch black"></i>接口建筑</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="map-wrap" data-view="3d">
+        <div id="map3d" class="map" aria-label="高德3D出图预览"></div>
+        <canvas id="overlay3d" class="overlay" aria-hidden="true"></canvas>
+        <div class="view-badge">3D 出图 <small>同一份坐标投影</small></div>
+        <div id="status" class="status">正在加载高德地图...</div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    window.AMAP_SYNC_CONFIG = {
+      key: "__AMAP_JS_KEY__",
+      securityJsCode: "__AMAP_SECURITY_CODE__"
+    };
+  </script>
+  <script src="./geometry.js"></script>
+  <script>
+    const config = window.AMAP_SYNC_CONFIG || {};
+    const defaultGeometry = window.AMAP_SYNC_GEOMETRY;
+    let geometry = cloneGeometry(defaultGeometry);
+    let activeDrawTool = "";
+    let lastSelectedTool = "";
+    let drawingPoints = [];
+    let drawingOverlay = null;
+    let isDrawingInteractionLocked = false;
+    let buildingSerial = 0;
+    let useCustomBuildingPrisms = false;
+    let modelExtrudeAngle = -58;
+    let modelExtrudeHeight = 44;
+    let isPerspectiveDragMode = false;
+    const query = new URLSearchParams(window.location.search);
+    let linkedProjectRecord = null;
+    let loadedProjectGeometry = false;
+    const statusNode = document.getElementById("status");
+
+    if (query.get("view") === "3d") {
+      document.body.dataset.mode = "3d";
+    }
+    if (query.get("export") === "1") {
+      document.body.dataset.export = "true";
+    }
+
+    function cloneGeometry(value) {
+      return JSON.parse(JSON.stringify(value));
+    }
+
+    function setStatus(text) {
+      statusNode.textContent = text;
+      console.info("[amap-sync]", text);
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function projectLabel(project) {
+      return [project?.station?.name, project?.name].filter(Boolean).join(" / ") || project?.name || "未命名项目";
+    }
+
+    function setLinkedProjectUi(record) {
+      const project = record?.project || null;
+      const stationName = project?.station?.name || query.get("station") || "未关联车站";
+      const projectName = project?.name || query.get("project") || "未关联地块";
+      document.getElementById("schematicTitle").textContent = `${stationName} / 联通示意出图`;
+      document.getElementById("schematicSubtitle").textContent = `当前关联：${stationName} / ${projectName}。本页用于校准红线、站体、出入口和通道坐标；保存后写入 user_geometry.json。`;
+      const searchInput = document.getElementById("placeSearchInput");
+      if (searchInput && !searchInput.value && stationName && stationName !== "未关联车站") {
+        searchInput.value = `${stationName}地铁站`;
+      }
+    }
+
+    function linkedProjectId(record = linkedProjectRecord) {
+      return record?.id || record?.project?.id || query.get("projectId") || "";
+    }
+
+    function geometryMatchesProject(payload, record = linkedProjectRecord) {
+      if (!record) return true;
+      const meta = payload?.meta || {};
+      const project = record.project || {};
+      const stationName = project.station?.name || query.get("station") || "";
+      const projectId = linkedProjectId(record);
+      if (meta.linkedProjectId && projectId && meta.linkedProjectId === projectId) return true;
+      if (meta.projectId && projectId && meta.projectId === projectId) return true;
+      const savedStation = String(meta.stationName || payload?.station?.name || "");
+      return Boolean(stationName && savedStation.includes(stationName));
+    }
+
+    function directionFromProject(project) {
+      const text = `${project?.parcel?.quadrant || ""} ${project?.parcel?.location || ""}`;
+      let x = -1;
+      let y = -0.24;
+      if (text.includes("西")) x = -1;
+      if (text.includes("东")) x = 1;
+      if (text.includes("南")) y = -1;
+      if (text.includes("北")) y = 1;
+      return { x, y };
+    }
+
+    function rectAround(center, halfLng, halfLat) {
+      const [lng, lat] = center;
+      return [
+        [Number((lng - halfLng).toFixed(8)), Number((lat - halfLat).toFixed(8))],
+        [Number((lng + halfLng).toFixed(8)), Number((lat - halfLat).toFixed(8))],
+        [Number((lng + halfLng).toFixed(8)), Number((lat + halfLat).toFixed(8))],
+        [Number((lng - halfLng).toFixed(8)), Number((lat + halfLat).toFixed(8))]
+      ];
+    }
+
+    function offsetPoint(center, dx, dy) {
+      return [
+        Number((center[0] + dx).toFixed(8)),
+        Number((center[1] + dy).toFixed(8))
+      ];
+    }
+
+    function generateProjectConceptGeometry(record, center = geometry.meta.center) {
+      const project = record?.project || null;
+      if (!project || !Array.isArray(center) || center.length < 2) return;
+      const station = project.station || {};
+      const parcel = project.parcel || {};
+      const dir = directionFromProject(project);
+      const parcelCenter = offsetPoint(center, dir.x * 0.00134, dir.y * 0.00076);
+      const visualCenter = offsetPoint(center, dir.x * 0.00056, dir.y * 0.00032);
+      const exitPoint = offsetPoint(center, dir.x * 0.00033, dir.y * 0.00016);
+      const interfacePoint = offsetPoint(parcelCenter, -dir.x * 0.00034, -dir.y * 0.00018);
+      const innerInterfacePoint = offsetPoint(parcelCenter, -dir.x * 0.00018, -dir.y * 0.00010);
+      const buildingCenter = offsetPoint(parcelCenter, dir.x * 0.00008, dir.y * 0.00004);
+      const projectName = project.name || query.get("project") || "目标地块";
+      geometry.meta = {
+        ...(geometry.meta || {}),
+        name: `${station.name || "站点"} / ${projectName} 联通概念示意`,
+        center: visualCenter,
+        stationCenter: center,
+        linkedProjectId: linkedProjectId(record),
+        stationName: station.name || query.get("station") || ""
+      };
+      geometry.parcel = {
+        ...(geometry.parcel || {}),
+        name: projectName,
+        stroke: "#e1262f",
+        fill: "#f8ed9a",
+        path: rectAround(parcelCenter, 0.00042, 0.00028)
+      };
+      geometry.underground = {
+        ...(geometry.underground || {}),
+        name: parcel.undergroundSpace || "接口预留带",
+        stroke: "#176bd6",
+        path: rectAround(innerInterfacePoint, 0.00024, 0.00010)
+      };
+      geometry.buildings = [{
+        id: "building-1",
+        name: projectName,
+        stroke: "#111827",
+        fill: "#ffffff",
+        path: rectAround(buildingCenter, 0.00025, 0.00015),
+        rotation: 0,
+        extrudeAngle: -58
+      }];
+      geometry.selectedBuildingId = "building-1";
+      geometry.station = {
+        ...(geometry.station || {}),
+        name: station.name ? `${station.name}站` : "目标车站",
+        stroke: "#7d3f98",
+        fill: "#8a58a5",
+        body: rectAround(center, 0.00024, 0.00015),
+        path: rectAround(center, 0.00024, 0.00015),
+        exitName: station.nearbyExit || "邻近出入口",
+        exitPoint
+      };
+      geometry.channel = {
+        ...(geometry.channel || {}),
+        name: "推荐联通路径",
+        stroke: "#0b77bd",
+        fill: "#1d8ccf",
+        centerline: [
+          exitPoint,
+          offsetPoint(center, dir.x * 0.00072, dir.y * 0.00032),
+          interfacePoint,
+          innerInterfacePoint
+        ],
+        path: []
+      };
+      geometry.channel.path = makeChannelFootprint(geometry.channel.centerline);
+      geometry.labels = [
+        { id: "parcel", text: "目标地块", position: centroid(geometry.parcel.path), className: "parcel" },
+        { id: "exit", text: `${station.name || "车站"} ${geometry.station.exitName}`, position: exitPoint, className: "exit" },
+        { id: "building-1", text: `${projectName}<br>${parcel.functionalFormat || parcel.landUseText || "综合开发"}`, position: buildingCenter, className: "building" }
+      ];
+      syncLegacyBuilding();
+      syncBuildingLabels();
+      document.body.dataset.conceptGeometry = "true";
+    }
+
+    function applyProjectContextToGeometry(record) {
+      const project = record?.project || null;
+      const station = project?.station || {};
+      const parcel = project?.parcel || {};
+      const stationName = station.name || query.get("station");
+      const projectName = project?.name || query.get("project");
+      if (stationName) {
+        geometry.station.name = `${stationName}站`;
+        geometry.station.exitName = station.nearbyExit || geometry.station.exitName || "出入口";
+      }
+      if (projectName) {
+        geometry.meta.name = `${stationName || "站点"} / ${projectName} 联通示意`;
+        geometry.meta.linkedProjectId = linkedProjectId(record);
+        geometry.meta.stationName = stationName || "";
+        geometry.parcel.name = projectName;
+        geometry.proposedBuilding.name = projectName;
+        if (geometry.buildings && geometry.buildings.length) {
+          geometry.buildings[0].name = projectName;
+        }
+      }
+      ensureGeometryV2NoLabels();
+      const filtered = (geometry.labels || []).filter((label) => !["station-context", "parcel-context"].includes(label.id));
+      geometry.labels = filtered;
+      if (stationName && geometry.station.exitPoint) {
+        geometry.labels.push({
+          id: "station-context",
+          text: `${stationName}<br>${station.nearbyExit || geometry.station.exitName || "出入口"}`,
+          position: geometry.station.exitPoint,
+          className: "exit"
+        });
+      }
+      if (projectName && geometry.parcel.path && geometry.parcel.path.length >= 3) {
+        geometry.labels.push({
+          id: "parcel-context",
+          text: projectName,
+          position: centroid(geometry.parcel.path),
+          className: "parcel"
+        });
+      }
+      syncLegacyBuilding();
+      syncBuildingLabels();
+      setLinkedProjectUi(record);
+    }
+
+    async function loadLinkedProjects() {
+      const select = document.getElementById("linkedProjectSelect");
+      try {
+        const response = await fetch("/api/projects", { cache: "no-store" });
+        if (!response.ok) return;
+        const payload = await response.json();
+        const projects = payload.projects || [];
+        select.innerHTML = `<option value="">选择关联项目</option>${projects.map((item) => (
+          `<option value="${escapeHtml(item.id)}">${escapeHtml(item.name || item.id)}</option>`
+        )).join("")}`;
+        const projectId = query.get("projectId");
+        if (projectId) select.value = projectId;
+      } catch (error) {
+        console.warn("[amap-sync] project list not loaded", error);
+      }
+      select.addEventListener("change", () => {
+        const id = select.value;
+        if (id) {
+          window.location.href = `/schematic/index.html?projectId=${encodeURIComponent(id)}`;
+        }
+      });
+    }
+
+    async function loadLinkedProjectRecord() {
+      const projectId = query.get("projectId");
+      if (!projectId) {
+        setLinkedProjectUi(null);
+        return null;
+      }
+      try {
+        const response = await fetch(`/api/projects/${encodeURIComponent(projectId)}`, { cache: "no-store" });
+        if (!response.ok) throw new Error(`项目读取失败：${response.status}`);
+        const payload = await response.json();
+        linkedProjectRecord = payload.record || null;
+        setLinkedProjectUi(linkedProjectRecord);
+        return linkedProjectRecord;
+      } catch (error) {
+        console.warn("[amap-sync] linked project not loaded", error);
+        setLinkedProjectUi(null);
+        return null;
+      }
+    }
+
+    function ensureGeometryV2() {
+      if (!Array.isArray(geometry.buildings)) {
+        geometry.buildings = [];
+      }
+      if (geometry.proposedBuilding && geometry.proposedBuilding.path && geometry.proposedBuilding.path.length >= 3 && geometry.buildings.length === 0) {
+        geometry.buildings.push({
+          id: "building-1",
+          name: "建筑 1",
+          stroke: geometry.proposedBuilding.stroke || "#111827",
+          fill: geometry.proposedBuilding.fill || "#ffffff",
+          path: geometry.proposedBuilding.path,
+          rotation: 0,
+          extrudeAngle: -58
+        });
+        geometry.selectedBuildingId = "building-1";
+      }
+      buildingSerial = geometry.buildings.reduce((max, building) => {
+        const match = String(building.id || "").match(/building-(\d+)/);
+        return Math.max(max, match ? Number(match[1]) : 0);
+      }, 0);
+      if (geometry.buildings.length > 0 && !geometry.selectedBuildingId) {
+        geometry.selectedBuildingId = geometry.buildings[geometry.buildings.length - 1].id;
+      }
+      geometry.buildings.forEach((building, index) => {
+        building.id = building.id || `building-${index + 1}`;
+        building.name = building.name || `建筑 ${index + 1}`;
+        building.stroke = building.stroke || "#111827";
+        building.fill = building.fill || "#ffffff";
+        building.rotation = building.rotation || 0;
+        building.extrudeAngle = Number.isFinite(building.extrudeAngle) ? building.extrudeAngle : -58;
+      });
+      syncLegacyBuilding();
+      syncBuildingLabels();
+    }
+
+    function getSelectedBuilding() {
+      ensureGeometryV2();
+      return geometry.buildings.find((building) => building.id === geometry.selectedBuildingId) || geometry.buildings[0] || null;
+    }
+
+    function syncLegacyBuilding() {
+      const selected = geometry.buildings.find((building) => building.id === geometry.selectedBuildingId) || geometry.buildings[0] || null;
+      geometry.proposedBuilding = {
+        ...(geometry.proposedBuilding || {}),
+        name: selected ? selected.name : "邻里中心",
+        stroke: "#111827",
+        fill: "#ffffff",
+        path: selected ? selected.path : []
+      };
+    }
+
+    function syncBuildingLabels() {
+      ensureGeometryV2NoLabels();
+      geometry.labels = (geometry.labels || []).filter((label) => !String(label.id || "").startsWith("building"));
+      geometry.buildings.forEach((building) => {
+        if (building.path && building.path.length >= 3) {
+          geometry.labels.push({
+            id: building.id,
+            text: `${building.name}<br>地上4层 / 地下1层`,
+            position: centroid(building.path),
+            className: "building"
+          });
+        }
+      });
+    }
+
+    function ensureGeometryV2NoLabels() {
+      if (!Array.isArray(geometry.labels)) {
+        geometry.labels = [];
+      }
+      if (!Array.isArray(geometry.buildings)) {
+        geometry.buildings = [];
+      }
+    }
+
+    function fail(message) {
+      setStatus(message);
+      document.body.dataset.ready = "failed";
+      console.error("[amap-sync]", message);
+    }
+
+    function loadAmap() {
+      if (!geometry) {
+        fail("缺少 geometry.js，无法绘制同源框线。");
+        return;
+      }
+
+      if (!config.key || config.key.includes("__AMAP")) {
+        fail("缺少 AMAP_JS_KEY，无法加载高德 2D/3D 底图。");
+        return;
+      }
+
+      window._AMapSecurityConfig = {
+        securityJsCode: config.securityJsCode || ""
+      };
+
+      const script = document.createElement("script");
+      const plugins = ["AMap.Scale", "AMap.ToolBar", "AMap.ControlBar", "AMap.MouseTool", "AMap.PlaceSearch"].join(",");
+      script.src = `https://webapi.amap.com/maps?v=2.0&key=${encodeURIComponent(config.key)}&plugin=${plugins}`;
+      script.async = true;
+      script.onerror = () => fail("高德 JS API 加载失败，请检查 Key、Referer 白名单或网络。");
+      script.onload = initMaps;
+      document.head.appendChild(script);
+    }
+
+    async function loadSavedGeometry() {
+      try {
+        const response = await fetch("/api/schematic/user-geometry", { cache: "no-store" });
+        if (!response.ok) {
+          return;
+        }
+        const saved = await response.json();
+        const payload = saved && saved.geometry ? saved.geometry : saved;
+        if (payload && payload.parcel && payload.meta && geometryMatchesProject(payload)) {
+          geometry = payload;
+          ensureGeometryV2();
+          loadedProjectGeometry = true;
+          setStatus("已载入上次保存的手动画线数据。");
+        } else if (payload && payload.parcel && payload.meta) {
+          setStatus("已忽略其他项目的历史草图，当前将生成本项目概念示意。");
+        }
+      } catch (error) {
+        console.warn("[amap-sync] saved geometry not loaded", error);
+      }
+      ensureGeometryV2();
+    }
+
+    function makeLabel(text, className) {
+      return `<div class="label ${className || ""}">${text}</div>`;
+    }
+
+    function getPoint(pixelLike) {
+      if (Array.isArray(pixelLike)) {
+        return { x: pixelLike[0], y: pixelLike[1] };
+      }
+      return {
+        x: typeof pixelLike.getX === "function" ? pixelLike.getX() : pixelLike.x,
+        y: typeof pixelLike.getY === "function" ? pixelLike.getY() : pixelLike.y
+      };
+    }
+
+    function projectPath(map, path) {
+      return path.map((lngLat) => getPoint(map.lngLatToContainer(lngLat)));
+    }
+
+    function setupCanvas(canvas) {
+      const dpr = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = Math.max(1, Math.round(rect.width * dpr));
+      canvas.height = Math.max(1, Math.round(rect.height * dpr));
+      const ctx = canvas.getContext("2d");
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, rect.width, rect.height);
+      ctx.lineJoin = "round";
+      ctx.lineCap = "round";
+      return ctx;
+    }
+
+    function path2d(points, offsetX = 0, offsetY = 0) {
+      const shape = new Path2D();
+      if (!points || points.length === 0) {
+        return shape;
+      }
+      points.forEach((point, index) => {
+        const x = point.x + offsetX;
+        const y = point.y + offsetY;
+        if (index === 0) {
+          shape.moveTo(x, y);
+        } else {
+          shape.lineTo(x, y);
+        }
+      });
+      shape.closePath();
+      return shape;
+    }
+
+    function drawGroundPolygon(ctx, points, style) {
+      if (!points || points.length < 3) {
+        return;
+      }
+      ctx.save();
+      ctx.fillStyle = style.fill;
+      ctx.strokeStyle = style.stroke;
+      ctx.lineWidth = style.lineWidth;
+      ctx.globalAlpha = style.alpha || 1;
+      const shape = path2d(points);
+      ctx.fill(shape);
+      ctx.stroke(shape);
+      ctx.restore();
+    }
+
+    function drawPrism(ctx, points, options) {
+      if (!points || points.length < 3) {
+        return;
+      }
+      const top = points.map((point) => ({
+        x: point.x + options.offsetX,
+        y: point.y + options.offsetY
+      }));
+
+      ctx.save();
+      for (let i = 0; i < points.length; i += 1) {
+        const next = (i + 1) % points.length;
+        const face = new Path2D();
+        face.moveTo(points[i].x, points[i].y);
+        face.lineTo(points[next].x, points[next].y);
+        face.lineTo(top[next].x, top[next].y);
+        face.lineTo(top[i].x, top[i].y);
+        face.closePath();
+        ctx.fillStyle = i % 2 ? options.sideB : options.sideA;
+        ctx.strokeStyle = options.stroke;
+        ctx.lineWidth = options.lineWidth || 2;
+        ctx.fill(face);
+        ctx.stroke(face);
+      }
+
+      const topShape = path2d(top);
+      ctx.fillStyle = options.top;
+      ctx.strokeStyle = options.stroke;
+      ctx.lineWidth = options.lineWidth || 2;
+      ctx.fill(topShape);
+      ctx.stroke(topShape);
+
+      if (options.floorLines) {
+        ctx.strokeStyle = options.floorStroke;
+        ctx.lineWidth = 1.1;
+        for (let step = 0.25; step < 1; step += 0.25) {
+          ctx.beginPath();
+          points.forEach((point, index) => {
+            const x = point.x + options.offsetX * step;
+            const y = point.y + options.offsetY * step;
+            if (index === 0) {
+              ctx.moveTo(x, y);
+            } else {
+              ctx.lineTo(x, y);
+            }
+          });
+          ctx.closePath();
+          ctx.stroke();
+        }
+      }
+      ctx.restore();
+    }
+
+    function drawProjectedLine(ctx, points, style) {
+      if (!points || points.length < 2) {
+        return;
+      }
+      ctx.save();
+      ctx.strokeStyle = style.stroke;
+      ctx.lineWidth = style.lineWidth;
+      ctx.globalAlpha = style.alpha || 1;
+      ctx.setLineDash(style.dash || []);
+      ctx.lineCap = style.lineCap || "butt";
+      ctx.lineJoin = style.lineJoin || "miter";
+      ctx.beginPath();
+      points.forEach((point, index) => {
+        if (index === 0) {
+          ctx.moveTo(point.x, point.y);
+        } else {
+          ctx.lineTo(point.x, point.y);
+        }
+      });
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function renderCanvas3d(map) {
+      const canvas = document.getElementById("overlay3d");
+      const ctx = setupCanvas(canvas);
+      const parcel = projectPath(map, geometry.parcel.path || []);
+      const station = projectPath(map, geometry.station.body || []);
+      const channel = geometry.channel.path && geometry.channel.path.length >= 3
+        ? projectPath(map, geometry.channel.path)
+        : [];
+      const channelLine = geometry.channel.centerline && geometry.channel.centerline.length >= 2
+        ? projectPath(map, geometry.channel.centerline)
+        : [];
+      ensureGeometryV2();
+      const isConceptGeometry = document.body.dataset.conceptGeometry === "true";
+      const buildings = geometry.buildings.map((building) => ({
+        data: building,
+        points: projectPath(map, building.path || [])
+      }));
+
+      drawGroundPolygon(ctx, parcel, {
+        fill: "rgba(248, 237, 154, 0.20)",
+        stroke: geometry.parcel.stroke,
+        lineWidth: 5
+      });
+
+      if (isConceptGeometry) {
+        buildings.forEach(({ data, points }) => {
+          drawGroundPolygon(ctx, points, {
+            fill: "rgba(255, 255, 255, 0.38)",
+            stroke: data.id === geometry.selectedBuildingId ? "rgba(17, 24, 39, 0.34)" : "rgba(17, 24, 39, 0.22)",
+            lineWidth: data.id === geometry.selectedBuildingId ? 1.6 : 1.2
+          });
+        });
+        drawGroundPolygon(ctx, station, {
+          fill: "rgba(138, 88, 165, 0.18)",
+          stroke: "rgba(94, 48, 119, 0.72)",
+          lineWidth: 2.2
+        });
+        drawProjectedLine(ctx, channelLine, {
+          stroke: "rgba(255, 255, 255, 0.86)",
+          lineWidth: 15,
+          lineCap: "round",
+          lineJoin: "round"
+        });
+        drawProjectedLine(ctx, channelLine, {
+          stroke: "rgba(10, 100, 166, 0.90)",
+          lineWidth: 9,
+          lineCap: "round",
+          lineJoin: "round"
+        });
+      } else {
+        drawPrism(ctx, station, {
+          offsetX: -7,
+          offsetY: -18,
+          top: "rgba(188, 143, 210, 0.36)",
+          sideA: "rgba(117, 68, 145, 0.28)",
+          sideB: "rgba(154, 101, 177, 0.24)",
+          stroke: "rgba(94, 48, 119, 0.58)",
+          lineWidth: 1.7
+        });
+
+        const channelAngle = (modelExtrudeAngle * Math.PI) / 180;
+        drawPrism(ctx, channel, {
+          offsetX: Math.cos(channelAngle) * 13,
+          offsetY: Math.sin(channelAngle) * 13,
+          top: "rgba(91, 185, 234, 0.44)",
+          sideA: "rgba(29, 140, 207, 0.26)",
+          sideB: "rgba(11, 119, 189, 0.22)",
+          stroke: "rgba(10, 100, 166, 0.72)",
+          lineWidth: 1.6
+        });
+        drawProjectedLine(ctx, channelLine, {
+          stroke: "rgba(10, 100, 166, 0.92)",
+          lineWidth: 7
+        });
+      }
+
+      buildings.forEach(({ data, points }) => {
+        if (isConceptGeometry) {
+          return;
+        }
+        drawGroundPolygon(ctx, points, {
+          fill: data.id === geometry.selectedBuildingId ? "rgba(11, 119, 189, 0.10)" : "rgba(255, 255, 255, 0.10)",
+          stroke: data.id === geometry.selectedBuildingId ? "rgba(11, 95, 145, 0.88)" : "rgba(17, 24, 39, 0.50)",
+          lineWidth: data.id === geometry.selectedBuildingId ? 2.6 : 1.7
+        });
+        if (useCustomBuildingPrisms) {
+          const angle = (modelExtrudeAngle * Math.PI) / 180;
+          const height = data.id === geometry.selectedBuildingId ? modelExtrudeHeight + 8 : modelExtrudeHeight;
+          drawPrism(ctx, points, {
+            offsetX: Math.cos(angle) * height,
+            offsetY: Math.sin(angle) * height,
+            top: "rgba(255, 255, 255, 0.90)",
+            sideA: "rgba(214, 221, 226, 0.84)",
+            sideB: "rgba(184, 195, 204, 0.78)",
+            stroke: data.id === geometry.selectedBuildingId ? "rgba(11, 95, 145, 0.92)" : "rgba(17, 24, 39, 0.66)",
+            floorLines: true,
+            floorStroke: "rgba(17, 24, 39, 0.28)",
+            lineWidth: data.id === geometry.selectedBuildingId ? 2.2 : 1.7
+          });
+        }
+      });
+
+      document.body.dataset.overlay3d = "true";
+    }
+
+    function createPolygonLayer(map, item, options = {}) {
+      if (!item.path || item.path.length < 3) {
+        return null;
+      }
+      return new AMap.Polygon({
+        path: item.path,
+        strokeColor: options.strokeColor || item.stroke,
+        strokeWeight: options.strokeWeight || 4,
+        strokeOpacity: options.strokeOpacity || 1,
+        strokeStyle: options.strokeStyle || "solid",
+        strokeDasharray: options.strokeDasharray,
+        fillColor: item.fill || "#ffffff",
+        fillOpacity: options.fillOpacity ?? 0.16,
+        zIndex: options.zIndex || 80
+      });
+    }
+
+    function createPolylineLayer(map, item, options = {}) {
+      const path = item.centerline || item.path;
+      if (!path || path.length < 2) {
+        return null;
+      }
+      return new AMap.Polyline({
+        path,
+        strokeColor: item.stroke,
+        strokeWeight: options.strokeWeight || 4,
+        strokeOpacity: options.strokeOpacity || 1,
+        strokeStyle: options.strokeStyle || "solid",
+        strokeDasharray: options.strokeDasharray,
+        zIndex: options.zIndex || 100
+      });
+    }
+
+    function addSharedLayers(map, view) {
+      ensureGeometryV2();
+      const layers = [
+        createPolygonLayer(map, geometry.parcel, {
+          strokeWeight: view === "2d" ? 5 : 4,
+          fillOpacity: view === "2d" ? 0.20 : 0.10,
+          zIndex: 90
+        }),
+        createPolygonLayer(map, geometry.underground, {
+          strokeWeight: 3,
+          strokeOpacity: 0.86,
+          strokeStyle: "dashed",
+          strokeDasharray: [12, 8],
+          fillOpacity: 0.04,
+          zIndex: 92
+        }),
+        createPolygonLayer(map, geometry.channel, {
+          strokeWeight: 3,
+          fillOpacity: view === "2d" ? 0.30 : 0.18,
+          zIndex: 96
+        }),
+        createPolylineLayer(map, geometry.channel, {
+          strokeWeight: view === "2d" ? 5 : 4,
+          strokeOpacity: 0.95,
+          zIndex: 104
+        }),
+        createPolygonLayer(map, geometry.station, {
+          strokeWeight: 2,
+          fillOpacity: view === "2d" ? 0.30 : 0.16,
+          zIndex: 94
+        })
+      ].filter(Boolean);
+      geometry.buildings.forEach((building) => {
+        layers.push(createPolygonLayer(map, building, {
+          strokeWeight: building.id === geometry.selectedBuildingId ? 4 : 2,
+          strokeColor: building.id === geometry.selectedBuildingId ? "#0b77bd" : undefined,
+          fillOpacity: view === "2d" ? 0.60 : 0.22,
+          zIndex: building.id === geometry.selectedBuildingId ? 101 : 98
+        }));
+      });
+      const visibleLayers = layers.filter(Boolean);
+      map.add(visibleLayers);
+      return visibleLayers;
+    }
+
+    function addMarkers(map, view) {
+      const markers = [];
+      geometry.labels.forEach((label) => {
+        markers.push(new AMap.Marker({
+          position: label.position,
+          content: makeLabel(label.text, label.className),
+          anchor: "bottom-center",
+          offset: new AMap.Pixel(0, -10),
+          zIndex: 160
+        }));
+      });
+
+      if (view === "2d") {
+        (geometry.parcel.path || []).forEach((point, index) => {
+          markers.push(new AMap.Marker({
+            position: point,
+            content: `<div class="vertex">${index + 1}</div>`,
+            anchor: "center",
+            zIndex: 170
+          }));
+        });
+      }
+
+      map.add(markers);
+      return markers;
+    }
+
+    function normalizeLngLat(item) {
+      return [
+        Number(typeof item.getLng === "function" ? item.getLng() : item.lng),
+        Number(typeof item.getLat === "function" ? item.getLat() : item.lat)
+      ];
+    }
+
+    function overlayPath(overlay) {
+      const rawPath = overlay.getPath ? overlay.getPath() : [];
+      return rawPath.map((point) => normalizeLngLat(point));
+    }
+
+    function makeChannelFootprint(line, width = 0.000055) {
+      if (!line || line.length < 2) {
+        return [];
+      }
+      const left = [];
+      const right = [];
+      line.forEach((point, index) => {
+        const prev = line[Math.max(0, index - 1)];
+        const next = line[Math.min(line.length - 1, index + 1)];
+        const dx = next[0] - prev[0];
+        const dy = next[1] - prev[1];
+        const length = Math.hypot(dx, dy) || 1;
+        const nx = -dy / length;
+        const ny = dx / length;
+        left.push([point[0] + nx * width, point[1] + ny * width]);
+        right.push([point[0] - nx * width, point[1] - ny * width]);
+      });
+      return left.concat(right.reverse());
+    }
+
+    function lngLatToArray(lngLat) {
+      return [
+        Number(typeof lngLat.getLng === "function" ? lngLat.getLng() : lngLat.lng),
+        Number(typeof lngLat.getLat === "function" ? lngLat.getLat() : lngLat.lat)
+      ];
+    }
+
+    function drawStyle(tool) {
+      const styles = {
+        parcel: { strokeColor: "#e1262f", fillColor: "#f8ed9a", fillOpacity: 0.20, strokeWeight: 5, zIndex: 220 },
+        underground: { strokeColor: "#176bd6", fillColor: "#ffffff", fillOpacity: 0.04, strokeWeight: 3, strokeStyle: "dashed", zIndex: 221 },
+        channel: { strokeColor: "#0b77bd", strokeWeight: 5, zIndex: 222 },
+        building: { strokeColor: "#111827", fillColor: "#ffffff", fillOpacity: 0.60, strokeWeight: 2, zIndex: 223 },
+        station: { strokeColor: "#7d3f98", fillColor: "#8a58a5", fillOpacity: 0.30, strokeWeight: 2, zIndex: 224 }
+      };
+      return styles[tool] || {};
+    }
+
+    function clearDrawingOverlay(map) {
+      if (drawingOverlay) {
+        map.remove(drawingOverlay);
+        drawingOverlay = null;
+      }
+    }
+
+    const toolNames = {
+      parcel: "红线",
+      underground: "地下轮廓",
+      channel: "通道线",
+      building: "建筑",
+      station: "站体",
+      exit: "1号口"
+    };
+
+    function minPointsForTool(tool) {
+      return tool === "channel" ? 2 : 3;
+    }
+
+    function updateLastDraw(tool) {
+      window.__AMAP_SYNC_LAST_DRAW__ = {
+        tool,
+        pathLength: drawingPoints.length,
+        path: drawingPoints.slice()
+      };
+    }
+
+    function setWorkflowGuide(text) {
+      const guide = document.getElementById("workflowGuide");
+      if (guide) {
+        guide.textContent = text;
+      }
+    }
+
+    function updateDrawingControls() {
+      const isLineTool = activeDrawTool && activeDrawTool !== "exit";
+      const hasActiveTool = Boolean(activeDrawTool);
+      const undoButton = document.getElementById("undoDrawButton");
+      const finishButton = document.getElementById("finishDrawButton");
+      const cancelButton = document.getElementById("cancelDrawButton");
+      const clearButton = document.getElementById("clearLayerButton");
+      if (undoButton) undoButton.disabled = !(isLineTool && drawingPoints.length > 0);
+      if (finishButton) finishButton.disabled = !isLineTool;
+      if (cancelButton) cancelButton.disabled = !hasActiveTool;
+      if (clearButton) clearButton.disabled = !(activeDrawTool || lastSelectedTool);
+    }
+
+    function clearCommittedLayer(tool) {
+      if (tool === "parcel") {
+        geometry.parcel.path = [];
+        geometry.labels = geometry.labels.filter((item) => item.id !== "parcel");
+      }
+      if (tool === "underground") {
+        geometry.underground.path = [];
+      }
+      if (tool === "building") {
+        const selected = getSelectedBuilding();
+        if (selected) {
+          geometry.buildings = geometry.buildings.filter((building) => building.id !== selected.id);
+          geometry.selectedBuildingId = geometry.buildings.length ? geometry.buildings[geometry.buildings.length - 1].id : null;
+        }
+        syncLegacyBuilding();
+        syncBuildingLabels();
+      }
+      if (tool === "station") {
+        geometry.station.path = [];
+        geometry.station.body = [];
+      }
+      if (tool === "channel") {
+        geometry.channel.path = [];
+        geometry.channel.centerline = [];
+      }
+      if (tool === "exit") {
+        geometry.station.exitPoint = null;
+        geometry.labels = geometry.labels.filter((item) => item.id !== "exit");
+      }
+    }
+
+    function updateBuildingSelect() {
+      ensureGeometryV2();
+      const select = document.getElementById("buildingSelect");
+      if (!select) {
+        return;
+      }
+      select.innerHTML = "";
+      geometry.buildings.forEach((building) => {
+        const option = document.createElement("option");
+        option.value = building.id;
+        option.textContent = building.name;
+        option.selected = building.id === geometry.selectedBuildingId;
+        select.appendChild(option);
+      });
+      select.disabled = geometry.buildings.length === 0;
+      const autoButton = document.getElementById("autoChannelButton");
+      const perspectiveButton = document.getElementById("perspectiveDragButton");
+      if (autoButton) autoButton.disabled = geometry.buildings.length === 0 || !geometry.station.exitPoint;
+      if (perspectiveButton) perspectiveButton.disabled = geometry.buildings.length === 0 && !geometry.channel.path.length;
+    }
+
+    function rotatePath(path, degrees) {
+      const center = centroid(path);
+      const radians = (degrees * Math.PI) / 180;
+      const cos = Math.cos(radians);
+      const sin = Math.sin(radians);
+      return path.map(([lng, lat]) => {
+        const dx = lng - center[0];
+        const dy = lat - center[1];
+        return [
+          Number((center[0] + dx * cos - dy * sin).toFixed(8)),
+          Number((center[1] + dx * sin + dy * cos).toFixed(8))
+        ];
+      });
+    }
+
+    function setModelPerspective(state, angle, height = modelExtrudeHeight) {
+      modelExtrudeAngle = Number(angle);
+      modelExtrudeHeight = Math.max(18, Math.min(82, Number(height) || modelExtrudeHeight));
+      renderCanvas3d(state.map3d);
+      setWorkflowGuide(`已调整 3D 透视方向：${Math.round(modelExtrudeAngle)}°。默认优先显示高德 3D 建筑；打开“自建体块”时会套用这个方向。`);
+      setStatus("已调整 3D 透视方向。");
+      return true;
+    }
+
+    function nearestPointOnSegment(point, a, b) {
+      const ax = a[0];
+      const ay = a[1];
+      const bx = b[0];
+      const by = b[1];
+      const dx = bx - ax;
+      const dy = by - ay;
+      const length2 = dx * dx + dy * dy;
+      if (length2 === 0) {
+        return a;
+      }
+      const t = Math.max(0, Math.min(1, ((point[0] - ax) * dx + (point[1] - ay) * dy) / length2));
+      return [ax + dx * t, ay + dy * t];
+    }
+
+    function nearestPointOnPolygon(point, polygon) {
+      let best = polygon[0];
+      let bestDistance = Infinity;
+      polygon.forEach((current, index) => {
+        const next = polygon[(index + 1) % polygon.length];
+        const candidate = nearestPointOnSegment(point, current, next);
+        const distance = Math.hypot(point[0] - candidate[0], point[1] - candidate[1]);
+        if (distance < bestDistance) {
+          bestDistance = distance;
+          best = candidate;
+        }
+      });
+      return best;
+    }
+
+    function autoGenerateChannel(state) {
+      const building = getSelectedBuilding();
+      if (!geometry.station.exitPoint) {
+        setWorkflowGuide("请先点 1号口，再自动生成通道。");
+        return false;
+      }
+      if (!building || !building.path || building.path.length < 3) {
+        setWorkflowGuide("请先画并选择一个目标建筑，再自动生成通道。");
+        return false;
+      }
+      const start = geometry.station.exitPoint;
+      const end = nearestPointOnPolygon(start, building.path);
+      const mid = [
+        Number(((start[0] + end[0]) / 2).toFixed(8)),
+        Number((start[1]).toFixed(8))
+      ];
+      geometry.channel.centerline = [start, mid, [Number(end[0].toFixed(8)), Number(end[1].toFixed(8))]];
+      geometry.channel.path = makeChannelFootprint(geometry.channel.centerline);
+      refreshScene(state);
+      setWorkflowGuide(`已自动生成通道：1号口连接到${building.name}最近边。若不满意，可手动画通道线覆盖。`);
+      setStatus(`已自动生成通道到${building.name}。`);
+      return true;
+    }
+
+    function setDrawingInteractionLocked(state, locked) {
+      if (isDrawingInteractionLocked === locked) {
+        return;
+      }
+      isDrawingInteractionLocked = locked;
+      document.body.classList.toggle("is-drawing", locked);
+      window.__AMAP_SYNC_DRAW_LOCKED__ = locked;
+      if (!state || !state.map2d || typeof state.map2d.setStatus !== "function") {
+        return;
+      }
+      state.map2d.setStatus({
+        dragEnable: !locked,
+        keyboardEnable: !locked,
+        doubleClickZoom: !locked,
+        scrollWheel: !locked,
+        touchZoom: !locked
+      });
+    }
+
+    function beginDrawing(tool, state) {
+      activeDrawTool = tool;
+      lastSelectedTool = tool;
+      drawingPoints = [];
+      updateLastDraw(tool);
+      clearDrawingOverlay(state.map2d);
+      setDrawingInteractionLocked(state, true);
+      updateDrawingControls();
+      setWorkflowGuide(tool === "exit"
+        ? "正在点 1号口：在左侧 2D 地图点击出入口位置。点错可点“取消本次”重新来。"
+        : `正在画${toolNames[tool]}：已取 0 点，至少需要 ${minPointsForTool(tool)} 点。点错可撤销上一点，整笔不满意可取消本次。`);
+      setStatus(tool === "exit"
+        ? "正在采集：点1号口。请在 2D 地图上点击出入口位置。"
+        : "正在采集：请在 2D 地图上逐点点击，最后点“完成绘制”或双击地图结束。"
+      );
+    }
+
+    function updateDrawingOverlay(state) {
+      clearDrawingOverlay(state.map2d);
+      if (!activeDrawTool || activeDrawTool === "exit" || drawingPoints.length === 0) {
+        return;
+      }
+      const style = drawStyle(activeDrawTool);
+      if (activeDrawTool === "channel" || drawingPoints.length < 3) {
+        drawingOverlay = new AMap.Polyline({
+          path: drawingPoints,
+          strokeColor: style.strokeColor,
+          strokeWeight: style.strokeWeight || 4,
+          strokeOpacity: 0.95,
+          strokeStyle: style.strokeStyle || "solid",
+          strokeDasharray: style.strokeDasharray,
+          zIndex: 230
+        });
+      } else {
+        drawingOverlay = new AMap.Polygon({
+          path: drawingPoints,
+          strokeColor: style.strokeColor,
+          strokeWeight: style.strokeWeight || 4,
+          strokeOpacity: 1,
+          strokeStyle: style.strokeStyle || "solid",
+          strokeDasharray: style.strokeDasharray,
+          fillColor: style.fillColor || "#ffffff",
+          fillOpacity: style.fillOpacity ?? 0.2,
+          zIndex: 230
+        });
+      }
+      state.map2d.add(drawingOverlay);
+    }
+
+    function finishManualDrawing(state) {
+      const tool = activeDrawTool;
+      if (!tool || tool === "exit") {
+        return false;
+      }
+      const minPoints = minPointsForTool(tool);
+      if (drawingPoints.length < minPoints) {
+        const message = `点数不足：${toolNames[tool]}至少需要 ${minPoints} 点，当前 ${drawingPoints.length} 点。`;
+        setWorkflowGuide(message);
+        setStatus(message);
+        return false;
+      }
+      applyDrawPath(tool, drawingPoints);
+      activeDrawTool = "";
+      drawingPoints = [];
+      updateLastDraw(tool);
+      clearDrawingOverlay(state.map2d);
+      setDrawingInteractionLocked(state, false);
+      document.querySelectorAll("[data-draw-tool]").forEach((item) => item.setAttribute("aria-pressed", "false"));
+      refreshScene(state);
+      updateDrawingControls();
+      setWorkflowGuide(`已完成${toolNames[tool]}。下一步可以继续画其他图层，或点“保存草图”，确认无误后点“导出PNG”。`);
+      setStatus(`已完成${toolNames[tool]}，2D/3D 预览已刷新。`);
+      return true;
+    }
+
+    function applyDrawPath(tool, path) {
+      ensureGeometryV2();
+      if (tool === "parcel" && path.length >= 3) {
+        geometry.parcel.path = path;
+        upsertLabel("parcel", "地块红线", centroid(path), "parcel");
+      }
+      if (tool === "underground" && path.length >= 3) {
+        geometry.underground.path = path;
+      }
+      if (tool === "building" && path.length >= 3) {
+        buildingSerial += 1;
+        const building = {
+          id: `building-${buildingSerial}`,
+          name: `建筑 ${buildingSerial}`,
+          stroke: "#111827",
+          fill: "#ffffff",
+          path,
+          rotation: 0,
+          extrudeAngle: -58
+        };
+        geometry.buildings.push(building);
+        geometry.selectedBuildingId = building.id;
+        syncLegacyBuilding();
+        syncBuildingLabels();
+      }
+      if (tool === "station" && path.length >= 3) {
+        geometry.station.path = path;
+        geometry.station.body = path;
+      }
+      if (tool === "channel" && path.length >= 2) {
+        geometry.channel.centerline = path;
+        geometry.channel.path = makeChannelFootprint(path);
+      }
+    }
+
+    function moveExitLabel(position) {
+      upsertLabel("exit", "群力站 1号口", position, "exit");
+    }
+
+    function centroid(path) {
+      if (!path || path.length === 0) {
+        return geometry.meta.center;
+      }
+      const sum = path.reduce((acc, point) => [acc[0] + point[0], acc[1] + point[1]], [0, 0]);
+      return [sum[0] / path.length, sum[1] / path.length];
+    }
+
+    function upsertLabel(id, text, position, className) {
+      let label = geometry.labels.find((item) => item.id === id);
+      if (!label) {
+        label = { id, text, position, className };
+        geometry.labels.push(label);
+      }
+      label.text = text;
+      label.position = position;
+      label.className = className;
+    }
+
+    function applyDrawResult(tool, overlay) {
+      if (tool === "exit") {
+        const point = normalizeLngLat(overlay.getPosition());
+        geometry.station.exitPoint = point;
+        moveExitLabel(point);
+        return;
+      }
+
+      const path = overlayPath(overlay);
+      if (path.length < 2) {
+        return;
+      }
+
+      applyDrawPath(tool, path);
+    }
+
+    function removeMapItems(map, items) {
+      if (items && items.length) {
+        map.remove(items);
+      }
+    }
+
+    function refreshScene(state) {
+      removeMapItems(state.map2d, state.layers2d);
+      removeMapItems(state.map3d, state.layers3d);
+      removeMapItems(state.map2d, state.markers2d);
+      removeMapItems(state.map3d, state.markers3d);
+      state.layers2d = addSharedLayers(state.map2d, "2d");
+      state.layers3d = addSharedLayers(state.map3d, "3d");
+      state.markers2d = addMarkers(state.map2d, "2d");
+      state.markers3d = addMarkers(state.map3d, "3d");
+      renderCanvas3d(state.map3d);
+      updateBuildingSelect();
+    }
+
+    async function saveUserGeometry() {
+      ensureGeometryV2();
+      geometry.meta = {
+        ...(geometry.meta || {}),
+        linkedProjectId: linkedProjectId(),
+        stationName: linkedProjectRecord?.project?.station?.name || query.get("station") || ""
+      };
+      const response = await fetch("/api/schematic/user-geometry", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(geometry)
+      });
+      const result = await response.json();
+      if (!response.ok || !result.ok) {
+        throw new Error(result.error || "保存失败");
+      }
+      return result;
+    }
+
+    async function exportPng() {
+      await saveUserGeometry();
+      const response = await fetch("/api/schematic/export-png", { method: "POST" });
+      const result = await response.json();
+      if (!response.ok || !result.ok) {
+        throw new Error(result.error || "导出失败");
+      }
+      return result;
+    }
+
+    function fitBoth(map2d, map3d) {
+      map2d.setZoomAndCenter(16.72, geometry.meta.center, false);
+      map3d.setZoomAndCenter(16.72, geometry.meta.center, false);
+      map3d.setPitch(38);
+      map3d.setRotation(0);
+    }
+
+    function lngLatFromPoi(poi) {
+      const location = poi?.location;
+      if (!location) return null;
+      const lng = typeof location.getLng === "function" ? location.getLng() : location.lng;
+      const lat = typeof location.getLat === "function" ? location.getLat() : location.lat;
+      return Number.isFinite(Number(lng)) && Number.isFinite(Number(lat)) ? [Number(lng), Number(lat)] : null;
+    }
+
+    function moveBothTo(map2d, map3d, center, zoom = 17.2) {
+      map2d.setZoomAndCenter(zoom, center, false);
+      map3d.setZoomAndCenter(zoom, center, false);
+      map3d.setPitch(38);
+      renderCanvas3d(map3d);
+    }
+
+    function setupPlaceSearch(map2d, map3d, state) {
+      const input = document.getElementById("placeSearchInput");
+      const button = document.getElementById("placeSearchButton");
+      const results = document.getElementById("placeSearchResults");
+      const stationName = linkedProjectRecord?.project?.station?.name || query.get("station") || "";
+      if (stationName && !input.value) {
+        input.value = `${stationName}地铁站`;
+      }
+      if (!window.AMap?.PlaceSearch) {
+        button.disabled = true;
+        results.disabled = true;
+        setStatus("地点搜索插件未加载，可继续手动拖动地图定位。");
+        return;
+      }
+      const placeSearch = new AMap.PlaceSearch({
+        city: "苏州",
+        citylimit: false,
+        pageSize: 10,
+        extensions: "base"
+      });
+      let pois = [];
+      const renderResults = () => {
+        results.innerHTML = `<option value="">${pois.length ? "选择搜索结果" : "无候选结果"}</option>${pois.map((poi, index) => {
+          const district = poi.adname || poi.district || "";
+          return `<option value="${index}">${escapeHtml(poi.name || "未命名地点")}${district ? ` / ${escapeHtml(district)}` : ""}</option>`;
+        }).join("")}`;
+      };
+      const runSearch = () => {
+        const keyword = input.value.trim();
+        if (!keyword) {
+          setStatus("请输入车站名或地点名后再搜索。");
+          input.focus();
+          return;
+        }
+        button.disabled = true;
+        setStatus(`正在搜索：${keyword}`);
+        placeSearch.search(keyword, (status, result) => {
+          button.disabled = false;
+          pois = status === "complete" && result?.poiList?.pois ? result.poiList.pois : [];
+          renderResults();
+          if (!pois.length) {
+            setStatus(`未找到“${keyword}”，可尝试加上“苏州 地铁站”或周边道路名。`);
+            return;
+          }
+          const first = lngLatFromPoi(pois[0]);
+          if (first) {
+            results.value = "0";
+            if (linkedProjectRecord && (!loadedProjectGeometry || document.body.dataset.conceptGeometry === "true")) {
+              generateProjectConceptGeometry(linkedProjectRecord, first);
+              refreshScene(state);
+            } else {
+              geometry.meta.center = first;
+            }
+            moveBothTo(map2d, map3d, first);
+            setStatus(`已定位到：${pois[0].name}。如候选不准，请在下拉中选择其他结果。`);
+          }
+        });
+      };
+      button.addEventListener("click", runSearch);
+      input.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          runSearch();
+        }
+      });
+      results.addEventListener("change", () => {
+        const poi = pois[Number(results.value)];
+        const center = lngLatFromPoi(poi);
+        if (!center) return;
+        if (linkedProjectRecord && (!loadedProjectGeometry || document.body.dataset.conceptGeometry === "true")) {
+          generateProjectConceptGeometry(linkedProjectRecord, center);
+          refreshScene(state);
+        } else {
+          geometry.meta.center = center;
+        }
+        moveBothTo(map2d, map3d, center);
+        setStatus(`已跳转到：${poi.name}。可以开始画红线、站体、出入口和通道。`);
+      });
+      if (linkedProjectRecord && !loadedProjectGeometry && input.value) {
+        setTimeout(runSearch, 200);
+      }
+    }
+
+    function bindSync(map2d, map3d) {
+      let syncing = false;
+      const copy2dTo3d = () => {
+        if (syncing) return;
+        syncing = true;
+        map3d.setZoomAndCenter(map2d.getZoom(), map2d.getCenter(), false);
+        syncing = false;
+      };
+      const copy3dTo2d = () => {
+        if (syncing) return;
+        syncing = true;
+        map2d.setZoomAndCenter(map3d.getZoom(), map3d.getCenter(), false);
+        syncing = false;
+      };
+      map2d.on("moveend", copy2dTo3d);
+      map2d.on("zoomend", copy2dTo3d);
+      map3d.on("moveend", copy3dTo2d);
+      map3d.on("zoomend", copy3dTo2d);
+    }
+
+    function bindCanvasRenderer(map3d) {
+      let ticking = false;
+      const redraw = () => {
+        if (ticking) return;
+        ticking = true;
+        requestAnimationFrame(() => {
+          ticking = false;
+          renderCanvas3d(map3d);
+        });
+      };
+      ["complete", "moveend", "zoomend", "resize", "rotatechange", "pitchchange"].forEach((eventName) => {
+        map3d.on(eventName, redraw);
+      });
+      window.addEventListener("resize", redraw);
+      redraw();
+    }
+
+    function setupButtons(map2d, map3d, state) {
+      document.querySelectorAll("[data-mode-button]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const mode = button.dataset.modeButton;
+          document.body.dataset.mode = mode;
+          document.querySelectorAll("[data-mode-button]").forEach((item) => {
+            item.setAttribute("aria-pressed", String(item === button));
+          });
+          setTimeout(() => {
+            map2d.resize();
+            map3d.resize();
+            renderCanvas3d(map3d);
+          }, 80);
+        });
+      });
+
+      document.getElementById("fitButton").addEventListener("click", () => {
+        fitBoth(map2d, map3d);
+        renderCanvas3d(map3d);
+      });
+
+      document.getElementById("toggleGuideButton").addEventListener("click", () => {
+        const panel = document.getElementById("drawPanel");
+        const button = document.getElementById("toggleGuideButton");
+        const collapsed = !panel.classList.toggle("is-collapsed");
+        button.setAttribute("aria-expanded", String(collapsed));
+      });
+
+      document.getElementById("buildingSelect").addEventListener("change", (event) => {
+        geometry.selectedBuildingId = event.target.value;
+        syncLegacyBuilding();
+        refreshScene(state);
+        const building = getSelectedBuilding();
+        setWorkflowGuide(building ? `已选中${building.name}。可以点“自动通道”连接 1号口；3D 建筑优先使用高德默认模型。` : "暂无建筑。");
+      });
+
+      document.getElementById("autoChannelButton").addEventListener("click", () => {
+        autoGenerateChannel(state);
+      });
+
+      document.getElementById("customModelToggle").addEventListener("click", () => {
+        useCustomBuildingPrisms = !useCustomBuildingPrisms;
+        document.getElementById("customModelToggle").setAttribute("aria-pressed", String(useCustomBuildingPrisms));
+        renderCanvas3d(map3d);
+        setWorkflowGuide(useCustomBuildingPrisms
+          ? "已显示自建体块。若透视方向不对，点“拖拽透视”后在右侧 3D 图上拖动。"
+          : "已隐藏自建建筑体块，优先使用高德默认 3D 建筑；保留你画的建筑轮廓用于选目标和连通。");
+      });
+
+      document.getElementById("perspectiveDragButton").addEventListener("click", () => {
+        isPerspectiveDragMode = !isPerspectiveDragMode;
+        document.getElementById("perspectiveDragButton").setAttribute("aria-pressed", String(isPerspectiveDragMode));
+        setWorkflowGuide(isPerspectiveDragMode
+          ? "透视调整中：在右侧 3D 图上按住并拖动，拖动方向就是通道/自建体块的立体投影方向。"
+          : "已退出透视调整。");
+      });
+
+      document.querySelectorAll("[data-draw-tool]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const tool = button.dataset.drawTool;
+          document.body.dataset.mode = "split";
+          document.querySelectorAll("[data-mode-button]").forEach((item) => {
+            item.setAttribute("aria-pressed", String(item.dataset.modeButton === "split"));
+          });
+          document.querySelectorAll("[data-draw-tool]").forEach((item) => {
+            item.setAttribute("aria-pressed", String(item === button));
+          });
+          beginDrawing(tool, state);
+        });
+      });
+
+      function handleDrawingClick(point) {
+        if (!activeDrawTool) {
+          return;
+        }
+        if (activeDrawTool === "exit") {
+          geometry.station.exitPoint = point;
+          moveExitLabel(point);
+          activeDrawTool = "";
+          drawingPoints = [];
+          updateLastDraw("exit");
+          setDrawingInteractionLocked(state, false);
+          document.querySelectorAll("[data-draw-tool]").forEach((item) => item.setAttribute("aria-pressed", "false"));
+          refreshScene(state);
+          updateDrawingControls();
+          setWorkflowGuide("已完成 1号口。下一步可以继续画通道线，或点“保存草图”，确认无误后点“导出PNG”。");
+          setStatus("已接收 1 号口点位，2D/3D 预览已刷新。");
+          return;
+        }
+        drawingPoints.push(point);
+        updateLastDraw(activeDrawTool);
+        updateDrawingOverlay(state);
+        updateDrawingControls();
+        setWorkflowGuide(`正在画${toolNames[activeDrawTool]}：已取 ${drawingPoints.length} 点，至少需要 ${minPointsForTool(activeDrawTool)} 点。点错可撤销上一点；轮廓闭合后点“完成绘制”。`);
+        setStatus(`已采集 ${drawingPoints.length} 个点，继续点击或点“完成绘制”。`);
+      }
+
+      const mapContainer = map2d.getContainer();
+      let drawingPointerStart = null;
+      let ignoreNextDrawingClick = false;
+      const drawingPointerPoint = (event) => {
+        const source = event.touches && event.touches.length ? event.touches[0] : event;
+        return { x: source.clientX, y: source.clientY };
+      };
+      const rememberDrawingPointerStart = (event) => {
+        if (!activeDrawTool) {
+          return;
+        }
+        drawingPointerStart = drawingPointerPoint(event);
+        ignoreNextDrawingClick = false;
+        event.preventDefault();
+        event.stopPropagation();
+      };
+      const rememberDrawingPointerMove = (event) => {
+        if (!activeDrawTool || !drawingPointerStart) {
+          return;
+        }
+        const point = drawingPointerPoint(event);
+        if (Math.hypot(point.x - drawingPointerStart.x, point.y - drawingPointerStart.y) > 4) {
+          ignoreNextDrawingClick = true;
+        }
+        event.preventDefault();
+        event.stopPropagation();
+      };
+      ["pointerdown", "mousedown", "touchstart"].forEach((eventName) => {
+        mapContainer.addEventListener(eventName, rememberDrawingPointerStart, { capture: true, passive: false });
+      });
+      ["pointermove", "mousemove", "touchmove"].forEach((eventName) => {
+        mapContainer.addEventListener(eventName, rememberDrawingPointerMove, { capture: true, passive: false });
+      });
+      mapContainer.addEventListener("click", (event) => {
+        if (!activeDrawTool) {
+          return;
+        }
+        if (ignoreNextDrawingClick) {
+          ignoreNextDrawingClick = false;
+          drawingPointerStart = null;
+          event.preventDefault();
+          event.stopPropagation();
+          return;
+        }
+        const rect = mapContainer.getBoundingClientRect();
+        const pixel = new AMap.Pixel(event.clientX - rect.left, event.clientY - rect.top);
+        const lngLat = map2d.containerToLngLat(pixel);
+        handleDrawingClick(lngLatToArray(lngLat));
+        drawingPointerStart = null;
+        event.preventDefault();
+        event.stopPropagation();
+      }, true);
+
+      mapContainer.addEventListener("dblclick", (event) => {
+        if (!activeDrawTool) {
+          return;
+        }
+        finishManualDrawing(state);
+        event.preventDefault();
+        event.stopPropagation();
+      }, true);
+
+      const map3dContainer = map3d.getContainer();
+      let perspectiveStart = null;
+      map3dContainer.addEventListener("pointerdown", (event) => {
+        if (!isPerspectiveDragMode) {
+          return;
+        }
+        perspectiveStart = { x: event.clientX, y: event.clientY };
+        event.preventDefault();
+        event.stopPropagation();
+      }, true);
+      map3dContainer.addEventListener("pointermove", (event) => {
+        if (!isPerspectiveDragMode || !perspectiveStart) {
+          return;
+        }
+        const dx = event.clientX - perspectiveStart.x;
+        const dy = event.clientY - perspectiveStart.y;
+        if (Math.hypot(dx, dy) < 8) {
+          return;
+        }
+        const angle = (Math.atan2(dy, dx) * 180) / Math.PI;
+        const height = Math.max(22, Math.min(78, Math.hypot(dx, dy) * 0.55));
+        setModelPerspective(state, angle, height);
+        event.preventDefault();
+        event.stopPropagation();
+      }, true);
+      window.addEventListener("pointerup", () => {
+        perspectiveStart = null;
+      });
+
+      document.getElementById("finishDrawButton").addEventListener("click", () => {
+        finishManualDrawing(state);
+      });
+
+      document.getElementById("undoDrawButton").addEventListener("click", () => {
+        if (!activeDrawTool || activeDrawTool === "exit" || drawingPoints.length === 0) {
+          return;
+        }
+        drawingPoints.pop();
+        updateLastDraw(activeDrawTool);
+        updateDrawingOverlay(state);
+        updateDrawingControls();
+        setWorkflowGuide(`已撤销上一点。正在画${toolNames[activeDrawTool]}：当前 ${drawingPoints.length} 点，至少需要 ${minPointsForTool(activeDrawTool)} 点。`);
+        setStatus(`已撤销上一点，当前 ${drawingPoints.length} 点。`);
+      });
+
+      document.getElementById("cancelDrawButton").addEventListener("click", () => {
+        if (!activeDrawTool) {
+          return;
+        }
+        const tool = activeDrawTool;
+        activeDrawTool = "";
+        drawingPoints = [];
+        updateLastDraw(tool);
+        clearDrawingOverlay(state.map2d);
+        setDrawingInteractionLocked(state, false);
+        document.querySelectorAll("[data-draw-tool]").forEach((item) => item.setAttribute("aria-pressed", "false"));
+        updateDrawingControls();
+        setWorkflowGuide(`已取消本次${toolNames[tool]}绘制。可以重新选择工具再画，已有保存的图层不受影响。`);
+        setStatus(`已取消本次${toolNames[tool]}绘制。`);
+      });
+
+      document.getElementById("clearLayerButton").addEventListener("click", () => {
+        const tool = activeDrawTool || lastSelectedTool;
+        if (!tool) {
+          return;
+        }
+        activeDrawTool = "";
+        drawingPoints = [];
+        updateLastDraw(tool);
+        clearDrawingOverlay(state.map2d);
+        clearCommittedLayer(tool);
+        setDrawingInteractionLocked(state, false);
+        document.querySelectorAll("[data-draw-tool]").forEach((item) => item.setAttribute("aria-pressed", "false"));
+        refreshScene(state);
+        updateDrawingControls();
+        setWorkflowGuide(`已清空${toolNames[tool]}。需要重新画时，点上方“画${toolNames[tool]}”再在 2D 地图上采点。`);
+        setStatus(`已清空${toolNames[tool]}。`);
+      });
+
+      document.getElementById("resetGeometryButton").addEventListener("click", () => {
+        geometry = cloneGeometry(defaultGeometry);
+        ensureGeometryV2();
+        activeDrawTool = "";
+        lastSelectedTool = "";
+        drawingPoints = [];
+        updateLastDraw("");
+        clearDrawingOverlay(state.map2d);
+        setDrawingInteractionLocked(state, false);
+        refreshScene(state);
+        updateDrawingControls();
+        setWorkflowGuide("已恢复默认。先选择一个工具，例如画红线；在左侧 2D 地图上逐点点击。");
+        setStatus("已恢复默认几何。");
+      });
+
+      document.getElementById("saveGeometryButton").addEventListener("click", async () => {
+        try {
+          await saveUserGeometry();
+          setWorkflowGuide("草图已保存。还可以继续调整图层；确认出图范围后点“导出PNG”。");
+          setStatus("已保存手动画线数据。");
+        } catch (error) {
+          fail(`保存失败：${error.message}`);
+        }
+      });
+
+      document.getElementById("exportPngButton").addEventListener("click", async () => {
+        const resultNode = document.getElementById("exportResult");
+        resultNode.textContent = "正在导出 PNG...";
+        try {
+          const result = await exportPng();
+          const relativePath = result.outputPath.split("\\outputs\\").pop();
+          resultNode.innerHTML = `已导出：<a href="./${relativePath ? relativePath.replace(/^amap_2d_3d_sync\\?/, "").replace(/\\/g, "/") : "exports/"}" target="_blank">${result.outputPath}</a>`;
+          setWorkflowGuide("PNG 已导出。还需要改线时，选择对应工具重新画，或用“清空当前图层”后再画。");
+          setStatus("PNG 已导出。");
+        } catch (error) {
+          resultNode.textContent = `导出失败：${error.message}`;
+          fail(`导出失败：${error.message}`);
+        }
+      });
+      updateDrawingControls();
+    }
+
+    function initMaps() {
+      if (!window.AMap) {
+        fail("高德 JS API 未返回 AMap 对象。");
+        return;
+      }
+
+      const common = {
+        center: geometry.meta.center,
+        zoom: 16.65,
+        resizeEnable: true,
+        mapStyle: "amap://styles/whitesmoke",
+        features: ["bg", "road", "building", "point"],
+        showLabel: true
+      };
+
+      const map2d = new AMap.Map("map2d", {
+        ...common,
+        viewMode: "2D",
+        pitch: 0,
+        rotation: 0
+      });
+
+      const map3d = new AMap.Map("map3d", {
+        ...common,
+        viewMode: "3D",
+        pitch: 38,
+        rotation: 0,
+        showBuildingBlock: true,
+        buildingAnimation: true
+      });
+
+      if (AMap.Buildings) {
+        map3d.addLayer(new AMap.Buildings({
+          heightFactor: 1.18,
+          wallColor: "rgba(176, 184, 190, 0.56)",
+          roofColor: "rgba(255, 255, 255, 0.84)",
+          zIndex: 12
+        }));
+      }
+
+      map2d.addControl(new AMap.Scale());
+      map3d.addControl(new AMap.Scale());
+      map3d.addControl(new AMap.ControlBar({ position: { right: "18px", top: "18px" } }));
+      map3d.addControl(new AMap.ToolBar({ position: { right: "18px", top: "112px" } }));
+
+      const state = {
+        map2d,
+        map3d,
+        layers2d: [],
+        layers3d: [],
+        markers2d: [],
+        markers3d: []
+      };
+      refreshScene(state);
+      bindSync(map2d, map3d);
+      bindCanvasRenderer(map3d);
+      setupButtons(map2d, map3d, state);
+      setupPlaceSearch(map2d, map3d, state);
+
+      let completed = 0;
+      const markComplete = () => {
+        completed += 1;
+        if (completed >= 2) {
+          fitBoth(map2d, map3d);
+          renderCanvas3d(map3d);
+          document.body.dataset.ready = "true";
+          setStatus("加载完成：2D 与 3D 使用同一份 geometry.js，经纬度框线已同步投影。");
+        }
+      };
+      map2d.on("complete", markComplete);
+      map3d.on("complete", markComplete);
+
+      window.__AMAP_SYNC__ = {
+        map2d,
+        map3d,
+        geometry,
+        saveUserGeometry,
+        exportPng,
+        getSelectedBuilding,
+        setModelPerspective: (angle, height) => setModelPerspective(state, angle, height),
+        getSummary() {
+          ensureGeometryV2();
+          return {
+            geometryVersion: geometry.meta.version,
+            sameParcelReference: geometry.parcel.path.length,
+            buildingCount: geometry.buildings.length,
+            selectedBuildingId: geometry.selectedBuildingId,
+            useCustomBuildingPrisms,
+            modelExtrudeAngle,
+            modelExtrudeHeight,
+            perspectiveDragMode: isPerspectiveDragMode,
+            canDraw: Boolean(AMap.MouseTool),
+            hasManualTools: document.querySelectorAll("[data-draw-tool]").length,
+            drawLocked: isDrawingInteractionLocked,
+            map2d: {
+              center: [map2d.getCenter().lng, map2d.getCenter().lat],
+              zoom: map2d.getZoom(),
+              pitch: map2d.getPitch ? map2d.getPitch() : 0,
+              rotation: map2d.getRotation ? map2d.getRotation() : 0
+            },
+            map3d: {
+              center: [map3d.getCenter().lng, map3d.getCenter().lat],
+              zoom: map3d.getZoom(),
+              pitch: map3d.getPitch ? map3d.getPitch() : null,
+              rotation: map3d.getRotation ? map3d.getRotation() : null
+            },
+            overlay3d: document.body.dataset.overlay3d === "true"
+          };
+        }
+      };
+    }
+
+    window.addEventListener("error", (event) => {
+      if (document.body.dataset.ready !== "true") {
+        fail(`页面脚本异常：${event.message || "未知错误"}`);
+      }
+    });
+
+    Promise.all([loadLinkedProjects(), loadLinkedProjectRecord()])
+      .then(([, record]) => loadSavedGeometry().then(() => {
+        if (record && !loadedProjectGeometry) {
+          generateProjectConceptGeometry(record);
+        }
+        applyProjectContextToGeometry(record);
+      }))
+      .finally(loadAmap);
+  </script>
+</body>
+</html>

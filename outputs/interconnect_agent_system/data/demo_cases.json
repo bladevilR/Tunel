@@ -1,0 +1,107 @@
+{
+  "version": "feedback-20260507",
+  "cases": [
+    {
+      "id": "jinjiayan-neighborhood-center",
+      "name": "金家堰邻里中心",
+      "projectCode": "6-JJY-2026-001",
+      "station": {
+        "name": "金家堰",
+        "district": "工业园区",
+        "line": "6",
+        "todLevel": "组团级TOD",
+        "locationLevel": "community",
+        "stationType": "normal",
+        "constructionState": "既有站点",
+        "nearbyExit": "3号口",
+        "interfaceCondition": "站厅非付费区预留远期接驳接口，接口位置与地块地下空间竖向标高匹配",
+        "dailyInbound": null
+      },
+      "parcel": {
+        "location": "金堰路东、东宏路北",
+        "quadrant": "东北象限",
+        "distanceBand": "200m核心开发区",
+        "landUse": "major_public_commercial",
+        "landUseText": "商业用地",
+        "functionalFormat": "综合性社区邻里中心",
+        "siteArea": 25000,
+        "buildingArea": 90000,
+        "developmentIntensity": "30k_100k",
+        "undergroundSpace": "commercial_public_pr",
+        "undergroundDescription": "有地下室，地下2层，包含停车、设备用房及公共服务/商业配套空间",
+        "planningIndicators": "容积率≤2.5，建筑密度≤50%，建筑限高60m",
+        "functionalDemand": "全天候接驳、无障碍通行、轨道客流与邻里中心双向引流",
+        "constraints": "需与金家堰站3号口邻里中心地块互联互通方案持续对接"
+      },
+      "attachments": "地块控制性详细规划图则；地块规划条件；地块概念设计方案"
+    },
+    {
+      "id": "qingshuwan-youth-apartment",
+      "name": "清树湾站东南象限青年公寓地块",
+      "projectCode": "4-QSW-2026-002",
+      "station": {
+        "name": "清树湾",
+        "district": "吴中区",
+        "line": "4",
+        "todLevel": "组团级TOD",
+        "locationLevel": "community",
+        "stationType": "normal",
+        "constructionState": "既有站点",
+        "nearbyExit": "3号出入口",
+        "interfaceCondition": "站厅非付费区具备远期接口预留条件",
+        "dailyInbound": null
+      },
+      "parcel": {
+        "location": "清树湾站东南象限，邻近既有/规划出入口",
+        "quadrant": "东南象限",
+        "distanceBand": "200m核心开发区",
+        "landUse": "general_public_commercial",
+        "landUseText": "青年公寓为主，配套少量社区商业",
+        "functionalFormat": "青年公寓及社区配套商业",
+        "siteArea": 14400,
+        "buildingArea": 21600,
+        "developmentIntensity": "5k_30k",
+        "undergroundSpace": "parking",
+        "undergroundDescription": "地下1层，功能为机动车停车、非机动车停车及设备用房",
+        "planningIndicators": "以控规及规划条件为准，当前按试算字段录入",
+        "functionalDemand": "通勤接驳、全天候步行、社区商业引流",
+        "constraints": "预留接口和地块建设时序需复核"
+      },
+      "attachments": ""
+    },
+    {
+      "id": "blank-template",
+      "name": "空白录入模板",
+      "projectCode": "",
+      "station": {
+        "name": "",
+        "district": "",
+        "line": "",
+        "todLevel": "",
+        "locationLevel": "",
+        "stationType": "",
+        "constructionState": "",
+        "nearbyExit": "",
+        "interfaceCondition": "",
+        "dailyInbound": null
+      },
+      "parcel": {
+        "location": "",
+        "quadrant": "",
+        "distanceBand": "",
+        "landUse": "",
+        "landUseText": "",
+        "functionalFormat": "",
+        "siteArea": null,
+        "buildingArea": null,
+        "developmentIntensity": "",
+        "undergroundSpace": "",
+        "undergroundDescription": "",
+        "planningIndicators": "",
+        "functionalDemand": "",
+        "constraints": ""
+      },
+      "attachments": ""
+    }
+  ]
+}

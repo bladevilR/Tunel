@@ -1,0 +1,194 @@
+[
+  {
+    "name": "desktop",
+    "view": "dashboard",
+    "screenshot": "E:\\ai\\苏州轨道交通站点周边互联互通智能体开发工作提资\\outputs\\interconnect_agent_system\\qa-final-dashboard-desktop-20260508.png",
+    "errors": [],
+    "metrics": {
+      "bodyWidth": 1680,
+      "viewportWidth": 1680,
+      "horizontalOverflow": false,
+      "overflowCount": 0,
+      "knowledgeResults": 0,
+      "backlog": 2,
+      "reportBrief": 3,
+      "loadDemoText": "载入示例"
+    }
+  },
+  {
+    "name": "desktop",
+    "view": "assessment",
+    "screenshot": "E:\\ai\\苏州轨道交通站点周边互联互通智能体开发工作提资\\outputs\\interconnect_agent_system\\qa-final-assessment-desktop-20260508.png",
+    "errors": [],
+    "metrics": {
+      "bodyWidth": 1680,
+      "viewportWidth": 1680,
+      "horizontalOverflow": false,
+      "overflowCount": 0,
+      "knowledgeResults": 0,
+      "backlog": 2,
+      "reportBrief": 3,
+      "loadDemoText": "载入示例"
+    }
+  },
+  {
+    "name": "desktop",
+    "view": "knowledge",
+    "screenshot": "E:\\ai\\苏州轨道交通站点周边互联互通智能体开发工作提资\\outputs\\interconnect_agent_system\\qa-final-knowledge-desktop-20260508.png",
+    "errors": [],
+    "metrics": {
+      "bodyWidth": 1680,
+      "viewportWidth": 1680,
+      "horizontalOverflow": false,
+      "overflowCount": 0,
+      "knowledgeResults": 5,
+      "backlog": 2,
+      "reportBrief": 3,
+      "loadDemoText": "载入示例"
+    }
+  },
+  {
+    "name": "desktop",
+    "view": "reporting",
+    "screenshot": "E:\\ai\\苏州轨道交通站点周边互联互通智能体开发工作提资\\outputs\\interconnect_agent_system\\qa-final-reporting-desktop-20260508.png",
+    "errors": [],
+    "metrics": {
+      "bodyWidth": 1680,
+      "viewportWidth": 1680,
+      "horizontalOverflow": false,
+      "overflowCount": 0,
+      "knowledgeResults": 0,
+      "backlog": 2,
+      "reportBrief": 3,
+      "loadDemoText": "载入示例"
+    }
+  },
+  {
+    "name": "laptop",
+    "view": "dashboard",
+    "screenshot": "E:\\ai\\苏州轨道交通站点周边互联互通智能体开发工作提资\\outputs\\interconnect_agent_system\\qa-final-dashboard-laptop-20260508.png",
+    "errors": [],
+    "metrics": {
+      "bodyWidth": 1366,
+      "viewportWidth": 1366,
+      "horizontalOverflow": false,
+      "overflowCount": 0,
+      "knowledgeResults": 0,
+      "backlog": 2,
+      "reportBrief": 3,
+      "loadDemoText": "载入示例"
+    }
+  },
+  {
+    "name": "laptop",
+    "view": "assessment",
+    "screenshot": "E:\\ai\\苏州轨道交通站点周边互联互通智能体开发工作提资\\outputs\\interconnect_agent_system\\qa-final-assessment-laptop-20260508.png",
+    "errors": [],
+    "metrics": {
+      "bodyWidth": 1366,
+      "viewportWidth": 1366,
+      "horizontalOverflow": false,
+      "overflowCount": 1,
+      "knowledgeResults": 0,
+      "backlog": 2,
+      "reportBrief": 3,
+      "loadDemoText": "载入示例"
+    }
+  },
+  {
+    "name": "laptop",
+    "view": "knowledge",
+    "screenshot": "E:\\ai\\苏州轨道交通站点周边互联互通智能体开发工作提资\\outputs\\interconnect_agent_system\\qa-final-knowledge-laptop-20260508.png",
+    "errors": [],
+    "metrics": {
+      "bodyWidth": 1366,
+      "viewportWidth": 1366,
+      "horizontalOverflow": false,
+      "overflowCount": 0,
+      "knowledgeResults": 5,
+      "backlog": 2,
+      "reportBrief": 3,
+      "loadDemoText": "载入示例"
+    }
+  },
+  {
+    "name": "laptop",
+    "view": "reporting",
+    "screenshot": "E:\\ai\\苏州轨道交通站点周边互联互通智能体开发工作提资\\outputs\\interconnect_agent_system\\qa-final-reporting-laptop-20260508.png",
+    "errors": [],
+    "metrics": {
+      "bodyWidth": 1366,
+      "viewportWidth": 1366,
+      "horizontalOverflow": false,
+      "overflowCount": 0,
+      "knowledgeResults": 0,
+      "backlog": 2,
+      "reportBrief": 3,
+      "loadDemoText": "载入示例"
+    }
+  },
+  {
+    "name": "mobile",
+    "view": "dashboard",
+    "screenshot": "E:\\ai\\苏州轨道交通站点周边互联互通智能体开发工作提资\\outputs\\interconnect_agent_system\\qa-final-dashboard-mobile-20260508.png",
+    "errors": [],
+    "metrics": {
+      "bodyWidth": 390,
+      "viewportWidth": 390,
+      "horizontalOverflow": false,
+      "overflowCount": 0,
+      "knowledgeResults": 0,
+      "backlog": 2,
+      "reportBrief": 3,
+      "loadDemoText": "载入示例"
+    }
+  },
+  {
+    "name": "mobile",
+    "view": "assessment",
+    "screenshot": "E:\\ai\\苏州轨道交通站点周边互联互通智能体开发工作提资\\outputs\\interconnect_agent_system\\qa-final-assessment-mobile-20260508.png",
+    "errors": [],
+    "metrics": {
+      "bodyWidth": 390,
+      "viewportWidth": 390,
+      "horizontalOverflow": false,
+      "overflowCount": 3,
+      "knowledgeResults": 0,
+      "backlog": 2,
+      "reportBrief": 3,
+      "loadDemoText": "载入示例"
+    }
+  },
+  {
+    "name": "mobile",
+    "view": "knowledge",
+    "screenshot": "E:\\ai\\苏州轨道交通站点周边互联互通智能体开发工作提资\\outputs\\interconnect_agent_system\\qa-final-knowledge-mobile-20260508.png",
+    "errors": [],
+    "metrics": {
+      "bodyWidth": 390,
+      "viewportWidth": 390,
+      "horizontalOverflow": false,
+      "overflowCount": 0,
+      "knowledgeResults": 5,
+      "backlog": 2,
+      "reportBrief": 3,
+      "loadDemoText": "载入示例"
+    }
+  },
+  {
+    "name": "mobile",
+    "view": "reporting",
+    "screenshot": "E:\\ai\\苏州轨道交通站点周边互联互通智能体开发工作提资\\outputs\\interconnect_agent_system\\qa-final-reporting-mobile-20260508.png",
+    "errors": [],
+    "metrics": {
+      "bodyWidth": 390,
+      "viewportWidth": 390,
+      "horizontalOverflow": false,
+      "overflowCount": 0,
+      "knowledgeResults": 0,
+      "backlog": 2,
+      "reportBrief": 3,
+      "loadDemoText": "载入示例"
+    }
+  }
+]

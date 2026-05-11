@@ -1,0 +1,546 @@
+[
+  {
+    "id": "outputs-feedback-20260507-核心工作思路-最优先-互联互通智能体研发工作方案0318-pptx",
+    "path": "outputs\\feedback_20260507\\（核心工作思路，最优先）互联互通智能体研发工作方案0318.pptx",
+    "name": "（核心工作思路，最优先）互联互通智能体研发工作方案0318.pptx",
+    "suffix": ".pptx",
+    "size": 7676228,
+    "parseStatus": "parsed",
+    "usefulness": "核心",
+    "priority": 100,
+    "category": "work_plan",
+    "reason": "PPT 是用户确认的一期最高优先级规则源",
+    "counts": {
+      "slides": 10
+    },
+    "note": ""
+  },
+  {
+    "id": "互联互通智能体资料缺项需求提报表-反馈版-xlsx",
+    "path": "互联互通智能体资料缺项需求提报表-反馈版.xlsx",
+    "name": "互联互通智能体资料缺项需求提报表-反馈版.xlsx",
+    "suffix": ".xlsx",
+    "size": 23807,
+    "parseStatus": "parsed",
+    "usefulness": "核心",
+    "priority": 98,
+    "category": "feedback",
+    "reason": "20260507 反馈明确评分、客流、等级和一期边界",
+    "counts": {
+      "sheets": [
+        {
+          "name": "提报摘要",
+          "rows": 12,
+          "cols": 8,
+          "nonEmptyRows": 10
+        },
+        {
+          "name": "缺项清单",
+          "rows": 20,
+          "cols": 13,
+          "nonEmptyRows": 19
+        },
+        {
+          "name": "待确认口径",
+          "rows": 12,
+          "cols": 6,
+          "nonEmptyRows": 12
+        },
+        {
+          "name": "实施建议",
+          "rows": 9,
+          "cols": 3,
+          "nonEmptyRows": 8
+        }
+      ]
+    },
+    "note": ""
+  },
+  {
+    "id": "outputs-feedback-20260507-02预设数据资料-构建知识库用-均为最新版文件-评价因子赋值明细表-xlsx",
+    "path": "outputs\\feedback_20260507\\02预设数据资料（构建知识库用，均为最新版文件）\\评价因子赋值明细表.xlsx",
+    "name": "评价因子赋值明细表.xlsx",
+    "suffix": ".xlsx",
+    "size": 13602,
+    "parseStatus": "parsed",
+    "usefulness": "核心",
+    "priority": 96,
+    "category": "scoring",
+    "reason": "评分赋值表是反馈确认的计算口径",
+    "counts": {
+      "sheets": [
+        {
+          "name": "Sheet1",
+          "rows": 46,
+          "cols": 5,
+          "nonEmptyRows": 46
+        }
+      ]
+    },
+    "note": ""
+  },
+  {
+    "id": "outputs-feedback-20260507-标准输入要素-docx",
+    "path": "outputs\\feedback_20260507\\标准输入要素.docx",
+    "name": "标准输入要素.docx",
+    "suffix": ".docx",
+    "size": 11037,
+    "parseStatus": "parsed",
+    "usefulness": "核心",
+    "priority": 94,
+    "category": "input_schema",
+    "reason": "标准输入界面字段来源",
+    "counts": {
+      "paragraphs": 17,
+      "tables": 0
+    },
+    "note": ""
+  },
+  {
+    "id": "outputs-feedback-20260507-02预设数据资料-构建知识库用-均为最新版文件-每站每月日均进站-xlsx",
+    "path": "outputs\\feedback_20260507\\02预设数据资料（构建知识库用，均为最新版文件）\\每站每月日均进站.xlsx",
+    "name": "每站每月日均进站.xlsx",
+    "suffix": ".xlsx",
+    "size": 62863,
+    "parseStatus": "parsed",
+    "usefulness": "核心",
+    "priority": 92,
+    "category": "ridership",
+    "reason": "一期客流口径来源",
+    "counts": {
+      "sheets": [
+        {
+          "name": "Sheet1",
+          "rows": 237,
+          "cols": 25,
+          "nonEmptyRows": 237
+        }
+      ]
+    },
+    "note": ""
+  },
+  {
+    "id": "outputs-feedback-20260507-01设计指引类资料-构建知识库用-均为最新版文件-苏州市轨道交通线网TOD综合开发专项规划-指挥部上会稿20241119-pdf",
+    "path": "outputs\\feedback_20260507\\01设计指引类资料（构建知识库用，均为最新版文件）\\苏州市轨道交通线网TOD综合开发专项规划-指挥部上会稿20241119.pdf",
+    "name": "苏州市轨道交通线网TOD综合开发专项规划-指挥部上会稿20241119.pdf",
+    "suffix": ".pdf",
+    "size": 11690617,
+    "parseStatus": "parsed",
+    "usefulness": "核心",
+    "priority": 90,
+    "category": "station_tod",
+    "reason": "站点 TOD 与线路预设来源",
+    "counts": {
+      "pages": 59,
+      "extractedPages": 59,
+      "textChars": 17462
+    },
+    "note": ""
+  },
+  {
+    "id": "outputs-feedback-20260507-02预设数据资料-构建知识库用-均为最新版文件-车站TOD级别划分整理-xlsx",
+    "path": "outputs\\feedback_20260507\\02预设数据资料（构建知识库用，均为最新版文件）\\车站TOD级别划分整理.xlsx",
+    "name": "车站TOD级别划分整理.xlsx",
+    "suffix": ".xlsx",
+    "size": 17130,
+    "parseStatus": "parsed",
+    "usefulness": "核心",
+    "priority": 90,
+    "category": "station_tod",
+    "reason": "站点 TOD 与线路预设来源",
+    "counts": {
+      "sheets": [
+        {
+          "name": "Sheet1",
+          "rows": 264,
+          "cols": 4,
+          "nonEmptyRows": 241
+        }
+      ]
+    },
+    "note": ""
+  },
+  {
+    "id": "outputs-feedback-20260507-02预设数据资料-构建知识库用-均为最新版文件-苏州地铁运营站点出入口-联通接口情况梳理统计表20260128-xlsx",
+    "path": "outputs\\feedback_20260507\\02预设数据资料（构建知识库用，均为最新版文件）\\苏州地铁运营站点出入口、联通接口情况梳理统计表20260128.xlsx",
+    "name": "苏州地铁运营站点出入口、联通接口情况梳理统计表20260128.xlsx",
+    "suffix": ".xlsx",
+    "size": 191603713,
+    "parseStatus": "parsed",
+    "usefulness": "核心",
+    "priority": 88,
+    "category": "station_interface",
+    "reason": "站点出入口、联通接口、建设状态和问题来源",
+    "counts": {
+      "sheets": [
+        {
+          "name": "1号线",
+          "rows": 116,
+          "cols": 18,
+          "nonEmptyRows": 116
+        },
+        {
+          "name": "2号线",
+          "rows": 228,
+          "cols": 24,
+          "nonEmptyRows": 198
+        },
+        {
+          "name": "3号线",
+          "rows": 208,
+          "cols": 27,
+          "nonEmptyRows": 208
+        },
+        {
+          "name": "4号线",
+          "rows": 215,
+          "cols": 19,
+          "nonEmptyRows": 200
+        },
+        {
+          "name": "5号线",
+          "rows": 195,
+          "cols": 23,
+          "nonEmptyRows": 195
+        },
+        {
+          "name": "6号线",
+          "rows": 172,
+          "cols": 24,
+          "nonEmptyRows": 171
+        },
+        {
+          "name": "7号线",
+          "rows": 216,
+          "cols": 19,
+          "nonEmptyRows": 205
+        },
+        {
+          "name": "8号线",
+          "rows": 219,
+          "cols": 24,
+          "nonEmptyRows": 170
+        },
+        {
+          "name": "11号线",
+          "rows": 184,
+          "cols": 18,
+          "nonEmptyRows": 184
+        },
+        {
+          "name": "Sheet1",
+          "rows": 40,
+          "cols": 15,
+          "nonEmptyRows": 40
+        },
+        {
+          "name": "Sheet2",
+          "rows": 20,
+          "cols": 15,
+          "nonEmptyRows": 15
+        }
+      ]
+    },
+    "note": ""
+  },
+  {
+    "id": "运营公司车站出入口开放及周边配套统计表202604-xlsx",
+    "path": "运营公司车站出入口开放及周边配套统计表202604.xlsx",
+    "name": "运营公司车站出入口开放及周边配套统计表202604.xlsx",
+    "suffix": ".xlsx",
+    "size": 427876,
+    "parseStatus": "parsed",
+    "usefulness": "重要",
+    "priority": 82,
+    "category": "station_amenities",
+    "reason": "运营视角出入口开放、运营管理和周边配套来源",
+    "counts": {
+      "sheets": [
+        {
+          "name": "1号线",
+          "rows": 103,
+          "cols": 43,
+          "nonEmptyRows": 103
+        },
+        {
+          "name": "2号线",
+          "rows": 157,
+          "cols": 51,
+          "nonEmptyRows": 144
+        },
+        {
+          "name": "3号线",
+          "rows": 181,
+          "cols": 57,
+          "nonEmptyRows": 160
+        },
+        {
+          "name": "4号线",
+          "rows": 141,
+          "cols": 43,
+          "nonEmptyRows": 141
+        },
+        {
+          "name": "5号线",
+          "rows": 133,
+          "cols": 61,
+          "nonEmptyRows": 133
+        },
+        {
+          "name": "6号线",
+          "rows": 119,
+          "cols": 59,
+          "nonEmptyRows": 118
+        },
+        {
+          "name": "7号线",
+          "rows": 105,
+          "cols": 51,
+          "nonEmptyRows": 105
+        },
+        {
+          "name": "8号线",
+          "rows": 108,
+          "cols": 44,
+          "nonEmptyRows": 108
+        },
+        {
+          "name": "11号线",
+          "rows": 136,
+          "cols": 42,
+          "nonEmptyRows": 129
+        },
+        {
+          "name": "出入口汇总",
+          "rows": 11,
+          "cols": 4,
+          "nonEmptyRows": 11
+        }
+      ]
+    },
+    "note": ""
+  },
+  {
+    "id": "outputs-feedback-20260507-01设计指引类资料-构建知识库用-均为最新版文件-20231128苏州市轨道交通站城融合设计导则-pdf",
+    "path": "outputs\\feedback_20260507\\01设计指引类资料（构建知识库用，均为最新版文件）\\20231128苏州市轨道交通站城融合设计导则.pdf",
+    "name": "20231128苏州市轨道交通站城融合设计导则.pdf",
+    "suffix": ".pdf",
+    "size": 13611741,
+    "parseStatus": "parsed",
+    "usefulness": "重要",
+    "priority": 75,
+    "category": "design_guidance",
+    "reason": "知识库规则条文与设计参数来源，需逐步细化成规则卡片",
+    "counts": {
+      "pages": 51,
+      "extractedPages": 51,
+      "textChars": 16251
+    },
+    "note": ""
+  },
+  {
+    "id": "outputs-feedback-20260507-01设计指引类资料-构建知识库用-均为最新版文件-AI开发节选-站点周边联通必要性评价体系-pdf",
+    "path": "outputs\\feedback_20260507\\01设计指引类资料（构建知识库用，均为最新版文件）\\AI开发节选-站点周边联通必要性评价体系.pdf",
+    "name": "AI开发节选-站点周边联通必要性评价体系.pdf",
+    "suffix": ".pdf",
+    "size": 3077046,
+    "parseStatus": "parsed",
+    "usefulness": "重要",
+    "priority": 75,
+    "category": "design_guidance",
+    "reason": "知识库规则条文与设计参数来源，需逐步细化成规则卡片",
+    "counts": {
+      "pages": 25,
+      "extractedPages": 25,
+      "textChars": 14074
+    },
+    "note": ""
+  },
+  {
+    "id": "outputs-feedback-20260507-01设计指引类资料-构建知识库用-均为最新版文件-苏州轨道交通站点周边地下公共联通空间设计细则-结题评审修改稿-docx",
+    "path": "outputs\\feedback_20260507\\01设计指引类资料（构建知识库用，均为最新版文件）\\苏州轨道交通站点周边地下公共联通空间设计细则-结题评审修改稿.docx",
+    "name": "苏州轨道交通站点周边地下公共联通空间设计细则-结题评审修改稿.docx",
+    "suffix": ".docx",
+    "size": 332635,
+    "parseStatus": "parsed",
+    "usefulness": "重要",
+    "priority": 75,
+    "category": "design_guidance",
+    "reason": "知识库规则条文与设计参数来源，需逐步细化成规则卡片",
+    "counts": {
+      "paragraphs": 235,
+      "tables": 3
+    },
+    "note": ""
+  },
+  {
+    "id": "outputs-feedback-20260507-01设计指引类资料-构建知识库用-均为最新版文件-轨道站点出入口周边空间一体化设计指引-1-doc",
+    "path": "outputs\\feedback_20260507\\01设计指引类资料（构建知识库用，均为最新版文件）\\轨道站点出入口周边空间一体化设计指引(1).doc",
+    "name": "轨道站点出入口周边空间一体化设计指引(1).doc",
+    "suffix": ".doc",
+    "size": 54830190,
+    "parseStatus": "parsed",
+    "usefulness": "重要",
+    "priority": 75,
+    "category": "design_guidance",
+    "reason": "知识库规则条文与设计参数来源，需逐步细化成规则卡片",
+    "counts": {
+      "convertedTo": "outputs\\feedback_20260507\\01设计指引类资料（构建知识库用，均为最新版文件）\\轨道站点出入口周边空间一体化设计指引(1).docx"
+    },
+    "note": "旧版 Word 文件已转换为同名 docx，全文由转换文件入库"
+  },
+  {
+    "id": "outputs-feedback-20260507-01设计指引类资料-构建知识库用-均为最新版文件-轨道站点出入口周边空间一体化设计指引-1-docx",
+    "path": "outputs\\feedback_20260507\\01设计指引类资料（构建知识库用，均为最新版文件）\\轨道站点出入口周边空间一体化设计指引(1).docx",
+    "name": "轨道站点出入口周边空间一体化设计指引(1).docx",
+    "suffix": ".docx",
+    "size": 53501182,
+    "parseStatus": "parsed",
+    "usefulness": "重要",
+    "priority": 75,
+    "category": "design_guidance",
+    "reason": "知识库规则条文与设计参数来源，需逐步细化成规则卡片",
+    "counts": {
+      "paragraphs": 372,
+      "tables": 4
+    },
+    "note": ""
+  },
+  {
+    "id": "outputs-feedback-20260507-03智能体输出成果参考报告-早期文件-由豆包编写-用于工作方案成果示意-仅供参考-低优先度-苏州轨道交通4号线清树湾站东南象限青年公寓地块与车站互联互通必要性评估与设计方案报告-docx",
+    "path": "outputs\\feedback_20260507\\03智能体输出成果参考报告（早期文件，由豆包编写，用于工作方案成果示意，仅供参考，低优先度）\\苏州轨道交通4号线清树湾站东南象限青年公寓地块与车站互联互通必要性评估与设计方案报告.docx",
+    "name": "苏州轨道交通4号线清树湾站东南象限青年公寓地块与车站互联互通必要性评估与设计方案报告.docx",
+    "suffix": ".docx",
+    "size": 36322,
+    "parseStatus": "parsed",
+    "usefulness": "低优先参考",
+    "priority": 35,
+    "category": "early_reference",
+    "reason": "可参考报告表达，不能覆盖 PPT/Excel/反馈口径",
+    "counts": {
+      "paragraphs": 119,
+      "tables": 6
+    },
+    "note": ""
+  },
+  {
+    "id": "outputs-feedback-20260507-03智能体输出成果参考报告-早期文件-由豆包编写-用于工作方案成果示意-仅供参考-低优先度-苏州轨道交通6号线金家堰站东北象限邻里中心地块与车站互联互通必要性评估与设计方案报告-docx",
+    "path": "outputs\\feedback_20260507\\03智能体输出成果参考报告（早期文件，由豆包编写，用于工作方案成果示意，仅供参考，低优先度）\\苏州轨道交通6号线金家堰站东北象限邻里中心地块与车站互联互通必要性评估与设计方案报告.docx",
+    "name": "苏州轨道交通6号线金家堰站东北象限邻里中心地块与车站互联互通必要性评估与设计方案报告.docx",
+    "suffix": ".docx",
+    "size": 34637,
+    "parseStatus": "parsed",
+    "usefulness": "低优先参考",
+    "priority": 35,
+    "category": "early_reference",
+    "reason": "可参考报告表达，不能覆盖 PPT/Excel/反馈口径",
+    "counts": {
+      "paragraphs": 115,
+      "tables": 6
+    },
+    "note": ""
+  },
+  {
+    "id": "outputs-feedback-20260507-针对核心思路-由豆包辅助编写的开发方案-仅供参考-低优先度-互联互通智能体研发工作方案-docx",
+    "path": "outputs\\feedback_20260507\\（针对核心思路，由豆包辅助编写的开发方案，仅供参考，低优先度）互联互通智能体研发工作方案.docx",
+    "name": "（针对核心思路，由豆包辅助编写的开发方案，仅供参考，低优先度）互联互通智能体研发工作方案.docx",
+    "suffix": ".docx",
+    "size": 22353,
+    "parseStatus": "parsed",
+    "usefulness": "低优先参考",
+    "priority": 35,
+    "category": "early_reference",
+    "reason": "可参考报告表达，不能覆盖 PPT/Excel/反馈口径",
+    "counts": {
+      "paragraphs": 74,
+      "tables": 0
+    },
+    "note": ""
+  },
+  {
+    "id": "outputs-feedback-20260507-04联通示意图出图-目前测试出的案例-微信图片-20260428105302-103-1650-png",
+    "path": "outputs\\feedback_20260507\\04联通示意图出图（目前测试出的案例）\\微信图片_20260428105302_103_1650.png",
+    "name": "微信图片_20260428105302_103_1650.png",
+    "suffix": ".png",
+    "size": 1219244,
+    "parseStatus": "metadata_only",
+    "usefulness": "参考",
+    "priority": 30,
+    "category": "visual_reference",
+    "reason": "联通意向效果图风格参考，对评分无直接作用",
+    "counts": {
+      "width": 1536,
+      "height": 1024,
+      "mode": "RGB"
+    },
+    "note": "图片先登记元数据和用途；若需图像语义，需要单独视觉标注"
+  },
+  {
+    "id": "outputs-feedback-20260507-04联通示意图出图-目前测试出的案例-微信图片-20260428105329-106-1650-png",
+    "path": "outputs\\feedback_20260507\\04联通示意图出图（目前测试出的案例）\\微信图片_20260428105329_106_1650.png",
+    "name": "微信图片_20260428105329_106_1650.png",
+    "suffix": ".png",
+    "size": 1196457,
+    "parseStatus": "metadata_only",
+    "usefulness": "参考",
+    "priority": 30,
+    "category": "visual_reference",
+    "reason": "联通意向效果图风格参考，对评分无直接作用",
+    "counts": {
+      "width": 1536,
+      "height": 1024,
+      "mode": "RGB"
+    },
+    "note": "图片先登记元数据和用途；若需图像语义，需要单独视觉标注"
+  },
+  {
+    "id": "outputs-feedback-20260507-04联通示意图出图-目前测试出的案例-微信图片-20260429115512-166-1650-png",
+    "path": "outputs\\feedback_20260507\\04联通示意图出图（目前测试出的案例）\\微信图片_20260429115512_166_1650.png",
+    "name": "微信图片_20260429115512_166_1650.png",
+    "suffix": ".png",
+    "size": 19826348,
+    "parseStatus": "metadata_only",
+    "usefulness": "参考",
+    "priority": 30,
+    "category": "visual_reference",
+    "reason": "联通意向效果图风格参考，对评分无直接作用",
+    "counts": {
+      "width": 6144,
+      "height": 3428,
+      "mode": "RGB"
+    },
+    "note": "图片先登记元数据和用途；若需图像语义，需要单独视觉标注"
+  },
+  {
+    "id": "outputs-feedback-20260507-04联通示意图出图-目前测试出的案例-微信图片-20260429115512-167-1650-png",
+    "path": "outputs\\feedback_20260507\\04联通示意图出图（目前测试出的案例）\\微信图片_20260429115512_167_1650.png",
+    "name": "微信图片_20260429115512_167_1650.png",
+    "suffix": ".png",
+    "size": 21271575,
+    "parseStatus": "metadata_only",
+    "usefulness": "参考",
+    "priority": 30,
+    "category": "visual_reference",
+    "reason": "联通意向效果图风格参考，对评分无直接作用",
+    "counts": {
+      "width": 6144,
+      "height": 3428,
+      "mode": "RGB"
+    },
+    "note": "图片先登记元数据和用途；若需图像语义，需要单独视觉标注"
+  },
+  {
+    "id": "outputs-feedback-20260507-02预设数据资料-构建知识库用-均为最新版文件-车站TOD级别划分整理-xlsx",
+    "path": "outputs\\feedback_20260507\\02预设数据资料（构建知识库用，均为最新版文件）\\~$车站TOD级别划分整理.xlsx",
+    "name": "~$车站TOD级别划分整理.xlsx",
+    "suffix": ".xlsx",
+    "size": 165,
+    "parseStatus": "ignored",
+    "usefulness": "无用",
+    "priority": 0,
+    "category": "office_temp",
+    "reason": "Office 临时锁文件，不含业务数据",
+    "counts": {},
+    "note": "Office 临时锁文件，跳过"
+  }
+]

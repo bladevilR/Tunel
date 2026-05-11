@@ -1,0 +1,66 @@
+{
+  "version": "knowledge-20260507",
+  "builtAt": "2026-05-09T11:19:27",
+  "root": "outputs\\interconnect_agent_system",
+  "summary": {
+    "sourceCount": 22,
+    "chunkCount": 1508,
+    "ruleCardCount": 30,
+    "stationIndexCount": 256,
+    "stationAmenitiesCount": 235,
+    "unparsedCount": 5
+  },
+  "sourceStatus": {
+    "parsed": 17,
+    "metadata_only": 4,
+    "ignored": 1
+  },
+  "sourceUsefulness": {
+    "核心": 8,
+    "重要": 6,
+    "低优先参考": 3,
+    "参考": 4,
+    "无用": 1
+  },
+  "sourceCategories": {
+    "work_plan": 1,
+    "feedback": 1,
+    "scoring": 1,
+    "input_schema": 1,
+    "ridership": 1,
+    "station_tod": 2,
+    "station_interface": 1,
+    "station_amenities": 1,
+    "design_guidance": 5,
+    "early_reference": 3,
+    "visual_reference": 4,
+    "office_temp": 1
+  },
+  "chunkCategories": {
+    "work_plan": 10,
+    "feedback": 7,
+    "scoring": 1,
+    "input_schema": 17,
+    "ridership": 67,
+    "station_tod": 63,
+    "station_interface": 73,
+    "station_amenities": 254,
+    "design_guidance": 692,
+    "early_reference": 320,
+    "visual_reference": 4
+  },
+  "files": {
+    "sourceManifest": "data/knowledge/source_manifest.json",
+    "knowledgeChunks": "data/knowledge/knowledge_chunks.jsonl",
+    "ruleCards": "data/knowledge/rule_cards.json",
+    "stationIndex": "data/knowledge/station_index.json",
+    "stationAmenities": "data/station_amenities.json",
+    "unparsedSources": "data/knowledge/unparsed_sources.json"
+  },
+  "knownLimitations": [
+    "旧版 .doc 文件未全文解析，需转换为 .docx 或 PDF/OCR 后补入。",
+    "部分 PDF 文本抽取量较少，可能包含扫描页；后续可做 OCR 强化。",
+    "PNG 当前只入库为视觉参考元数据，未做图像语义标注。",
+    "早期豆包报告按低优先参考入库，不参与规则裁决。"
+  ]
+}

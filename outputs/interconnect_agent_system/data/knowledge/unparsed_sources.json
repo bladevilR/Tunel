@@ -1,0 +1,32 @@
+[
+  {
+    "path": "outputs\\feedback_20260507\\04联通示意图出图（目前测试出的案例）\\微信图片_20260428105302_103_1650.png",
+    "parseStatus": "metadata_only",
+    "reason": "图片先登记元数据和用途；若需图像语义，需要单独视觉标注",
+    "usefulness": "参考"
+  },
+  {
+    "path": "outputs\\feedback_20260507\\04联通示意图出图（目前测试出的案例）\\微信图片_20260428105329_106_1650.png",
+    "parseStatus": "metadata_only",
+    "reason": "图片先登记元数据和用途；若需图像语义，需要单独视觉标注",
+    "usefulness": "参考"
+  },
+  {
+    "path": "outputs\\feedback_20260507\\04联通示意图出图（目前测试出的案例）\\微信图片_20260429115512_166_1650.png",
+    "parseStatus": "metadata_only",
+    "reason": "图片先登记元数据和用途；若需图像语义，需要单独视觉标注",
+    "usefulness": "参考"
+  },
+  {
+    "path": "outputs\\feedback_20260507\\04联通示意图出图（目前测试出的案例）\\微信图片_20260429115512_167_1650.png",
+    "parseStatus": "metadata_only",
+    "reason": "图片先登记元数据和用途；若需图像语义，需要单独视觉标注",
+    "usefulness": "参考"
+  },
+  {
+    "path": "outputs\\feedback_20260507\\02预设数据资料（构建知识库用，均为最新版文件）\\~$车站TOD级别划分整理.xlsx",
+    "parseStatus": "ignored",
+    "reason": "Office 临时锁文件，跳过",
+    "usefulness": "无用"
+  }
+]
