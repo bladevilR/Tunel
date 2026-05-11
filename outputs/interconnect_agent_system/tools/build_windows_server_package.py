@@ -34,6 +34,14 @@ PACKAGE_FILES = [
     "verify_system.cjs",
 ]
 
+SECRET_ENV_NAMES = [
+    "LLM_BASE_URL",
+    "LLM_API_KEY",
+    "LLM_MODEL",
+    "AMAP_JS_KEY",
+    "AMAP_SECURITY_CODE",
+]
+
 EXCLUDE_DIR_NAMES = {
     "__pycache__",
     ".git",
@@ -138,6 +146,51 @@ def write_package(stage_root: Path, zip_path: Path) -> None:
                 archive.write(path, path.relative_to(stage_root.parent))
 
 
+def user_environment_value(name: str) -> str:
+    value = os.environ.get(name, "").strip()
+    if value:
+        return value
+    if os.name != "nt":
+        return ""
+    try:
+        import winreg
+
+        with winreg.OpenKey(winreg.HKEY_CURRENT_USER, "Environment") as env_key:
+            return str(winreg.QueryValueEx(env_key, name)[0]).strip()
+    except Exception:
+        return ""
+
+
+def parse_env_file(path: Path) -> dict[str, str]:
+    values: dict[str, str] = {}
+    if not path.exists():
+        return values
+    for raw_line in path.read_text(encoding="utf-8").splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        name, value = line.split("=", 1)
+        values[name.strip()] = value.strip()
+    return values
+
+
+def write_env_local(stage_root: Path, include_key: bool) -> None:
+    if not include_key:
+        return
+    source_values = parse_env_file(ROOT / ".env.local")
+    merged = dict(source_values)
+    for name in SECRET_ENV_NAMES:
+        if not merged.get(name):
+            value = user_environment_value(name)
+            if value:
+                merged[name] = value
+    missing = [name for name in SECRET_ENV_NAMES if name in {"LLM_API_KEY", "AMAP_JS_KEY", "AMAP_SECURITY_CODE"} and not merged.get(name)]
+    if missing:
+        raise FileNotFoundError(f"要求包含密钥，但缺少环境变量: {', '.join(missing)}")
+    lines = [f"{name}={merged[name]}" for name in SECRET_ENV_NAMES if merged.get(name)]
+    (stage_root / ".env.local").write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
 def build_package(include_key: bool = True, with_runtime: bool = True) -> Path:
     stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
     package_name = f"interconnect-agent-server-{stamp}{'-with-key' if include_key else ''}"
@@ -157,11 +210,7 @@ def build_package(include_key: bool = True, with_runtime: bool = True) -> Path:
     shutil.copy2(ROOT / "deploy" / "start_server.bat", stage_root / "start_server.bat")
     shutil.copy2(ROOT / "deploy" / "README_DEPLOY.md", stage_root / "README_DEPLOY.md")
 
-    env_local = ROOT / ".env.local"
-    if include_key and env_local.exists():
-        shutil.copy2(env_local, stage_root / ".env.local")
-    elif include_key:
-        raise FileNotFoundError("要求包含密钥，但项目根目录没有 .env.local")
+    write_env_local(stage_root, include_key)
 
     (stage_root / "exports").mkdir(exist_ok=True)
     (stage_root / "logs").mkdir(exist_ok=True)
@@ -173,7 +222,7 @@ def build_package(include_key: bool = True, with_runtime: bool = True) -> Path:
     write_package(stage_root, zip_path)
     print(f"Package created: {zip_path}")
     print(f"Size: {zip_path.stat().st_size / 1024 / 1024:.1f} MB")
-    print(f"Included .env.local: {'yes' if include_key and env_local.exists() else 'no'}")
+    print(f"Included .env.local: {'yes' if include_key else 'no'}")
     return zip_path
 
 

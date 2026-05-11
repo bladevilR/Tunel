@@ -10,6 +10,8 @@ if "%INTERCONNECT_PORT%"=="" set "INTERCONNECT_PORT=8765"
 set "PYTHONUTF8=1"
 set "PYTHONIOENCODING=utf-8"
 
+powershell -NoProfile -ExecutionPolicy Bypass -Command "Add-Type -Namespace Win32 -Name Console -MemberDefinition '[DllImport(\"kernel32.dll\", SetLastError=true)] public static extern IntPtr GetStdHandle(int nStdHandle); [DllImport(\"kernel32.dll\", SetLastError=true)] public static extern bool GetConsoleMode(IntPtr hConsoleHandle, out int lpMode); [DllImport(\"kernel32.dll\", SetLastError=true)] public static extern bool SetConsoleMode(IntPtr hConsoleHandle, int dwMode);'; $h=[Win32.Console]::GetStdHandle(-10); $mode=0; if([Win32.Console]::GetConsoleMode($h,[ref]$mode)){ $mode = ($mode -band (-bnot 0x40)) -band (-bnot 0x20); [Win32.Console]::SetConsoleMode($h,$mode) | Out-Null }" >nul 2>nul
+
 for %%F in (".env" ".env.local") do (
   if exist "%ROOT%%%~F" (
     for /f "usebackq eol=# tokens=1,* delims==" %%A in ("%ROOT%%%~F") do (

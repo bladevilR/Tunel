@@ -60,6 +60,12 @@ def assert_required_files(package_root: Path) -> None:
     if leaked:
         raise AssertionError(f"部署包包含不应分发的本地文件: {leaked}")
 
+    env_local = (package_root / ".env.local").read_text(encoding="utf-8", errors="replace")
+    required_env = ["LLM_API_KEY=", "AMAP_JS_KEY=", "AMAP_SECURITY_CODE="]
+    missing_env = [name for name in required_env if name not in env_local]
+    if missing_env:
+        raise AssertionError(f".env.local 缺少必要密钥配置: {missing_env}")
+
 
 def wait_for_health(port: int, proc: subprocess.Popen[str]) -> dict:
     url = f"http://127.0.0.1:{port}/api/health"
@@ -135,10 +141,13 @@ def verify_package(zip_path: Path) -> dict:
         try:
             health = wait_for_health(port, proc)
             home = read_text(f"http://127.0.0.1:{port}/")
+            schematic = read_text(f"http://127.0.0.1:{port}/schematic/index.html")
             bootstrap = read_json(f"http://127.0.0.1:{port}/api/bootstrap")
             compressed_bootstrap, content_encoding = read_compressed(f"http://127.0.0.1:{port}/api/bootstrap")
             if "苏州轨道交通站点周边互联互通智能体" not in home:
                 raise AssertionError("首页 HTML 未包含应用标题")
+            if "__AMAP_JS_KEY__" in schematic or "__AMAP_SECURITY_CODE__" in schematic:
+                raise AssertionError("高德 Key 未注入 schematic 页面")
             demos = (bootstrap.get("demos") or {}).get("cases") or []
             factors = (bootstrap.get("factors") or {}).get("dimensions") or []
             if not demos or not factors:
