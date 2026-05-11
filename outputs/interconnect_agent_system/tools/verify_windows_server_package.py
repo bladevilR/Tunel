@@ -85,6 +85,12 @@ def read_json(url: str) -> dict:
         return json.loads(response.read().decode("utf-8"))
 
 
+def read_compressed(url: str) -> tuple[bytes, str]:
+    request = urllib.request.Request(url, headers={"Accept-Encoding": "gzip"})
+    with urllib.request.urlopen(request, timeout=8) as response:
+        return response.read(), response.headers.get("Content-Encoding", "")
+
+
 def read_text(url: str) -> str:
     with urllib.request.urlopen(url, timeout=8) as response:
         return response.read().decode("utf-8", errors="replace")
@@ -130,12 +136,15 @@ def verify_package(zip_path: Path) -> dict:
             health = wait_for_health(port, proc)
             home = read_text(f"http://127.0.0.1:{port}/")
             bootstrap = read_json(f"http://127.0.0.1:{port}/api/bootstrap")
+            compressed_bootstrap, content_encoding = read_compressed(f"http://127.0.0.1:{port}/api/bootstrap")
             if "苏州轨道交通站点周边互联互通智能体" not in home:
                 raise AssertionError("首页 HTML 未包含应用标题")
             demos = (bootstrap.get("demos") or {}).get("cases") or []
             factors = (bootstrap.get("factors") or {}).get("dimensions") or []
             if not demos or not factors:
                 raise AssertionError("bootstrap 数据不完整")
+            if content_encoding != "gzip" or len(compressed_bootstrap) > 450_000:
+                raise AssertionError(f"bootstrap 压缩异常: encoding={content_encoding}, bytes={len(compressed_bootstrap)}")
         finally:
             subprocess.run(["taskkill", "/T", "/F", "/PID", str(proc.pid)], capture_output=True, text=True)
 
@@ -147,6 +156,8 @@ def verify_package(zip_path: Path) -> dict:
         "bootstrap": {
             "demos": len(demos),
             "dimensions": len(factors),
+            "compressedBytes": len(compressed_bootstrap),
+            "contentEncoding": content_encoding,
         },
     }
 

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import gzip
 import mimetypes
 import os
 import re
@@ -1945,10 +1946,16 @@ class Handler(BaseHTTPRequestHandler):
         self.send_header("Access-Control-Allow-Headers", "Content-Type")
 
     def _json(self, payload: dict, status: HTTPStatus = HTTPStatus.OK) -> None:
-        data = json.dumps(payload, ensure_ascii=False, indent=2).encode("utf-8")
+        data = json.dumps(payload, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
+        accepts_gzip = "gzip" in (self.headers.get("Accept-Encoding") or "").lower()
+        if accepts_gzip:
+            data = gzip.compress(data, compresslevel=6)
         self.send_response(status)
         self._cors()
         self.send_header("Content-Type", "application/json; charset=utf-8")
+        if accepts_gzip:
+            self.send_header("Content-Encoding", "gzip")
+            self.send_header("Vary", "Accept-Encoding")
         self.send_header("Content-Length", str(len(data)))
         self.send_header("Cache-Control", "no-store")
         self.end_headers()
