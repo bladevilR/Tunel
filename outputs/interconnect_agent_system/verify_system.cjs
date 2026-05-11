@@ -33,6 +33,9 @@ async function main() {
     deviceScaleFactor: 1,
     acceptDownloads: true
   });
+  await context.addInitScript(() => {
+    window.localStorage.setItem("modelLedUiOfflineFallback", "1");
+  });
   const page = await context.newPage();
   const logs = [];
   const errors = [];
@@ -54,6 +57,7 @@ async function main() {
   const forgedExportResponse = await context.request.post(apiUrl("/api/export"), {
     data: {
       project: demoProject,
+      researchOptions: { allowOfflineFallback: true, forceOfflineFallback: true },
       result: {
         project: demoProject,
         score: 9999,
@@ -71,6 +75,11 @@ async function main() {
     : {};
 
   await page.goto(url, { waitUntil: "load", timeout: 30000 });
+  await page.waitForFunction(() => {
+    return document.querySelectorAll("#stationList option").length > 0
+      && document.querySelector("#demoSelect")?.value;
+  }, null, { timeout: 15000 });
+  await page.click("#evaluateBtn");
   await page.waitForFunction(() => {
     const score = document.querySelector("#scoreValue");
     const level = document.querySelector("#levelValue");

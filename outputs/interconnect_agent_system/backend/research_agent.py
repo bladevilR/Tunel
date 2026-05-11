@@ -888,6 +888,7 @@ def build_model_oriented_research(
 ) -> dict:
     options = options or {}
     allow_offline_fallback = bool(options.get("allowOfflineFallback"))
+    force_offline_fallback = bool(options.get("forceOfflineFallback"))
     plan = build_research_plan(project, station_context, dimensions, missing)
     immutable_facts = {
         "score": score,
@@ -905,7 +906,14 @@ def build_model_oriented_research(
     evidence_items.extend(live_items)
 
     evidence_items = dedupe_evidence(evidence_items)
-    model_data, llm_status, model_web_items = run_model_assessment(project, immutable_facts, plan, evidence_items)
+    if force_offline_fallback:
+        model_data, llm_status, model_web_items = None, {
+            "available": False,
+            "mode": "offline_forced",
+            "reason": "本次请求强制使用离线兜底，跳过外部模型调用。"
+        }, []
+    else:
+        model_data, llm_status, model_web_items = run_model_assessment(project, immutable_facts, plan, evidence_items)
     model_data = normalize_model_assessment_data(model_data)
     if model_web_items:
         evidence_items = dedupe_evidence(evidence_items + model_web_items)
@@ -1425,7 +1433,12 @@ def build_client_report(
         research_bundle
     )
     llm_status = (research_bundle.get("capabilityStatus") or {}).get("llm") or {}
-    if llm_configured() and assessment.get("status") != "awaiting_offline_fallback_consent":
+    should_try_model_report = (
+        llm_configured()
+        and assessment.get("status") != "awaiting_offline_fallback_consent"
+        and llm_status.get("mode") != "offline_forced"
+    )
+    if should_try_model_report:
         model_report = model_client_report(
             project,
             score_percent,

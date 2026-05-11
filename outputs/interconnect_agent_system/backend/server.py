@@ -1308,6 +1308,9 @@ def export_report_file(result: dict) -> dict:
     stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
 
     files = []
+    snapshot_file = EXPORT_DIR / f"{slug}-{stamp}-evaluation-snapshot.json"
+    snapshot_file.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
+    files.append(file_info(snapshot_file))
     report_docx = create_docx_report(result, slug, stamp)
     score_docx = create_score_detail_docx(result, slug, stamp)
     for docx_file in [report_docx, score_docx]:

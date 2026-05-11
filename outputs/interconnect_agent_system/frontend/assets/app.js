@@ -8,7 +8,8 @@ const state = {
   lastKnowledgeResults: [],
   offlineFallbackConsent: false,
   evaluating: false,
-  progressTimer: null
+  progressTimer: null,
+  reportMode: "client_formal"
 };
 
 const $ = (selector) => document.querySelector(selector);
@@ -292,6 +293,8 @@ function autofillStationByName() {
 }
 
 function researchOptions() {
+  const localOverride = window.localStorage?.getItem("modelLedUiOfflineFallback") === "1";
+  if (localOverride) return { allowOfflineFallback: true, forceOfflineFallback: true };
   return state.offlineFallbackConsent ? { allowOfflineFallback: true } : {};
 }
 
@@ -919,6 +922,123 @@ function renderDeliveryStatus() {
   `).join("");
 }
 
+function modelJudgement(result = state.currentResult) {
+  return result?.modelJudgement || {};
+}
+
+function modelDifference(result = state.currentResult) {
+  return result?.modelRuleDifference || {};
+}
+
+function modelQuality(result = state.currentResult) {
+  return result?.modelQuality || {};
+}
+
+function renderModelList(node, items, className) {
+  if (!node) return;
+  if (!items?.length) {
+    node.innerHTML = `<div class="empty-state">暂无模型条目。</div>`;
+    return;
+  }
+  node.innerHTML = items.map((item) => `
+    <article class="${className}">
+      <strong>${escapeHtml(item.title || item.name || item.id)}</strong>
+      <p>${escapeHtml(item.detail || item.reason || item.reviewLabel || "")}</p>
+      <span>${escapeHtml(item.severity || item.priority || item.reviewLabel || "复核")}</span>
+    </article>
+  `).join("");
+}
+
+function renderModelJudgement(result = state.currentResult) {
+  const judgement = modelJudgement(result);
+  const difference = modelDifference(result);
+  const quality = modelQuality(result);
+  const title = $("#modelJudgementTitle");
+  const reason = $("#modelJudgementReason");
+  const confidence = $("#modelConfidence");
+  const differencePanel = $("#modelDifferencePanel");
+  if (!title || !reason || !confidence || !differencePanel) return;
+  if (!result || !judgement.level) {
+    title.textContent = "模型研判待运行";
+    reason.textContent = "运行评估后展示模型最终结论、覆盖理由和置信度。";
+    confidence.textContent = "--";
+    differencePanel.textContent = "规则基线与模型差异将在运行后展示。";
+    renderModelList($("#modelRiskList"), [], "model-risk-item");
+    renderModelList($("#modelFundingList"), [], "model-funding-item");
+    return;
+  }
+  title.textContent = `模型建议：${judgement.level}，${judgement.recommendedType}`;
+  reason.textContent = judgement.reason || "模型已基于项目资料生成综合判断。";
+  confidence.textContent = `${Math.round(Number(judgement.confidence || 0) * 100)}%`;
+  const labels = [...new Set([...(difference.reviewLabels || []), ...(quality.labels || [])].filter(Boolean))];
+  differencePanel.innerHTML = `
+    <strong>规则基线：${escapeHtml(difference.ruleLevel || result.level)} / ${escapeHtml(difference.ruleRecommendedType || result.recommendation?.primary?.name || "")}</strong>
+    <span>模型结论：${escapeHtml(difference.modelLevel || judgement.level)} / ${escapeHtml(difference.modelRecommendedType || judgement.recommendedType)}</span>
+    <p>${escapeHtml(difference.reason || judgement.overrideReason || "模型结论与规则基线一致。")}</p>
+    <div>${labels.map((label) => `<b>${escapeHtml(label)}</b>`).join("")}</div>
+  `;
+  renderModelList($("#modelRiskList"), judgement.riskItems || [], "model-risk-item");
+  renderModelList($("#modelFundingList"), judgement.fundingRequests || [], "model-funding-item");
+}
+
+function renderReportModes(result = state.currentResult) {
+  const tabs = $("#reportModeTabs");
+  const summary = $("#reportModeSummary");
+  if (!tabs || !summary) return;
+  const modes = result?.reportModes || [];
+  if (!modes.length) {
+    tabs.innerHTML = "";
+    summary.textContent = "运行评估后可切换客户正式版、专家附录版和领导汇报版。";
+    return;
+  }
+  const active = state.reportMode || modes[0].id;
+  tabs.innerHTML = modes.map((mode) => `
+    <button type="button" data-report-mode="${escapeHtml(mode.id)}" class="${mode.id === active ? "active" : ""}">
+      ${escapeHtml(mode.name)}
+    </button>
+  `).join("");
+  const selected = modes.find((mode) => mode.id === active) || modes[0];
+  summary.textContent = `${selected.name}：${selected.tone}。重点：${selected.focus}。`;
+}
+
+function renderDiagramBrief(result = state.currentResult) {
+  const brief = result?.diagramBrief || {};
+  const title = $("#diagramBriefTitle");
+  const node = $("#diagramBriefSvg");
+  if (!title || !node) return;
+  title.textContent = brief.title || "推荐联通路径示意";
+  const nodes = brief.nodes || [];
+  const edges = brief.edges || [];
+  if (!nodes.length || !edges.length) {
+    node.innerHTML = `<div class="empty-state">运行评估后生成示意图 brief。</div>`;
+    return;
+  }
+  const byId = Object.fromEntries(nodes.map((item) => [item.id, item]));
+  node.innerHTML = `
+    <svg viewBox="0 0 560 280" role="img" aria-label="${escapeHtml(brief.title || "推荐联通路径示意")}">
+      <rect x="18" y="24" width="524" height="216" rx="8" class="diagram-bg"></rect>
+      ${edges.map((edge) => {
+        const from = byId[edge.from] || nodes[0];
+        const to = byId[edge.to] || nodes[nodes.length - 1];
+        const label = edge.label?.includes("推荐") ? edge.label : `推荐：${edge.label || "联通路径"}`;
+        return `<g>
+          <path d="M ${from.x} ${from.y} C ${from.x + 90} ${from.y - 70}, ${to.x - 90} ${to.y + 70}, ${to.x} ${to.y}" class="diagram-path"></path>
+          <text x="${(from.x + to.x) / 2 - 58}" y="${(from.y + to.y) / 2 - 38}" class="diagram-label">${escapeHtml(label)}</text>
+        </g>`;
+      }).join("")}
+      ${nodes.map((item) => `
+        <g>
+          <circle cx="${item.x}" cy="${item.y}" r="34" class="diagram-node ${escapeHtml(item.type || "")}"></circle>
+          <text x="${item.x}" y="${item.y + 4}" text-anchor="middle" class="diagram-node-label">${escapeHtml(item.label)}</text>
+        </g>
+      `).join("")}
+      ${(brief.annotations || []).map((item, index) => `
+        <text x="52" y="${226 + index * 18}" class="diagram-note">${escapeHtml(item.text)}</text>
+      `).join("")}
+    </svg>
+  `;
+}
+
 function renderDashboardHero() {
   const result = state.currentResult;
   const project = result?.project || state.currentProject || collectProject();
@@ -944,6 +1064,9 @@ function renderDashboardHero() {
     $("#dashboardPolicy").textContent = "运行评估后展示联通等级、推荐方式与主要判断依据。";
     $("#currentProjectBadge").textContent = "待运行";
     $("#currentProjectBadge").className = "pill muted";
+    renderModelJudgement(null);
+    renderReportModes(null);
+    renderDiagramBrief(null);
     renderDashboardDimensions(null);
     renderDashboardReportOutline(null);
     return;
@@ -955,6 +1078,9 @@ function renderDashboardHero() {
   $("#dashboardPolicy").textContent = `${result.policy} 命中规则：${result.recommendation.rule.reason}`;
   $("#currentProjectBadge").textContent = result.provisional ? "含待补齐" : "核心字段完整";
   $("#currentProjectBadge").className = result.provisional ? "pill warn" : "pill";
+  renderModelJudgement(result);
+  renderReportModes(result);
+  renderDiagramBrief(result);
   renderDashboardDimensions(result);
   renderDashboardReportOutline(result);
 }
@@ -1324,6 +1450,12 @@ function updateActionStates() {
 }
 
 function bindEvents() {
+  document.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-report-mode]");
+    if (!button) return;
+    state.reportMode = button.dataset.reportMode;
+    renderReportModes(state.currentResult);
+  });
   for (const link of $$("[data-view-link]")) {
     link.addEventListener("click", (event) => {
       event.preventDefault();
