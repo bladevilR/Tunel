@@ -208,6 +208,23 @@ button:disabled {
   width: clamp(190px, 16vw, 260px);
 }
 
+.toolbar-status {
+  min-width: 0;
+  max-width: 260px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.toolbar-status[data-mode="ok"] {
+  color: #167044;
+}
+
+.toolbar-status[data-mode="error"] {
+  color: #b42318;
+}
+
 #loadDemoBtn {
   width: auto;
   min-width: 88px;
@@ -914,6 +931,48 @@ label {
   color: #344054;
   font-size: 12px;
   font-weight: 800;
+}
+
+.station-search-results {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: -2px;
+}
+
+.station-search-results[hidden] {
+  display: none;
+}
+
+.station-suggestion {
+  display: grid;
+  gap: 3px;
+  min-height: 66px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  color: #243447;
+  text-align: left;
+  background: #fff;
+  cursor: pointer;
+}
+
+.station-suggestion:hover,
+.station-suggestion:focus-visible {
+  border-color: #3b9dcc;
+  background: #f4fbff;
+}
+
+.station-suggestion strong {
+  font-size: 13px;
+}
+
+.station-suggestion span,
+.station-suggestion small {
+  overflow-wrap: anywhere;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.25;
 }
 
 .wide {

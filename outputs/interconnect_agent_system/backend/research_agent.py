@@ -1099,6 +1099,124 @@ def waiting_client_report() -> tuple[list[dict], str]:
     ], "awaiting_model_or_fallback_consent"
 
 
+LEGACY_REPORT_SECTION_TITLES = [
+    "项目概况",
+    "联通必要性评估结论",
+    "联通方式比选与推荐方案",
+    "方案设计核心技术要求",
+    "合规性校验说明",
+    "设计优化与实施建议",
+    "意向效果图输出指引",
+]
+
+
+def section_content(sections: list[dict], title_part: str) -> str:
+    for section in sections:
+        if title_part in str(section.get("title") or ""):
+            return str(section.get("content") or "").strip()
+    return ""
+
+
+def report_ridership_notice(station_context: dict) -> str:
+    daily = station_context.get("dailyInbound")
+    source = station_context.get("dailyInboundSource") or "每站每月日均进站.xlsx"
+    if isinstance(daily, (int, float)):
+        return (
+            f"客流判断影响：已匹配{source}，日均进站约{daily:.0f}人次/日；该指标用于判断联通设施的服务强度、"
+            "全天候接驳必要性、通道宽度弹性和高峰组织压力，但不单独决定是否联通，仍需与站点能级、周边功能、"
+            "接口成熟度和实施条件共同研判。"
+        )
+    return (
+        "客流判断影响：现阶段未匹配到可直接引用的每站每月日均进站.xlsx记录，客流仅能作为待补齐项；"
+        "在正式决策前应补充站点客流、方向分布和高峰时段数据，再复核通道尺度和实施优先级。"
+    )
+
+
+def old_city_protection_notice(project: dict) -> str:
+    station = project.get("station") or {}
+    parcel = project.get("parcel") or {}
+    location_text = " ".join(str(item or "") for item in [
+        station.get("district"),
+        station.get("name"),
+        parcel.get("location"),
+        parcel.get("quadrant"),
+        parcel.get("constraints"),
+    ])
+    likely_sensitive = any(token in location_text for token in ["姑苏", "古城", "平江", "观前", "山塘", "历史"])
+    if likely_sensitive:
+        return (
+            "古城保护与历史文化保护：项目文本含姑苏、古城、历史街区或相近敏感线索，需按苏州历史文化名城保护、"
+            "古城保护、文物保护和风貌管控要求进行人工复核；在权威范围线、控高、风貌和地下文保要求确认前，"
+            "不得把连通方式、出入口位置或地面构筑物形态作为最终方案。"
+        )
+    return (
+        "古城保护与历史文化保护：当前结构化数据未接入权威古城保护范围、历史文化街区、文物保护单位和建设控制地带图层，"
+        "因此本报告将其列为人工复核项；若后续核实项目位于苏州历史文化名城或古城保护相关范围内，应补充风貌、控高、"
+        "地下空间和施工扰动专项论证。"
+    )
+
+
+def safety_and_rail_protection_notice() -> str:
+    return (
+        "轨道交通保护区与安全保护区提示：涉及车站、区间、附属结构、出入口和地下连通空间时，应核对轨道交通保护区、"
+        "安全保护区及运营安全边界，明确结构安全、沉降控制、施工监测、接口封堵、防水和运营维保责任。"
+        "消防与疏散提示：地下或半地下连通空间必须同步校核防火分区、排烟、应急照明、疏散距离、疏散宽度、无障碍连续性和管理界面，"
+        "不得以商业展示、装修或导流需求削弱基本安全功能。"
+    )
+
+
+def build_legacy_ordered_report_sections(
+    base_sections: list[dict],
+    project: dict,
+    station_context: dict,
+    missing_text: str,
+) -> list[dict]:
+    overview = section_content(base_sections, "项目概况")
+    necessity = " ".join(filter(None, [
+        section_content(base_sections, "联通必要性评估结论"),
+        section_content(base_sections, "模型主导研判结论"),
+        section_content(base_sections, "结论核心依据说明"),
+        report_ridership_notice(station_context),
+    ]))
+    comparison = " ".join(filter(None, [
+        section_content(base_sections, "联通方式比选与推荐方案"),
+        section_content(base_sections, "推荐方案整体设计思路"),
+    ]))
+    technical = " ".join(filter(None, [
+        section_content(base_sections, "方案设计核心技术要求"),
+        "技术深化阶段应把客流判断影响转化为通道宽度、节点集散、导向标识、照明、无障碍、电扶梯或坡道组织等可校核指标。",
+    ]))
+    compliance = " ".join(filter(None, [
+        section_content(base_sections, "合规性校验说明"),
+        old_city_protection_notice(project),
+        safety_and_rail_protection_notice(),
+    ]))
+    optimization = " ".join(filter(None, [
+        section_content(base_sections, "设计优化与实施建议"),
+        section_content(base_sections, "资料补齐与复核问题"),
+        f"资料补齐要求：{missing_text}",
+    ]))
+    rendering = " ".join(filter(None, [
+        section_content(base_sections, "意向效果图") or section_content(base_sections, "示意图输出指引"),
+        "出图时应同步标注客流主方向、站厅非付费区接口、轨道交通保护区或安全保护区复核边界、消防疏散路径、"
+        "无障碍连续路径、近期可实施范围和远期预留接口；如涉及古城保护或历史文化风貌敏感范围，应在图面中单独标出需人工复核的控制线和说明文字。",
+    ]))
+
+    content_by_title = {
+        "项目概况": " ".join(filter(None, [overview, report_ridership_notice(station_context)])),
+        "联通必要性评估结论": necessity,
+        "联通方式比选与推荐方案": comparison,
+        "方案设计核心技术要求": technical,
+        "合规性校验说明": compliance,
+        "设计优化与实施建议": optimization,
+        "意向效果图输出指引": rendering,
+    }
+    return [
+        {"title": title, "content": content_by_title.get(title, "").strip()}
+        for title in LEGACY_REPORT_SECTION_TITLES
+    ]
+
+
 def fallback_client_report(
     project: dict,
     score: float,
@@ -1244,7 +1362,7 @@ def fallback_client_report(
             )
         }
     ]
-    return report, "offline_fallback_written"
+    return build_legacy_ordered_report_sections(report, project, station_context, missing_text), "offline_fallback_written"
 
 
 def split_report_text(text: str) -> list[dict]:

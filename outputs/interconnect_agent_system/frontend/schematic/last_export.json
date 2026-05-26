@@ -1,0 +1,9 @@
+{
+  "ok": true,
+  "outputPath": "E:\\ai\\苏州轨道交通站点周边互联互通智能体开发工作提资\\outputs\\interconnect_agent_system\\frontend\\schematic\\exports\\amap-3d-export-2026-05-25T0632.png",
+  "url": "http://127.0.0.1:18801/schematic/index.html?view=3d&export=1",
+  "automation": "chrome-devtools-protocol",
+  "pageErrors": [],
+  "pageWarnings": [],
+  "failedRequests": []
+}

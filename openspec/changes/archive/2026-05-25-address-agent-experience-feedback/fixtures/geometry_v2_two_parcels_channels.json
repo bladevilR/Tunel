@@ -1,0 +1,85 @@
+{
+  "schemaVersion": "schematic-geometry.v2",
+  "meta": {
+    "name": "two parcels two channels schematic",
+    "center": [120.6656, 31.2798],
+    "version": "v2-fixture",
+    "linkedProjectId": "fixture-jjy",
+    "stationName": "\u91d1\u5bb6\u5830"
+  },
+  "viewState": {
+    "pitch": 42,
+    "rotation": -18,
+    "zoom": 16.8
+  },
+  "parcels": [
+    {
+      "id": "parcel-east",
+      "name": "east parcel",
+      "stroke": "#e1262f",
+      "fill": "#f8ed9a",
+      "path": [[120.6646, 31.2806], [120.6657, 31.2806], [120.6657, 31.2795], [120.6646, 31.2795]]
+    },
+    {
+      "id": "parcel-south",
+      "name": "south parcel",
+      "stroke": "#e1262f",
+      "fill": "#f8ed9a",
+      "path": [[120.6669, 31.2792], [120.6681, 31.2792], [120.6681, 31.2782], [120.6669, 31.2782]]
+    }
+  ],
+  "stationOutlines": [
+    {
+      "id": "station-main",
+      "name": "station body",
+      "stroke": "#7d3f98",
+      "fill": "#8a58a5",
+      "path": [[120.6638, 31.2799], [120.6642, 31.2799], [120.6642, 31.2796], [120.6638, 31.2796]]
+    }
+  ],
+  "exits": [
+    {
+      "id": "exit-3",
+      "name": "3号口",
+      "point": [120.6642, 31.2798],
+      "stationOutlineId": "station-main"
+    }
+  ],
+  "channels": [
+    {
+      "id": "channel-east",
+      "name": "channel east",
+      "centerline": [[120.6642, 31.2798], [120.6648, 31.2798], [120.6652, 31.2800]],
+      "spaceType": "underground",
+      "groundFloors": 0,
+      "undergroundFloors": 1
+    },
+    {
+      "id": "channel-south",
+      "name": "channel south",
+      "centerline": [[120.6642, 31.2798], [120.6660, 31.2792], [120.6674, 31.2787]],
+      "spaceType": "ground",
+      "groundFloors": 1,
+      "undergroundFloors": 0
+    }
+  ],
+  "spatialItems": [
+    {
+      "id": "space-east",
+      "name": "east mixed-use block",
+      "path": [[120.6648, 31.2804], [120.6655, 31.2804], [120.6655, 31.2797], [120.6648, 31.2797]],
+      "spaceType": "ground",
+      "groundFloors": 6,
+      "undergroundFloors": 2
+    },
+    {
+      "id": "space-south-underground",
+      "name": "south underground space",
+      "path": [[120.6671, 31.2790], [120.6679, 31.2790], [120.6679, 31.2784], [120.6671, 31.2784]],
+      "spaceType": "underground",
+      "groundFloors": 0,
+      "undergroundFloors": 2
+    }
+  ],
+  "labels": []
+}

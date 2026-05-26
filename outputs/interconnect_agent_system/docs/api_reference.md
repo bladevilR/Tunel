@@ -138,3 +138,29 @@ http://127.0.0.1:8765
 ## GET /exports/{filename}
 
 下载后端导出的报告文件。
+
+## Platform Readiness APIs
+
+### GET /api/capabilities
+
+Returns explicit capability flags for generated images, accounts, administrator station outlines, and deployment/runtime status. Each item includes at least `enabled` and `mode`.
+
+### GET /api/identity
+
+Returns the local anonymous identity contract. This keeps saved local data usable before account login is introduced and provides a stable owner id for future migration.
+
+### POST /api/generated-images
+
+Placeholder endpoint for future generated-image integration. When `GENERATED_IMAGE_API_ENABLED=1` and `OPENAI_API_KEY` are not configured, the endpoint returns a structured `not_configured` error.
+
+### GET /api/admin/station-outlines
+
+Lists shared administrator station outlines from `data/admin_station_outlines.json`. Optional query parameters: `station` or `stationName`.
+
+### POST /api/admin/station-outlines
+
+Saves a shared administrator station outline separately from user project data.
+
+### POST /api/admin/station-outlines/apply
+
+Applies an administrator station outline to a project geometry payload and writes source snapshot metadata, including `kind=admin_station_outline`, `recordId`, `stationName`, and `snapshotAt`.

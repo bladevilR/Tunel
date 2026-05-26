@@ -9,8 +9,12 @@ const state = {
   offlineFallbackConsent: false,
   evaluating: false,
   progressTimer: null,
+  stationSearchTimer: null,
+  selectedStationContext: null,
   reportMode: "client_formal"
 };
+
+const PROJECT_INTAKE_SCHEMA_VERSION = "interconnect.project-intake.v1";
 
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => Array.from(document.querySelectorAll(selector));
@@ -66,6 +70,44 @@ function clipText(value, maxLength = 260) {
   const text = String(value || "").replace(/\s+/g, " ").trim();
   if (text.length <= maxLength) return text;
   return `${text.slice(0, maxLength)}...`;
+}
+
+function downloadJson(filename, payload) {
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}
+
+function safeDownloadSlug(value, fallback = "project-intake") {
+  const slug = String(value || fallback)
+    .trim()
+    .replace(/[^\w\u4e00-\u9fff-]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+  return slug || fallback;
+}
+
+function lineCount(value) {
+  return String(value || "").split(/[\/、,，\s]+/).filter(Boolean).length;
+}
+
+function inferStationTypeFromLine(line, stationName = "") {
+  if (lineCount(line) >= 2) return "current_transfer";
+  return stationName ? "normal" : "";
+}
+
+function stationTypeLabel(value) {
+  const labels = {
+    current_transfer: "现状换乘站",
+    planned_transfer: "规划换乘站",
+    normal: "一般站"
+  };
+  return labels[value] || value || "待补齐";
 }
 
 function readableKind(kind) {
@@ -254,6 +296,9 @@ function fillProject(project) {
   for (const field of $$("#projectForm [name]")) {
     const value = getNested(project, field.name);
     field.value = value ?? "";
+    delete field.dataset.stationAutofilled;
+    delete field.dataset.stationUserOwned;
+    delete field.dataset.stationAutofillSource;
   }
   $("#projectSelect").value = state.currentProjectId || "";
   updateActionStates();
@@ -263,33 +308,113 @@ function selectedDemo() {
   return state.bootstrap.demos.cases.find((item) => item.id === $("#demoSelect").value);
 }
 
-function autofillStationByName() {
-  const stationName = $('[name="station.name"]').value.trim();
+function setAutofilledStationField(selector, value, sourceLabel = "station context") {
+  const field = $(selector);
+  if (!field) return;
+  const next = value ?? "";
+  if (next === "") return;
+  if (field.dataset.stationUserOwned === "true") return;
+  field.value = next;
+  field.dataset.stationAutofilled = "true";
+  field.dataset.stationAutofillSource = sourceLabel;
+  delete field.dataset.stationUserOwned;
+}
+
+function bindStationAutofillOwnership() {
+  const selectors = [
+    '[name="station.todLevel"]',
+    '[name="station.locationLevel"]',
+    '[name="station.line"]',
+    '[name="station.dailyInbound"]',
+    '[name="station.district"]',
+    '[name="station.nearbyExit"]',
+    '[name="station.interfaceCondition"]',
+    '[name="station.stationType"]'
+  ];
+  for (const selector of selectors) {
+    const field = $(selector);
+    if (!field) continue;
+    ["input", "change"].forEach((eventName) => {
+      field.addEventListener(eventName, () => {
+        if (field.value.trim()) {
+          field.dataset.stationUserOwned = "true";
+          delete field.dataset.stationAutofilled;
+          delete field.dataset.stationAutofillSource;
+        } else {
+          delete field.dataset.stationUserOwned;
+        }
+      });
+    });
+  }
+}
+
+function localStationContext(stationName) {
   const station = state.bootstrap.stations.stations.find((item) => aliasMatches(stationName, [item.name]));
   const ridership = findRidership(stationName);
   const operations = findStationOperations(stationName);
   const amenities = findStationAmenities(stationName);
-
-  if (station) {
-    $('[name="station.todLevel"]').value = station.todLevel || "";
-    $('[name="station.locationLevel"]').value = station.locationLevel || "";
-  }
-  if (!$('[name="station.line"]').value) {
-    $('[name="station.line"]').value = station?.lines || ridership?.lines || (operations?.lines || amenities?.lines || []).join("/");
-  }
-  if (!$('[name="station.dailyInbound"]').value && ridership?.latestDailyInbound) {
-    $('[name="station.dailyInbound"]').value = Math.round(ridership.latestDailyInbound);
-  }
-  if (!$('[name="station.district"]').value && operations?.districts?.length) {
-    $('[name="station.district"]').value = operations.districts[0];
-  }
-  if (!$('[name="station.nearbyExit"]').value && amenities?.sampleExits?.length) {
-    $('[name="station.nearbyExit"]').value = amenities.sampleExits[0].exit;
-  }
-  if (!$('[name="station.interfaceCondition"]').value && operations) {
+  const line = station?.lines || ridership?.lines || (operations?.lines || amenities?.lines || []).join("/");
+  const fields = {
+    "station.name": station?.name || stationName,
+    "station.todLevel": station?.todLevel || "",
+    "station.locationLevel": station?.locationLevel || "",
+    "station.line": line || "",
+    "station.stationType": inferStationTypeFromLine(line, station?.name || stationName),
+    "station.dailyInbound": ridership?.latestDailyInbound ? Math.round(ridership.latestDailyInbound) : "",
+    "station.district": operations?.districts?.[0] || "",
+    "station.nearbyExit": amenities?.sampleExits?.[0]?.exit || "",
+    "station.interfaceCondition": ""
+  };
+  if (operations) {
     const forms = operations.connectionForms?.length ? operations.connectionForms.join("、") : "暂无已登记联通形式";
-    $('[name="station.interfaceCondition"]').value = `已识别出入口${operations.exitCount || 0}个；联通形式：${forms}；问题记录${operations.issueCount || 0}条。`;
+    fields["station.interfaceCondition"] = `已识别出入口${operations.exitCount || 0}个；联通形式：${forms}；问题记录${operations.issueCount || 0}条。`;
   }
+  return {
+    ok: Boolean(station || ridership || operations || amenities),
+    query: stationName,
+    name: fields["station.name"],
+    suggestedFields: fields,
+    sources: [
+      station ? { key: "station", label: "TOD station preset", matched: true } : null,
+      ridership ? { key: "ridership", label: "ridership workbook", matched: true } : null,
+      operations ? { key: "operations", label: "station interface workbook", matched: true } : null,
+      amenities ? { key: "amenities", label: "station amenity workbook", matched: true } : null
+    ].filter(Boolean)
+  };
+}
+
+function applyStationContext(context, options = {}) {
+  if (!context?.suggestedFields) return;
+  state.selectedStationContext = context;
+  const sourceLabel = (context.sources || []).map((item) => item.label).join(", ") || "station context";
+  for (const [path, value] of Object.entries(context.suggestedFields)) {
+    if (path === "station.name") continue;
+    setAutofilledStationField(`[name="${path}"]`, value, sourceLabel);
+  }
+  if (options.explicit) {
+    const panel = $("#stationSearchResults");
+    if (panel) panel.hidden = true;
+  }
+}
+
+async function fetchStationContext(stationName) {
+  return api(`/api/stations/context?name=${encodeURIComponent(stationName)}`);
+}
+
+async function autofillStationByName() {
+  const stationName = $('[name="station.name"]').value.trim();
+  if (!stationName) return;
+  try {
+    const context = await fetchStationContext(stationName);
+    if (context.ok) {
+      applyStationContext(context);
+      return;
+    }
+  } catch (error) {
+    console.warn("station context API unavailable, using bootstrap data", error);
+  }
+  const fallback = localStationContext(stationName);
+  if (fallback.ok) applyStationContext(fallback);
 }
 
 function researchOptions() {
@@ -399,7 +524,7 @@ function clearEvaluationOutput(message = "请选择项目并点击“运行评�
 }
 
 async function runEvaluation() {
-  autofillStationByName();
+  await autofillStationByName();
   const project = collectProject();
   if (state.currentProjectId) project.id = state.currentProjectId;
   state.currentProject = project;
@@ -523,6 +648,137 @@ async function deleteCurrentProject() {
   $("#exportPathValue").textContent = "项目已删除，可继续编辑当前表单并另存。";
   $("#exportFiles").innerHTML = "";
   updateActionStates();
+}
+
+function setProjectIntakeStatus(message, mode = "info") {
+  const node = $("#projectIntakeStatus");
+  if (!node) return;
+  node.textContent = message || "";
+  node.dataset.mode = mode;
+}
+
+function projectIntakePayload() {
+  const project = collectProject();
+  if (state.currentProjectId) project.id = state.currentProjectId;
+  return {
+    schemaVersion: PROJECT_INTAKE_SCHEMA_VERSION,
+    exportedAt: new Date().toISOString(),
+    record: {
+      id: state.currentProjectId || project.id || null,
+      project,
+      researchOptions: researchOptions()
+    },
+    project
+  };
+}
+
+function validateProjectIntakePayload(payload) {
+  if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
+    throw new Error("导入文件不是有效的 JSON 对象");
+  }
+  const project = payload.project || payload.record?.project;
+  if (!project || typeof project !== "object" || Array.isArray(project)) {
+    throw new Error("导入文件缺少 project 或 record.project");
+  }
+  const station = project.station || {};
+  if (station && typeof station !== "object") {
+    throw new Error("导入文件中的 station 字段格式不兼容");
+  }
+  return {
+    schemaVersion: payload.schemaVersion || "legacy",
+    id: payload.record?.id || project.id || null,
+    project,
+    researchOptions: payload.record?.researchOptions || payload.researchOptions || {}
+  };
+}
+
+function exportProjectIntake() {
+  const payload = projectIntakePayload();
+  const project = payload.record.project;
+  const slug = safeDownloadSlug(project.projectCode || project.name || project.station?.name);
+  downloadJson(`${slug}-project-intake.json`, payload);
+  setProjectIntakeStatus("提资 JSON 已生成", "ok");
+}
+
+async function importProjectIntakeFile(file) {
+  if (!file) return;
+  try {
+    const payload = JSON.parse(await file.text());
+    const intake = validateProjectIntakePayload(payload);
+    const project = structuredClone(intake.project);
+    if (intake.id) project.id = intake.id;
+    fillProject(project);
+    clearEvaluationOutput("提资文件已导入。请复核字段后运行评估。");
+    await autofillStationByName();
+    setProjectIntakeStatus(`已导入：${project.name || project.station?.name || "未命名项目"}`, "ok");
+    showView("assessment");
+  } catch (error) {
+    setProjectIntakeStatus(`导入失败：${error.message}`, "error");
+  } finally {
+    const input = $("#importProjectIntakeFile");
+    if (input) input.value = "";
+  }
+}
+
+function renderStationSuggestions(results) {
+  const panel = $("#stationSearchResults");
+  if (!panel) return;
+  if (!results.length) {
+    panel.hidden = true;
+    panel.innerHTML = "";
+    return;
+  }
+  panel.hidden = false;
+  panel.innerHTML = results.map((item) => `
+    <button type="button" class="station-suggestion" data-station-name="${escapeHtml(item.name)}">
+      <strong>${escapeHtml(item.name)}</strong>
+      <span>${escapeHtml([item.line, stationTypeLabel(item.stationType), item.todLevel].filter(Boolean).join(" / "))}</span>
+      <small>${escapeHtml((item.sourceLabels || []).join(" · "))}</small>
+    </button>
+  `).join("");
+  for (const button of $$("#stationSearchResults [data-station-name]")) {
+    button.addEventListener("click", async () => {
+      await selectStationSuggestion(button.dataset.stationName);
+    });
+  }
+}
+
+async function searchStationSuggestions() {
+  const query = $('[name="station.name"]').value.trim();
+  if (!query) {
+    renderStationSuggestions([]);
+    return;
+  }
+  try {
+    const response = await api(`/api/stations/search?q=${encodeURIComponent(query)}&limit=8`);
+    renderStationSuggestions(response.results || []);
+  } catch (error) {
+    console.warn("station search API unavailable", error);
+    const fallback = localStationContext(query);
+    renderStationSuggestions(fallback.ok ? [{
+      name: fallback.name,
+      line: fallback.suggestedFields["station.line"],
+      stationType: fallback.suggestedFields["station.stationType"],
+      todLevel: fallback.suggestedFields["station.todLevel"],
+      sourceLabels: fallback.sources.map((item) => item.label)
+    }] : []);
+  }
+}
+
+function queueStationSearch() {
+  window.clearTimeout(state.stationSearchTimer);
+  state.stationSearchTimer = window.setTimeout(searchStationSuggestions, 160);
+}
+
+async function selectStationSuggestion(stationName) {
+  const field = $('[name="station.name"]');
+  field.value = stationName;
+  try {
+    const context = await fetchStationContext(stationName);
+    applyStationContext(context, { explicit: true });
+  } catch (error) {
+    applyStationContext(localStationContext(stationName), { explicit: true });
+  }
 }
 
 function renderResult(result) {
@@ -1378,6 +1634,12 @@ function buildMarkdown(result) {
   return `# ${title}\n\n综合评分（百分制）：${result.scorePercent.toFixed(2)}分\n\n原始加权分：${result.score.toFixed(4)}${rawMax ? ` / ${Number(rawMax).toFixed(4)}` : ""}\n\n联通等级：${result.level}\n\n推荐方式：${result.recommendation.primary.name}\n\n${sections}\n`;
 }
 
+function exportDownloadUrl(item = {}) {
+  if (item.downloadUrl) return item.downloadUrl;
+  if (item.relativePath) return `/${item.relativePath.replaceAll("\\", "/")}`;
+  return "#";
+}
+
 async function exportReport() {
   if (!state.currentResult) await runEvaluation();
   const project = state.currentResult?.project || state.currentProject || collectProject();
@@ -1390,7 +1652,7 @@ async function exportReport() {
   const files = response.export.files || [];
   $("#exportPathValue").textContent = files.length ? `${files.length} 个文件已生成` : response.export.relativePath;
   $("#exportFiles").innerHTML = files.map((item) => {
-    const href = `/${item.relativePath.replaceAll("\\", "/")}`;
+    const href = item.downloadUrl || exportDownloadUrl(item);
     return `<a href="${href}" title="${escapeHtml(item.relativePath)}">${escapeHtml(item.filename)}</a>`;
   }).join("");
   await refreshExports();
@@ -1398,7 +1660,7 @@ async function exportReport() {
   const first = files.find((item) => item.filename.endsWith("-formal-report.docx")) || files[0];
   if (first) {
     const link = document.createElement("a");
-    link.href = `/${first.relativePath.replaceAll("\\", "/")}`;
+    link.href = first.downloadUrl || exportDownloadUrl(first);
     link.download = first.filename;
     document.body.appendChild(link);
     link.click();
@@ -1426,7 +1688,7 @@ function renderExportHistory() {
   }
   node.className = "export-history";
   node.innerHTML = state.exports.slice(0, 12).map((item) => `
-    <a href="/${item.relativePath.replaceAll("\\", "/")}" class="export-row">
+    <a href="${item.downloadUrl || exportDownloadUrl(item)}" class="export-row">
       <span>${escapeHtml(item.kind || "导出文件")}</span>
       <strong>${escapeHtml(item.filename)}</strong>
       <small>${escapeHtml(item.updatedAt || "")}</small>
@@ -1473,9 +1735,14 @@ function bindEvents() {
   });
   $("#saveProjectBtn").addEventListener("click", saveProject);
   $("#deleteProjectBtn").addEventListener("click", deleteCurrentProject);
+  $("#exportProjectIntakeBtn").addEventListener("click", exportProjectIntake);
+  $("#importProjectIntakeBtn").addEventListener("click", () => $("#importProjectIntakeFile").click());
+  $("#importProjectIntakeFile").addEventListener("change", (event) => importProjectIntakeFile(event.target.files?.[0]));
   $("#exportBtn").addEventListener("click", exportReport);
   $("#projectSelect").addEventListener("change", loadSavedProject);
+  $('[name="station.name"]').addEventListener("input", queueStationSearch);
   $('[name="station.name"]').addEventListener("change", autofillStationByName);
+  bindStationAutofillOwnership();
   $("#knowledgeSearchBtn").addEventListener("click", searchKnowledge);
   $("#knowledgeSearchInput").addEventListener("keydown", (event) => {
     if (event.key === "Enter") {

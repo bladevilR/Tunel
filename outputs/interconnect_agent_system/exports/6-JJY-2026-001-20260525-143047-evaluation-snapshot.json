@@ -1,0 +1,1563 @@
+{
+  "project": {
+    "id": "jinjiayan-neighborhood-center",
+    "name": "金家堰邻里中心",
+    "projectCode": "6-JJY-2026-001",
+    "station": {
+      "name": "金家堰",
+      "district": "工业园区",
+      "line": "6",
+      "todLevel": "组团级TOD",
+      "locationLevel": "community",
+      "stationType": "normal",
+      "constructionState": "既有站点",
+      "nearbyExit": "3号口",
+      "interfaceCondition": "站厅非付费区预留远期接驳接口，接口位置与地块地下空间竖向标高匹配",
+      "dailyInbound": null
+    },
+    "parcel": {
+      "location": "金堰路东、东宏路北",
+      "quadrant": "东北象限",
+      "distanceBand": "200m核心开发区",
+      "landUse": "major_public_commercial",
+      "landUseText": "商业用地",
+      "functionalFormat": "综合性社区邻里中心",
+      "siteArea": 25000,
+      "buildingArea": 90000,
+      "developmentIntensity": "30k_100k",
+      "undergroundSpace": "commercial_public_pr",
+      "undergroundDescription": "有地下室，地下2层，包含停车、设备用房及公共服务/商业配套空间",
+      "planningIndicators": "容积率≤2.5，建筑密度≤50%，建筑限高60m",
+      "functionalDemand": "全天候接驳、无障碍通行、轨道客流与邻里中心双向引流",
+      "constraints": "需与金家堰站3号口邻里中心地块互联互通方案持续对接"
+    },
+    "attachments": "地块控制性详细规划图则；地块规划条件；地块概念设计方案"
+  },
+  "score": 2.5306,
+  "scorePercent": 62.03,
+  "scoreScale": {
+    "rawMax": 4.0795,
+    "normalizedMax": 100,
+    "gradingBasis": "scorePercent = rawScore / rawMax * 100; 20260507反馈暂按80分以上必连、60-80分尽连、60分以下可连",
+    "feedbackDate": "2026-05-07"
+  },
+  "level": "尽连地块",
+  "policy": "必要性次之，应尽量联通；优先推动接口条件、建设协同和方案比选。",
+  "stationContext": {
+    "dailyInbound": 685.73,
+    "dailyInboundSource": "每站每月日均进站.xlsx：2025-11日均进站",
+    "ridership": {
+      "stationName": "金家堰",
+      "lines": "06",
+      "latestMonth": "2025-11",
+      "latestDailyInbound": 685.73,
+      "averageDailyInbound": 541.71,
+      "monthCount": 11,
+      "monthly": [
+        {
+          "month": "2025-01",
+          "inboundTotal": 12269.0,
+          "dailyInbound": 395.77
+        },
+        {
+          "month": "2025-02",
+          "inboundTotal": 12720.0,
+          "dailyInbound": 454.29
+        },
+        {
+          "month": "2025-03",
+          "inboundTotal": 16406.0,
+          "dailyInbound": 529.23
+        },
+        {
+          "month": "2025-04",
+          "inboundTotal": 16902.0,
+          "dailyInbound": 563.4
+        },
+        {
+          "month": "2025-05",
+          "inboundTotal": 16375.0,
+          "dailyInbound": 528.23
+        },
+        {
+          "month": "2025-06",
+          "inboundTotal": 15745.0,
+          "dailyInbound": 524.83
+        },
+        {
+          "month": "2025-07",
+          "inboundTotal": 16227.0,
+          "dailyInbound": 523.45
+        },
+        {
+          "month": "2025-08",
+          "inboundTotal": 16351.0,
+          "dailyInbound": 527.45
+        },
+        {
+          "month": "2025-09",
+          "inboundTotal": 18935.0,
+          "dailyInbound": 631.17
+        },
+        {
+          "month": "2025-10",
+          "inboundTotal": 18454.0,
+          "dailyInbound": 595.29
+        },
+        {
+          "month": "2025-11",
+          "inboundTotal": 20572.0,
+          "dailyInbound": 685.73
+        }
+      ]
+    },
+    "operations": {
+      "name": "金家堰",
+      "displayNames": [
+        "金家堰站"
+      ],
+      "aliases": [
+        "金家堰",
+        "金家堰站"
+      ],
+      "lines": [
+        "6号线"
+      ],
+      "districts": [
+        "园区"
+      ],
+      "types": [
+        "车站出入口"
+      ],
+      "connectionForms": [
+        "地下通道",
+        "预留接口"
+      ],
+      "statusCounts": {
+        "已开通": 3,
+        "建设中": 4,
+        "已建设未开通": 0,
+        "未建设未开通": 2
+      },
+      "issueCount": 6,
+      "priorityLabels": [
+        "一级",
+        "追踪落实"
+      ],
+      "details": [
+        {
+          "line": "6号线",
+          "displayStationName": "金家堰站",
+          "district": "园区",
+          "type": "车站出入口",
+          "part": "1号口",
+          "parcel": "大家房产",
+          "connectionForm": "地下通道",
+          "developmentProgress": "在建地块",
+          "status": "建设中",
+          "problem": "实施中，暂未开通",
+          "priority": "追踪落实"
+        },
+        {
+          "line": "6号线",
+          "displayStationName": "金家堰站",
+          "district": "园区",
+          "type": "车站出入口",
+          "part": "2号口",
+          "parcel": "市政绿地",
+          "connectionForm": "/",
+          "developmentProgress": "/",
+          "status": "已开通",
+          "problem": "",
+          "priority": ""
+        },
+        {
+          "line": "6号线",
+          "displayStationName": "金家堰站",
+          "district": "园区",
+          "type": "车站出入口",
+          "part": "3号口",
+          "parcel": "空地\n（规划金家堰邻里中心）",
+          "connectionForm": "/",
+          "developmentProgress": "待建地块",
+          "status": "已开通",
+          "problem": "因金家堰3号口邻里中心地块互联互通需求，车站附属目前已向规划部门提交初步连通方案，目前方案正在对接中。",
+          "priority": ""
+        },
+        {
+          "line": "6号线",
+          "displayStationName": "金家堰站",
+          "district": "园区",
+          "type": "车站出入口",
+          "part": "",
+          "parcel": "",
+          "connectionForm": "预留接口",
+          "developmentProgress": "",
+          "status": "未建设未开通",
+          "problem": "",
+          "priority": "一级"
+        },
+        {
+          "line": "6号线",
+          "displayStationName": "金家堰站",
+          "district": "园区",
+          "type": "车站出入口",
+          "part": "4号口",
+          "parcel": "华润置地",
+          "connectionForm": "地下通道",
+          "developmentProgress": "在建地块",
+          "status": "建设中",
+          "problem": "实施中，暂未开通",
+          "priority": "追踪落实"
+        },
+        {
+          "line": "6号线",
+          "displayStationName": "金家堰站",
+          "district": "园区",
+          "type": "车站出入口",
+          "part": "1号口",
+          "parcel": "大家房产",
+          "connectionForm": "地下通道",
+          "developmentProgress": "在建地块",
+          "status": "建设中",
+          "problem": "实施中，暂未开通",
+          "priority": "追踪落实"
+        },
+        {
+          "line": "6号线",
+          "displayStationName": "金家堰站",
+          "district": "园区",
+          "type": "车站出入口",
+          "part": "3号口",
+          "parcel": "空地\n（规划金家堰邻里中心）",
+          "connectionForm": "/",
+          "developmentProgress": "待建地块",
+          "status": "已开通",
+          "problem": "因金家堰3号口邻里中心地块互联互通需求，车站附属目前已向规划部门提交初步连通方案，目前方案正在对接中。",
+          "priority": "一级"
+        },
+        {
+          "line": "6号线",
+          "displayStationName": "金家堰站",
+          "district": "园区",
+          "type": "车站出入口",
+          "part": "",
+          "parcel": "",
+          "connectionForm": "预留接口",
+          "developmentProgress": "",
+          "status": "未建设未开通",
+          "problem": "",
+          "priority": ""
+        },
+        {
+          "line": "6号线",
+          "displayStationName": "金家堰站",
+          "district": "园区",
+          "type": "车站出入口",
+          "part": "4号口",
+          "parcel": "华润置地",
+          "connectionForm": "地下通道",
+          "developmentProgress": "在建地块",
+          "status": "建设中",
+          "problem": "实施中，暂未开通",
+          "priority": "追踪落实"
+        }
+      ],
+      "exitCount": 4,
+      "exitParts": [
+        "1号口",
+        "2号口",
+        "3号口",
+        "4号口"
+      ],
+      "interfaceCount": 2
+    },
+    "amenities": {
+      "name": "金家堰",
+      "displayNames": [
+        "金家堰站"
+      ],
+      "aliases": [
+        "金家堰",
+        "金家堰站"
+      ],
+      "lines": [
+        "6号口线"
+      ],
+      "exitRows": 4,
+      "openExitCount": 4,
+      "closedExitCount": 0,
+      "managedExitCount": 4,
+      "owners": [
+        "运营公司"
+      ],
+      "nearby": {
+        "schools": [
+          "人大附中苏州学校"
+        ],
+        "hubs": [],
+        "residential": [
+          "仁恒华发雅苑\n（在建中 未开放）",
+          "月上海棠轩\n（在建中 未开放）",
+          "润云华庭"
+        ],
+        "commercial": [
+          "玉皇宫"
+        ],
+        "other": []
+      },
+      "mobility": {
+        "publicBike": [],
+        "sharedBike": [],
+        "parkAndRide": [],
+        "bikeAndRide": [],
+        "busTransfer": []
+      },
+      "sampleExits": [
+        {
+          "line": "6号口线",
+          "exit": "1号出入口",
+          "isOpen": "是",
+          "owner": "运营公司",
+          "isManaged": "是"
+        },
+        {
+          "line": "6号口线",
+          "exit": "2号出入口",
+          "isOpen": "是",
+          "owner": "运营公司",
+          "isManaged": "是"
+        },
+        {
+          "line": "6号口线",
+          "exit": "3号出入口",
+          "isOpen": "是",
+          "owner": "运营公司",
+          "isManaged": "是"
+        },
+        {
+          "line": "6号口线",
+          "exit": "4号出入口",
+          "isOpen": "是",
+          "owner": "运营公司",
+          "isManaged": "是"
+        }
+      ]
+    }
+  },
+  "provisional": false,
+  "dataCompleteness": {
+    "done": 6,
+    "total": 6,
+    "ratio": 1.0
+  },
+  "dimensions": [
+    {
+      "id": "function",
+      "name": "功能属性",
+      "weight": 0.4188,
+      "score": 1.3359,
+      "factors": [
+        {
+          "factorId": "land_use",
+          "name": "用地功能",
+          "value": "major_public_commercial",
+          "label": "重要医疗文体设施、综合商业、邻里中心",
+          "score": 4,
+          "weight": 0.0795,
+          "weightedScore": 0.318,
+          "assumed": false,
+          "source": "现有输入/预设数据"
+        },
+        {
+          "factorId": "development_intensity",
+          "name": "开发强度",
+          "value": "30k_100k",
+          "label": "建筑面积 3 万-10 万平方米",
+          "score": 3,
+          "weight": 0.3393,
+          "weightedScore": 1.0179,
+          "assumed": false,
+          "source": "现有输入/预设数据"
+        }
+      ]
+    },
+    {
+      "id": "location",
+      "name": "区位属性",
+      "weight": 0.1407,
+      "score": 0.2814,
+      "factors": [
+        {
+          "factorId": "location_level",
+          "name": "区位能级",
+          "value": "community",
+          "label": "社区级中心",
+          "score": 2,
+          "weight": 0.1407,
+          "weightedScore": 0.2814,
+          "assumed": false,
+          "source": "现有输入/预设数据"
+        }
+      ]
+    },
+    {
+      "id": "transport",
+      "name": "交通属性",
+      "weight": 0.2976,
+      "score": 0.3417,
+      "factors": [
+        {
+          "factorId": "ridership",
+          "name": "出行客流",
+          "value": "lt_2500",
+          "label": "日均进站量小于 2500",
+          "score": 1,
+          "weight": 0.2535,
+          "weightedScore": 0.2535,
+          "assumed": false,
+          "source": "每站每月日均进站.xlsx：2025-11日均进站"
+        },
+        {
+          "factorId": "transfer",
+          "name": "高效换乘",
+          "value": "normal",
+          "label": "一般站",
+          "score": 2,
+          "weight": 0.0441,
+          "weightedScore": 0.0882,
+          "assumed": false,
+          "source": "现有输入/预设数据"
+        }
+      ]
+    },
+    {
+      "id": "underground",
+      "name": "地下属性",
+      "weight": 0.1429,
+      "score": 0.5716,
+      "factors": [
+        {
+          "factorId": "underground_space",
+          "name": "地下空间",
+          "value": "commercial_public_pr",
+          "label": "有，功能为商业、公共服务、文体、商业+停车或 P+R 停车",
+          "score": 4,
+          "weight": 0.1429,
+          "weightedScore": 0.5716,
+          "assumed": false,
+          "source": "现有输入/预设数据"
+        }
+      ]
+    }
+  ],
+  "missing": [],
+  "recommendation": {
+    "primary": {
+      "id": "underground_main",
+      "name": "地下主通道",
+      "category": "地下联通",
+      "priority": 1,
+      "bestFor": [
+        "必连地块",
+        "尽连地块",
+        "商业公服",
+        "交通枢纽",
+        "地下公共空间"
+      ],
+      "avoidWhen": [
+        "无地下空间",
+        "接口条件不足",
+        "历史保护或地下遗址限制未论证"
+      ],
+      "parameters": [
+        "通行功能净宽不小于 5.0m，净高不小于 3.0m。",
+        "通行兼休憩或商业功能净高不小于 3.5m。",
+        "路径宜短直，减少多次弯折，节点处设置集散空间。",
+        "与车站非付费区、地块地下公共空间、防火分隔和运营界面一体化设计。"
+      ]
+    },
+    "alternatives": [
+      {
+        "id": "underground_secondary",
+        "name": "地下次通道",
+        "category": "地下联通",
+        "priority": 2,
+        "bestFor": [
+          "尽连地块",
+          "可连地块",
+          "停车接驳",
+          "接口预留"
+        ],
+        "avoidWhen": [
+          "地下空间缺失",
+          "工程经济性明显不足"
+        ],
+        "parameters": [
+          "以通行为主，宜控制商业性植入。",
+          "优先衔接站厅非付费区和地块地下一层公共流线。",
+          "需同步落实防火、排烟、防水、无障碍和导向标识。"
+        ]
+      },
+      {
+        "id": "weather_corridor",
+        "name": "风雨连廊",
+        "category": "地面联通",
+        "priority": 2,
+        "bestFor": [
+          "居住类",
+          "学校医院",
+          "青年公寓",
+          "社区公服",
+          "无地下公共空间"
+        ],
+        "avoidWhen": [
+          "人行道净宽不足",
+          "风貌管控严格且未论证"
+        ],
+        "parameters": [
+          "适用于地面接驳需求强、地下连通工程经济性不足的场景。",
+          "应保障人行道剩余通行净宽和无障碍通行。",
+          "需与车站出入口集散空间、地块主入口和标识系统连续衔接。",
+          "结构、排水、照明和城市风貌应同步控制。"
+        ]
+      }
+    ],
+    "rule": {
+      "id": "priority_connect_public_underground",
+      "when": "尽连地块，且地下空间为公共开放或商业服务功能",
+      "primary": "underground_main",
+      "alternatives": [
+        "underground_secondary",
+        "weather_corridor"
+      ],
+      "reason": "地块公共属性较强且具备实施条件，优先推动地下通道连通。"
+    }
+  },
+  "researchPlan": {
+    "generatedAt": "2026-05-25T06:30:47Z",
+    "strategy": "实时优先；联网或模型失败时使用本地知识库与五类标杆案例缓存兜底。",
+    "benchmarkCase": {
+      "id": "jinjiayan-neighborhood-center",
+      "label": "地下联通商业公服标杆",
+      "station": "金家堰",
+      "scenario": "商业公服地块具备地下公共空间，优先校核地下主通道、下沉广场和地下中庭。",
+      "dimensions": [
+        "地下公共空间",
+        "商业公服服务对象",
+        "接口竖向",
+        "全天候接驳",
+        "运营分界"
+      ],
+      "queries": [
+        "金家堰 邻里中心 地下 联通",
+        "地下公共空间 轨道站点 商业公服 接口"
+      ],
+      "matched": true
+    },
+    "questions": [
+      {
+        "id": "station_role",
+        "question": "金家堰在TOD等级、线路换乘、客流和片区功能中承担什么角色？",
+        "evidenceTypes": [
+          "station_index",
+          "ridership",
+          "tod_plan",
+          "live_search"
+        ],
+        "priority": "high"
+      },
+      {
+        "id": "surrounding_functions",
+        "question": "周边商业、公服、居住、学校、医院、枢纽等服务对象是否形成稳定联通需求？",
+        "evidenceTypes": [
+          "station_amenities",
+          "live_search",
+          "benchmark_cache"
+        ],
+        "priority": "high"
+      },
+      {
+        "id": "interface_feasibility",
+        "question": "车站非付费区、出入口、地块地下室和竖向标高是否支持推荐联通方式？",
+        "evidenceTypes": [
+          "station_interface",
+          "design_guidance",
+          "project_input"
+        ],
+        "priority": "high"
+      },
+      {
+        "id": "scheme_benchmark",
+        "question": "当前项目与“地下联通商业公服标杆”相比，哪些维度应借鉴、哪些条件需复核？",
+        "evidenceTypes": [
+          "benchmark_cache",
+          "local_knowledge"
+        ],
+        "priority": "medium"
+      },
+      {
+        "id": "risk_constraints",
+        "question": "消防疏散、运营界面、管线权属、风貌景观和建设时序有哪些不确定性？",
+        "evidenceTypes": [
+          "design_guidance",
+          "live_search",
+          "manual_review"
+        ],
+        "priority": "medium"
+      },
+      {
+        "id": "data_gap_impact",
+        "question": "正式提资缺项会如何影响评分等级、方案优先级和实施建议？",
+        "evidenceTypes": [
+          "project_input",
+          "rule_engine",
+          "missing_items"
+        ],
+        "priority": "medium"
+      },
+      {
+        "id": "parcel_format",
+        "question": "地块业态“综合性社区邻里中心”对全天候接驳、导向和运营边界提出哪些特定要求？",
+        "evidenceTypes": [
+          "project_input",
+          "benchmark_cache",
+          "live_search"
+        ],
+        "priority": "medium"
+      }
+    ],
+    "dimensions": [
+      {
+        "id": "city_interface",
+        "name": "城市界面与站城融合",
+        "focus": "站点与地块、道路、公共空间之间是否形成连续开放界面。"
+      },
+      {
+        "id": "walking_accessibility",
+        "name": "慢行可达与无障碍连续性",
+        "focus": "步行距离、过街阻隔、风雨遮蔽、无障碍和导向是否完整。"
+      },
+      {
+        "id": "service_population",
+        "name": "服务对象与功能复合",
+        "focus": "商业、公服、居住、学校、医院、枢纽等人群需求是否稳定。"
+      },
+      {
+        "id": "engineering_interface",
+        "name": "工程接口与竖向条件",
+        "focus": "站厅非付费区、地下室、标高、防水、结构和管线条件是否支持落地。"
+      },
+      {
+        "id": "operation_management",
+        "name": "运营管理与安全边界",
+        "focus": "消防、疏散、运营分界、开放时段、安防和维护责任是否清晰。"
+      },
+      {
+        "id": "implementation_timing",
+        "name": "实施时序与投资协同",
+        "focus": "近期接驳、中期接口预留、远期一体化开发的协同路径是否清楚。"
+      },
+      {
+        "id": "benchmark_地下公共空间",
+        "name": "地下公共空间",
+        "focus": "来自地下联通商业公服标杆的专项观察维度。"
+      },
+      {
+        "id": "benchmark_商业公服服务对象",
+        "name": "商业公服服务对象",
+        "focus": "来自地下联通商业公服标杆的专项观察维度。"
+      },
+      {
+        "id": "benchmark_接口竖向",
+        "name": "接口竖向",
+        "focus": "来自地下联通商业公服标杆的专项观察维度。"
+      },
+      {
+        "id": "benchmark_全天候接驳",
+        "name": "全天候接驳",
+        "focus": "来自地下联通商业公服标杆的专项观察维度。"
+      },
+      {
+        "id": "benchmark_运营分界",
+        "name": "运营分界",
+        "focus": "来自地下联通商业公服标杆的专项观察维度。"
+      }
+    ],
+    "tasks": [
+      {
+        "id": "project_input",
+        "name": "读取项目正式输入与缺项",
+        "channel": "rule_engine",
+        "required": true
+      },
+      {
+        "id": "local_knowledge",
+        "name": "检索本地规则、设计导则、站点和运营资料",
+        "channel": "local_cache",
+        "required": true
+      },
+      {
+        "id": "benchmark_cache",
+        "name": "匹配五类标杆案例知识包",
+        "channel": "local_cache",
+        "required": true
+      },
+      {
+        "id": "independent_search",
+        "name": "调用独立搜索接口获取实时外部证据",
+        "channel": "live_search",
+        "required": false
+      },
+      {
+        "id": "model_web_search",
+        "name": "如模型具备联网能力，补充模型侧外搜观点",
+        "channel": "model_web",
+        "required": false
+      },
+      {
+        "id": "model_assessment",
+        "name": "模型或本地兜底生成动态维度研判",
+        "channel": "llm_or_fallback",
+        "required": true
+      }
+    ],
+    "missingSensitiveFactors": []
+  },
+  "evidencePack": {
+    "generatedAt": "2026-05-25T06:30:47Z",
+    "mode": "offline_cache",
+    "benchmarkCase": {
+      "id": "jinjiayan-neighborhood-center",
+      "label": "地下联通商业公服标杆",
+      "station": "金家堰",
+      "scenario": "商业公服地块具备地下公共空间，优先校核地下主通道、下沉广场和地下中庭。",
+      "dimensions": [
+        "地下公共空间",
+        "商业公服服务对象",
+        "接口竖向",
+        "全天候接驳",
+        "运营分界"
+      ],
+      "queries": [
+        "金家堰 邻里中心 地下 联通",
+        "地下公共空间 轨道站点 商业公服 接口"
+      ],
+      "matched": true
+    },
+    "priorityRule": "项目正式输入/规则源 > 本地标杆缓存 > 独立搜索 > 模型联网低置信补充",
+    "items": [
+      {
+        "id": "local-knowledge-1",
+        "type": "local_search",
+        "source": "苏州地铁运营站点出入口、联通接口情况梳理统计表20260128.xlsx",
+        "title": "苏州地铁运营站点出入口、联通接口情况梳理统计表20260128.xlsx / Sheet1 / 行1-40",
+        "summary": "场地块建设进度 预留接口 | √ | 一级 6号线 | 金家堰站 | 园区 | 车站出入口 | 1号口 | 大家房产 | 地下通道 | 在建地块 | √ | 实施中，暂未开通 | 追踪落实 | 反馈现场地块建设进度和地下通道建设进度 3号口 | 空地；（规划金家堰邻里中心） | / | 待建地块 | √ | 因金家堰3号口邻里中心地块互联互通需求，车站附属目前已向规划部门提交初步连通方案，目前方案正在对接中。 | 一级 | 反馈现场地块建设进度 预留接口 | √ 4号口 | 华润置地 | 地下通道 | 在建地块 |...",
+        "query": "金家堰 邻里中心 地下 联通",
+        "confidence": 0.86,
+        "cached": true,
+        "priority": 688,
+        "collectedAt": "2026-05-25T06:30:47Z"
+      },
+      {
+        "id": "local-knowledge-2",
+        "type": "local_search",
+        "source": "苏州地铁运营站点出入口、联通接口情况梳理统计表20260128.xlsx",
+        "title": "苏州地铁运营站点出入口、联通接口情况梳理统计表20260128.xlsx / 6号线 / 行81-160",
+        "summary": "口 | 1号口 | 元成科技 | / | 已建地块 | √ 2号口 | 腾飞新苏工业坊 | / | 已建地块 | √ 3号口 | 加城大厦 | / | 已建地块 | √ 4号口 | 苏州住友电木 | / | 已建地块 | √ 621 | 6号线 | 南施公园南站 | 园区 | 车站出入口 | 1号口 | 伊顿小镇 | / | 已建地块 | √ 2号口 | 澳韵花园 | / | 已建地块 | √ 3号口 | 公园绿地 | / | 已建地块 | √ 4号口 | 公园绿地 | / | 已建地块 | √ 622 | 6号线...",
+        "query": "金家堰 邻里中心 地下 联通",
+        "confidence": 0.86,
+        "cached": true,
+        "priority": 598,
+        "collectedAt": "2026-05-25T06:30:47Z"
+      },
+      {
+        "id": "local-knowledge-3",
+        "type": "local_search",
+        "source": "苏州轨道交通6号线金家堰站东北象限邻里中心地块与车站互联互通必要性评估与设计方案报告.docx",
+        "title": "苏州轨道交通6号线金家堰站东北象限邻里中心地块与车站互联互通必要性评估与设计方案报告.docx / 表格 5",
+        "summary": "联通方式 | 细分类型 | 场景适配性分析 | 建设成本 | 实施难度 | 适配性评级 地下联通 | 地下主通道 | 可直接衔接车站站厅非付费区与地块地下一层公共中庭，实现全天候无缝接驳，完美匹配邻里中心商业、公服业态的客流引流需求，与地块地下空间高度契合，符合尽连地块的优先连通要求，适配性最高 | 中 | 中 | ★★★★★ | 地下次通道 | 仅满足基础通行功能，无法匹配大型邻里中心的大客流集散需求，空间尺度与业态适配性不足 | 中低 | 中 | ★★★ 地面联通 | 风雨连廊 | 可实现车站3号出入口与地块主...",
+        "query": "金家堰 邻里中心 地下 联通",
+        "confidence": 0.86,
+        "cached": true,
+        "priority": 595,
+        "collectedAt": "2026-05-25T06:30:47Z"
+      },
+      {
+        "id": "local-knowledge-4",
+        "type": "local_search",
+        "source": "（核心工作思路，最优先）互联互通智能体研发工作方案0318.pptx",
+        "title": "（核心工作思路，最优先）互联互通智能体研发工作方案0318.pptx / 第4页",
+        "summary": "苏州市轨道交通线网 TOD 综合开发专项规划 依据苏州市 TOD 重点片区布局和分级分类规划，对站点周边联通必要性进行初步评估。 01 站点周边地块联通必要性多维度评价体系 从用地的功能、区位、交通与地下属性 4 个维度为相关评价因子赋值，生成可量化的联通必要性评估。 02 苏州市轨道交通站城融合设计导则 从城市设计层面出发，围绕功能、交通、空间一体化三个维度，提出总体设计引导。 03 轨道站点出入口周边空间一体化设计指引 从建筑设计层面出发，阐述地面联通、地下联通、高架联通三类联通形式的需求场景，提供具体设计指引...",
+        "query": "地下公共联通 空间 设计",
+        "confidence": 0.86,
+        "cached": true,
+        "priority": 550,
+        "collectedAt": "2026-05-25T06:30:47Z"
+      },
+      {
+        "id": "local-knowledge-5",
+        "type": "local_search",
+        "source": "20231128苏州市轨道交通站城融合设计导则.pdf",
+        "title": "20231128苏州市轨道交通站城融合设计导则.pdf / 第3页",
+        "summary": "3 1.2 工作依据 明确要求开展轨道交通场站综合开发利用研究， 及每条线路的轨道交通选线专项规划 三个层面指引：城市层面规划引导、线路层面规划 引导、站点层面规划设计引导 其他相关标准、规范、规划 •《江苏省城市规划管理技术规定（2019 年版）》 •《苏州市城乡规划若干强制性内容的规 定》（2013年） •《苏州市国土空间总体规划（2021- 2035）》 •《苏州古城控制性详细规划》 •《苏州市总体城市设计》 •《导向导则设计标准》（苏州） •《建筑设计指南及标准图》（苏州） •《苏州市轨道交通标志系统设计指...",
+        "query": "地下公共联通 空间 设计",
+        "confidence": 0.86,
+        "cached": true,
+        "priority": 505,
+        "collectedAt": "2026-05-25T06:30:47Z"
+      },
+      {
+        "id": "local-knowledge-6",
+        "type": "local_search",
+        "source": "苏州轨道交通站点周边地下公共联通空间设计细则-结题评审修改稿.docx",
+        "title": "苏州轨道交通站点周边地下公共联通空间设计细则-结题评审修改稿.docx / 表格 1",
+        "summary": "周边地下空间类型 | 轨道站点周边区位 | 轨道站点周边区位 | 轨道站点周边区位 | 轨道站点周边区位 | 轨道站点周边区位 | 轨道站点周边区位 周边地下空间类型 | 城市重点地下空间；建设区 | 城市重点地下空间；建设区 | 片区重点地下空间；建设区 | 片区重点地下空间；建设区 | 主要节点地下空间；建设区 | 主要节点地下空间；建设区 周边地下空间类型 | 核心；开发区 | 规划；引导区 | 核心；开发区 | 规划；引导区 | 核心；开发区 | 规划；引导区 商业 | ● | ◎ | ● | ○ | ◎...",
+        "query": "地下公共联通 空间 设计",
+        "confidence": 0.86,
+        "cached": true,
+        "priority": 495,
+        "collectedAt": "2026-05-25T06:30:47Z"
+      },
+      {
+        "id": "local-knowledge-7",
+        "type": "local_search",
+        "source": "苏州轨道交通4号线清树湾站东南象限青年公寓地块与车站互联互通必要性评估与设计方案报告.docx",
+        "title": "苏州轨道交通4号线清树湾站东南象限青年公寓地块与车站互联互通必要性评估与设计方案报告.docx / 段落 50",
+        "summary": "整体设计思路：以车站3号出入口集散广场为起点，沿迎春南路东侧人行道设置封闭式风雨连廊，主线终点衔接地块北侧公寓主入口，同步设置支线衔接地块西侧社区商业主出入口，实现车站与地块的全天候步行接驳；连廊设计兼顾苏州本地气候特征、无障碍通行要求与城市风貌协调性，不占用机动车道、不阻断人行道通行，同步完善导向标识、休憩设施与便民配套，兼顾通勤效率与商业引流需求。",
+        "query": "风雨连廊 无障碍 导向",
+        "confidence": 0.86,
+        "cached": true,
+        "priority": 365,
+        "collectedAt": "2026-05-25T06:30:47Z"
+      },
+      {
+        "id": "local-knowledge-8",
+        "type": "local_search",
+        "source": "苏州轨道交通4号线清树湾站东南象限青年公寓地块与车站互联互通必要性评估与设计方案报告.docx",
+        "title": "苏州轨道交通4号线清树湾站东南象限青年公寓地块与车站互联互通必要性评估与设计方案报告.docx / 段落 56",
+        "summary": "不新增建构筑物，仅对车站3号出入口至地块主入口、商业出入口的现有步行道进行优化提升，包括路面翻新、防滑处理、无障碍坡道完善、沿线导向标识系统加密、夜间照明提升等，满足基础步行接驳需求。该方案实施成本最低、周期最短，适用于项目建设资金有限、暂不具备连廊实施条件的场景，需同步预留远期风雨连廊建设条件。",
+        "query": "风雨连廊 无障碍 导向",
+        "confidence": 0.86,
+        "cached": true,
+        "priority": 365,
+        "collectedAt": "2026-05-25T06:30:47Z"
+      },
+      {
+        "id": "local-knowledge-9",
+        "type": "local_search",
+        "source": "苏州轨道交通6号线金家堰站东北象限邻里中心地块与车站互联互通必要性评估与设计方案报告.docx",
+        "title": "苏州轨道交通6号线金家堰站东北象限邻里中心地块与车站互联互通必要性评估与设计方案报告.docx / 段落 55",
+        "summary": "以车站3号出入口集散广场为起点，沿金堰路东侧人行道设置封闭式风雨连廊，终点衔接地块西侧主出入口，总长度控制在100m以内，连廊净宽不小于4m，配套无障碍设计、休憩设施与导向标识。该方案建设成本低、审批流程简单、施工周期短，可实现全天候步行接驳，适用于项目地下空间暂不具备连通条件的场景，需同步预留远期地下连通接口。",
+        "query": "风雨连廊 无障碍 导向",
+        "confidence": 0.86,
+        "cached": true,
+        "priority": 365,
+        "collectedAt": "2026-05-25T06:30:47Z"
+      },
+      {
+        "id": "rule-score",
+        "type": "rule_fact",
+        "source": "评价因子赋值明细表.xlsx / 后端规则引擎",
+        "title": "规则评分与等级",
+        "summary": "综合评分、百分制得分、必连/尽连/可连等级和推荐方式由规则引擎计算，模型不得改写。",
+        "confidence": 1.0,
+        "cached": true,
+        "priority": 100,
+        "collectedAt": "2026-05-25T06:30:47Z"
+      },
+      {
+        "id": "station-ridership",
+        "type": "local_knowledge",
+        "source": "每站每月日均进站.xlsx：2025-11日均进站",
+        "title": "金家堰客流线索",
+        "summary": "日均进站约685.73，用于判断交通需求和路径组织强度。",
+        "confidence": 0.92,
+        "cached": true,
+        "priority": 92,
+        "collectedAt": "2026-05-25T06:30:47Z"
+      },
+      {
+        "id": "station-interface",
+        "type": "local_knowledge",
+        "source": "苏州地铁运营站点出入口、联通接口情况梳理统计表20260128.xlsx",
+        "title": "金家堰出入口与联通接口",
+        "summary": "识别出入口4个，联通形式地下通道、预留接口，问题记录6条。",
+        "confidence": 0.9,
+        "cached": true,
+        "priority": 90,
+        "collectedAt": "2026-05-25T06:30:47Z"
+      },
+      {
+        "id": "recommendation-rule",
+        "type": "rule_fact",
+        "source": "design_rules.json",
+        "title": "推荐方式：地下主通道",
+        "summary": "地块公共属性较强且具备实施条件，优先推动地下通道连通。",
+        "confidence": 0.9,
+        "cached": true,
+        "priority": 88,
+        "collectedAt": "2026-05-25T06:30:47Z"
+      },
+      {
+        "id": "station-amenities",
+        "type": "local_knowledge",
+        "source": "运营公司车站出入口开放及周边配套统计表202604.xlsx",
+        "title": "金家堰周边配套",
+        "summary": "schools:人大附中苏州学校；residential:仁恒华发雅苑 （在建中 未开放）、月上海棠轩 （在建中 未开放）、润云华庭；commercial:玉皇宫",
+        "confidence": 0.86,
+        "cached": true,
+        "priority": 86,
+        "collectedAt": "2026-05-25T06:30:47Z"
+      },
+      {
+        "id": "benchmark-jinjiayan-neighborhood-center",
+        "type": "benchmark_cache",
+        "source": "五类标杆案例知识包",
+        "title": "地下联通商业公服标杆",
+        "summary": "商业公服地块具备地下公共空间，优先校核地下主通道、下沉广场和地下中庭。",
+        "confidence": 0.84,
+        "cached": true,
+        "priority": 82,
+        "collectedAt": "2026-05-25T06:30:47Z"
+      },
+      {
+        "id": "dimension-function",
+        "type": "rule_dimension",
+        "source": "后端四维评分明细",
+        "title": "功能属性维度",
+        "summary": "得分1.3359；临时试算因子：无。",
+        "confidence": 0.88,
+        "cached": true,
+        "priority": 80,
+        "collectedAt": "2026-05-25T06:30:47Z"
+      },
+      {
+        "id": "dimension-location",
+        "type": "rule_dimension",
+        "source": "后端四维评分明细",
+        "title": "区位属性维度",
+        "summary": "得分0.2814；临时试算因子：无。",
+        "confidence": 0.88,
+        "cached": true,
+        "priority": 80,
+        "collectedAt": "2026-05-25T06:30:47Z"
+      },
+      {
+        "id": "dimension-transport",
+        "type": "rule_dimension",
+        "source": "后端四维评分明细",
+        "title": "交通属性维度",
+        "summary": "得分0.3417；临时试算因子：无。",
+        "confidence": 0.88,
+        "cached": true,
+        "priority": 80,
+        "collectedAt": "2026-05-25T06:30:47Z"
+      },
+      {
+        "id": "dimension-underground",
+        "type": "rule_dimension",
+        "source": "后端四维评分明细",
+        "title": "地下属性维度",
+        "summary": "得分0.5716；临时试算因子：无。",
+        "confidence": 0.88,
+        "cached": true,
+        "priority": 80,
+        "collectedAt": "2026-05-25T06:30:47Z"
+      },
+      {
+        "id": "benchmark-jinjiayan-neighborhood-center-1",
+        "type": "benchmark_dimension",
+        "source": "五类标杆案例知识包",
+        "title": "地下公共空间",
+        "summary": "作为地下联通商业公服标杆的专项研判维度，用于补足固定评分维度之外的模型观察。",
+        "confidence": 0.78,
+        "cached": true,
+        "priority": 70,
+        "collectedAt": "2026-05-25T06:30:47Z"
+      },
+      {
+        "id": "benchmark-jinjiayan-neighborhood-center-2",
+        "type": "benchmark_dimension",
+        "source": "五类标杆案例知识包",
+        "title": "商业公服服务对象",
+        "summary": "作为地下联通商业公服标杆的专项研判维度，用于补足固定评分维度之外的模型观察。",
+        "confidence": 0.78,
+        "cached": true,
+        "priority": 70,
+        "collectedAt": "2026-05-25T06:30:47Z"
+      },
+      {
+        "id": "benchmark-jinjiayan-neighborhood-center-3",
+        "type": "benchmark_dimension",
+        "source": "五类标杆案例知识包",
+        "title": "接口竖向",
+        "summary": "作为地下联通商业公服标杆的专项研判维度，用于补足固定评分维度之外的模型观察。",
+        "confidence": 0.78,
+        "cached": true,
+        "priority": 70,
+        "collectedAt": "2026-05-25T06:30:47Z"
+      },
+      {
+        "id": "benchmark-jinjiayan-neighborhood-center-4",
+        "type": "benchmark_dimension",
+        "source": "五类标杆案例知识包",
+        "title": "全天候接驳",
+        "summary": "作为地下联通商业公服标杆的专项研判维度，用于补足固定评分维度之外的模型观察。",
+        "confidence": 0.78,
+        "cached": true,
+        "priority": 70,
+        "collectedAt": "2026-05-25T06:30:47Z"
+      },
+      {
+        "id": "benchmark-jinjiayan-neighborhood-center-5",
+        "type": "benchmark_dimension",
+        "source": "五类标杆案例知识包",
+        "title": "运营分界",
+        "summary": "作为地下联通商业公服标杆的专项研判维度，用于补足固定评分维度之外的模型观察。",
+        "confidence": 0.78,
+        "cached": true,
+        "priority": 70,
+        "collectedAt": "2026-05-25T06:30:47Z"
+      }
+    ],
+    "summary": {
+      "total": 24,
+      "cached": 24,
+      "live": 0
+    }
+  },
+  "modelAssessment": {
+    "generatedAt": "2026-05-25T06:30:47Z",
+    "provider": "awaiting_model_or_user_consent",
+    "status": "awaiting_offline_fallback_consent",
+    "fallbackUsed": false,
+    "immutableFacts": {
+      "score": 2.5306,
+      "scorePercent": 62.03,
+      "level": "尽连地块",
+      "policy": "必要性次之，应尽量联通；优先推动接口条件、建设协同和方案比选。",
+      "primaryRecommendation": "地下主通道",
+      "ruleReason": "地块公共属性较强且具备实施条件，优先推动地下通道连通。"
+    },
+    "summary": "尚未连接可用模型。系统已准备研究计划和本地证据包，但不会自动使用离线兜底生成综合研判。",
+    "dynamicDimensions": [],
+    "risks": [],
+    "uncertainties": [
+      "未检测到可用模型或模型调用失败。",
+      "需要用户确认后，才会使用本地知识库和五类标杆案例缓存生成离线兜底研判。"
+    ],
+    "reviewQuestions": [
+      "是否连接模型后重新运行评估？",
+      "是否确认使用离线兜底，由本地资料提供研判弹药？"
+    ],
+    "confidence": 0,
+    "preparedEvidenceRefs": [
+      "local-knowledge-1",
+      "local-knowledge-2",
+      "local-knowledge-3",
+      "local-knowledge-4",
+      "local-knowledge-5",
+      "local-knowledge-6",
+      "local-knowledge-7",
+      "local-knowledge-8"
+    ],
+    "benchmarkCase": {
+      "id": "jinjiayan-neighborhood-center",
+      "label": "地下联通商业公服标杆",
+      "station": "金家堰",
+      "scenario": "商业公服地块具备地下公共空间，优先校核地下主通道、下沉广场和地下中庭。",
+      "dimensions": [
+        "地下公共空间",
+        "商业公服服务对象",
+        "接口竖向",
+        "全天候接驳",
+        "运营分界"
+      ],
+      "queries": [
+        "金家堰 邻里中心 地下 联通",
+        "地下公共空间 轨道站点 商业公服 接口"
+      ],
+      "matched": true
+    }
+  },
+  "modelJudgement": {
+    "status": "fallback_written",
+    "level": "尽连地块",
+    "recommendedType": "地下主通道",
+    "confidence": 0.05,
+    "reason": "尚未连接可用模型。系统已准备研究计划和本地证据包，但不会自动使用离线兜底生成综合研判。",
+    "overrideReason": "模型以规则评分为基线，结合站点上下文、案例经验和资料缺口形成最终判断。",
+    "evidenceRefs": [],
+    "riskItems": [
+      {
+        "id": "risk-review-1",
+        "title": "工程边界复核",
+        "detail": "接口、管线、产权和消防条件需在深化阶段复核。",
+        "severity": "中",
+        "reviewLabel": "需人工复核"
+      },
+      {
+        "id": "risk-review-2",
+        "title": "工程边界复核",
+        "detail": "接口、管线、产权和消防条件需在深化阶段复核。",
+        "severity": "中",
+        "reviewLabel": "需人工复核"
+      },
+      {
+        "id": "risk-review-3",
+        "title": "工程边界复核",
+        "detail": "接口、管线、产权和消防条件需在深化阶段复核。",
+        "severity": "中",
+        "reviewLabel": "需人工复核"
+      }
+    ],
+    "fundingRequests": [
+      {
+        "id": "funding-interface",
+        "title": "接口标高与运营边界",
+        "priority": "高",
+        "reason": "需明确车站非付费区、接口标高和运营管理界面，避免模型将预评估线索误写为工程事实。",
+        "reviewLabel": "需人工复核"
+      },
+      {
+        "id": "funding-underground",
+        "title": "地下空间与消防分区",
+        "priority": "中",
+        "reason": "需补充地下层数、公共开放空间、消防分区和疏散条件，支撑后续方案深化。",
+        "reviewLabel": "模型推断"
+      },
+      {
+        "id": "funding-implementation",
+        "title": "权属界面与实施时序",
+        "priority": "中",
+        "reason": "需明确产权边界、施工组织、投资分担和开放运营责任，支撑客户版成果落地。",
+        "reviewLabel": "需人工复核"
+      }
+    ],
+    "reviewQuestions": [
+      "是否连接模型后重新运行评估？",
+      "是否确认使用离线兜底，由本地资料提供研判弹药？"
+    ]
+  },
+  "modelRuleDifference": {
+    "status": "aligned",
+    "ruleLevel": "尽连地块",
+    "modelLevel": "尽连地块",
+    "ruleRecommendedType": "地下主通道",
+    "modelRecommendedType": "地下主通道",
+    "reason": "模型结论与规则基线一致。",
+    "reviewLabels": [
+      "依据充分",
+      "依据不足"
+    ]
+  },
+  "modelQuality": {
+    "factHonesty": "pass",
+    "evidenceCoverage": "sufficient",
+    "labels": [
+      "依据不足"
+    ],
+    "missingCount": 0,
+    "evidenceCount": 24
+  },
+  "diagramBrief": {
+    "diagramId": "D-001",
+    "diagramType": "recommended_connection_path",
+    "title": "推荐联通路径示意",
+    "summary": "表达金家堰与金家堰邻里中心之间的地下主通道关系，并标注主要风险与待复核界面。",
+    "nodes": [
+      {
+        "id": "station",
+        "label": "金家堰",
+        "type": "station",
+        "x": 110,
+        "y": 160,
+        "level": "B1"
+      },
+      {
+        "id": "parcel",
+        "label": "金家堰邻里中心",
+        "type": "parcel",
+        "x": 430,
+        "y": 160,
+        "level": "B1"
+      }
+    ],
+    "edges": [
+      {
+        "id": "path-1",
+        "from": "station",
+        "to": "parcel",
+        "type": "recommended",
+        "label": "地下主通道"
+      }
+    ],
+    "annotations": [
+      {
+        "id": "risk-1",
+        "text": "接口标高、消防分区、产权界面需复核",
+        "anchorTo": "path-1"
+      }
+    ],
+    "exports": [
+      "svg",
+      "png",
+      "docx"
+    ]
+  },
+  "reportModes": [
+    {
+      "id": "client_formal",
+      "name": "客户正式版",
+      "tone": "正式、稳健、可审阅",
+      "focus": "结论、依据、风险、补资和实施建议",
+      "sectionDensity": "medium",
+      "qualityLabels": [
+        "依据不足"
+      ]
+    },
+    {
+      "id": "expert_appendix",
+      "name": "专家附录版",
+      "tone": "证据完整、规则透明、便于复核",
+      "focus": "规则基线、模型差异、证据引用和复核问题",
+      "sectionDensity": "high",
+      "qualityLabels": [
+        "依据充分",
+        "依据不足"
+      ]
+    },
+    {
+      "id": "leadership_brief",
+      "name": "领导汇报版",
+      "tone": "一页一结论、一页一风险、一页一行动",
+      "focus": "模型结论、推荐方案、关键风险和下一步动作",
+      "sectionDensity": "low",
+      "qualityLabels": [
+        "可汇报",
+        "依据不足"
+      ]
+    }
+  ],
+  "capabilityStatus": {
+    "generatedAt": "2026-05-25T06:30:47Z",
+    "strategy": "分层增强：规则与本地缓存保下限，独立搜索和模型联网争上限。",
+    "localCache": {
+      "available": true,
+      "mode": "cache",
+      "evidenceCount": 24,
+      "reason": ""
+    },
+    "independentSearch": {
+      "available": false,
+      "mode": "not_configured",
+      "reason": "SEARCH_API_URL 或 SEARCH_API_KEY 未配置"
+    },
+    "llm": {
+      "available": false,
+      "mode": "not_configured",
+      "reason": "LLM_BASE_URL、LLM_API_KEY 或 LLM_MODEL 未配置"
+    },
+    "modelWebSearch": {
+      "available": false,
+      "mode": "not_configured",
+      "evidenceCount": 0,
+      "reason": "未获得可复核的模型联网证据"
+    },
+    "liveEvidenceCount": 0,
+    "requiresOfflineFallbackConsent": true,
+    "offlineFallbackAuthorized": false,
+    "fallbackReason": "尚未连接可用模型，等待用户确认是否使用离线兜底。"
+  },
+  "clientReport": [
+    {
+      "title": "客户报告生成提示",
+      "content": "当前尚未连接可用模型。系统已完成规则评分、资料检索和研究问题准备，但不会自动生成完整顾问式成果报告。请连接模型后重新运行评估，或在页面提示中确认使用离线兜底，由本地知识库和五类标杆案例生成客户报告初稿。"
+    }
+  ],
+  "clientReportMode": "awaiting_model_or_fallback_consent",
+  "llmReviewContext": {
+    "purpose": "供模型在规则基线、项目事实和证据材料基础上做最终综合研判，可在说明理由和复核标签后覆盖规则结论。",
+    "guardrails": [
+      "可以覆盖规则等级或推荐方式，但必须保留规则基线、覆盖理由、证据引用和人工复核标签。",
+      "正式地块资料缺失时必须标注预评估性质，不得把站点周边线索当作地块正式输入。",
+      "引用资料应说明来源和用途；无法确认的工程条件应进入补齐项或风险项。",
+      "输出需区分近期可实施措施、中期深化设计和远期一体化预留。"
+    ],
+    "projectFacts": {
+      "name": "金家堰邻里中心",
+      "station": "金家堰",
+      "score": 2.5306,
+      "scorePercent": 62.03,
+      "level": "尽连地块",
+      "policy": "必要性次之，应尽量联通；优先推动接口条件、建设协同和方案比选。",
+      "primaryRecommendation": "地下主通道",
+      "ruleReason": "地块公共属性较强且具备实施条件，优先推动地下通道连通。",
+      "missingItems": []
+    },
+    "referenceBasis": [
+      {
+        "source": "互联互通智能体研发工作方案0318.pptx",
+        "use": "确定近期目标、评价到报告的工作流、规则优先级和试点交付边界。",
+        "status": "PPT规则源，优先于早期示例报告。"
+      },
+      {
+        "source": "评价因子赋值明细表.xlsx",
+        "use": "确定功能、区位、交通、地下四类维度、因子权重和选项赋值。",
+        "status": "当前评分计算的直接依据。"
+      },
+      {
+        "source": "20260507反馈",
+        "use": "确认评分口径以Excel/PPT为准，早期样例报告仅作章节和表达参考。",
+        "status": "验收口径确认。"
+      },
+      {
+        "source": "车站TOD级别划分整理.xlsx",
+        "use": "提供金家堰的TOD级别、线路和区位能级。",
+        "status": "站点级预评估依据。"
+      },
+      {
+        "source": "每站每月日均进站.xlsx",
+        "use": "提供站点日均进站客流，用于交通属性中的出行客流因子。",
+        "status": "每站每月日均进站.xlsx：2025-11日均进站"
+      },
+      {
+        "source": "苏州地铁运营站点出入口、联通接口情况梳理统计表20260128.xlsx",
+        "use": "提供出入口、接口、联通形式、开发进度和推进问题线索。",
+        "status": "用于站点上下文和推荐规则分层，不替代正式地块资料。"
+      },
+      {
+        "source": "运营公司车站出入口开放及周边配套统计表202604.xlsx",
+        "use": "提供出入口开放、运营管理、周边学校/商业/住宅/公共设施等配套线索。",
+        "status": "用于周边服务对象判断和资料补齐提示。"
+      },
+      {
+        "source": "苏州轨道交通站点周边地下公共联通空间设计细则-结题评审修改稿.docx",
+        "use": "作为地下联通空间、接口、无障碍、消防、运营界面等设计控制要求的知识库来源。",
+        "status": "设计建议引用源，具体条款需在深化阶段人工复核。"
+      }
+    ],
+    "dimensionJudgement": [
+      {
+        "id": "function",
+        "name": "功能属性",
+        "weight": 0.4188,
+        "score": 1.3359,
+        "factorEvidence": [
+          "用地功能=重要医疗文体设施、综合商业、邻里中心，4分，权重0.0795，加权0.318，来源：现有输入/预设数据，状态：已取值",
+          "开发强度=建筑面积 3 万-10 万平方米，3分，权重0.3393，加权1.0179，来源：现有输入/预设数据，状态：已取值"
+        ],
+        "interpretation": "功能属性支撑度较强，对联通必要性形成正向贡献。"
+      },
+      {
+        "id": "location",
+        "name": "区位属性",
+        "weight": 0.1407,
+        "score": 0.2814,
+        "factorEvidence": [
+          "区位能级=社区级中心，2分，权重0.1407，加权0.2814，来源：现有输入/预设数据，状态：已取值"
+        ],
+        "interpretation": "区位属性贡献中等或偏弱，需结合工程条件和实施成本综合判断。"
+      },
+      {
+        "id": "transport",
+        "name": "交通属性",
+        "weight": 0.2976,
+        "score": 0.3417,
+        "factorEvidence": [
+          "出行客流=日均进站量小于 2500，1分，权重0.2535，加权0.2535，来源：每站每月日均进站.xlsx：2025-11日均进站，状态：已取值",
+          "高效换乘=一般站，2分，权重0.0441，加权0.0882，来源：现有输入/预设数据，状态：已取值"
+        ],
+        "interpretation": "交通属性贡献中等或偏弱，需结合工程条件和实施成本综合判断。"
+      },
+      {
+        "id": "underground",
+        "name": "地下属性",
+        "weight": 0.1429,
+        "score": 0.5716,
+        "factorEvidence": [
+          "地下空间=有，功能为商业、公共服务、文体、商业+停车或 P+R 停车，4分，权重0.1429，加权0.5716，来源：现有输入/预设数据，状态：已取值"
+        ],
+        "interpretation": "地下属性支撑度较强，对联通必要性形成正向贡献。"
+      }
+    ],
+    "schemeComparison": [
+      {
+        "role": "推荐方案",
+        "name": "地下主通道",
+        "category": "地下联通",
+        "reason": "地块公共属性较强且具备实施条件，优先推动地下通道连通。",
+        "bestFor": [
+          "必连地块",
+          "尽连地块",
+          "商业公服",
+          "交通枢纽",
+          "地下公共空间"
+        ],
+        "avoidWhen": [
+          "无地下空间",
+          "接口条件不足",
+          "历史保护或地下遗址限制未论证"
+        ],
+        "technicalParameters": [
+          "通行功能净宽不小于 5.0m，净高不小于 3.0m。",
+          "通行兼休憩或商业功能净高不小于 3.5m。",
+          "路径宜短直，减少多次弯折，节点处设置集散空间。",
+          "与车站非付费区、地块地下公共空间、防火分隔和运营界面一体化设计。"
+        ]
+      },
+      {
+        "role": "备选方案1",
+        "name": "地下次通道",
+        "category": "地下联通",
+        "reason": "作为备选，用于接口、投资、交通组织或风貌约束变化时复核。",
+        "bestFor": [
+          "尽连地块",
+          "可连地块",
+          "停车接驳",
+          "接口预留"
+        ],
+        "avoidWhen": [
+          "地下空间缺失",
+          "工程经济性明显不足"
+        ],
+        "technicalParameters": [
+          "以通行为主，宜控制商业性植入。",
+          "优先衔接站厅非付费区和地块地下一层公共流线。",
+          "需同步落实防火、排烟、防水、无障碍和导向标识。"
+        ]
+      },
+      {
+        "role": "备选方案2",
+        "name": "风雨连廊",
+        "category": "地面联通",
+        "reason": "作为备选，用于接口、投资、交通组织或风貌约束变化时复核。",
+        "bestFor": [
+          "居住类",
+          "学校医院",
+          "青年公寓",
+          "社区公服",
+          "无地下公共空间"
+        ],
+        "avoidWhen": [
+          "人行道净宽不足",
+          "风貌管控严格且未论证"
+        ],
+        "technicalParameters": [
+          "适用于地面接驳需求强、地下连通工程经济性不足的场景。",
+          "应保障人行道剩余通行净宽和无障碍通行。",
+          "需与车站出入口集散空间、地块主入口和标识系统连续衔接。",
+          "结构、排水、照明和城市风貌应同步控制。"
+        ]
+      }
+    ],
+    "riskAndReviewPoints": [
+      {
+        "topic": "正式地块资料",
+        "point": "用地性质、建筑面积/容积率、地下空间功能缺失时，评分和推荐只能作为站点级预评估。",
+        "action": "补齐控规图则、规划条件、地块指标和地下空间说明后复核。"
+      },
+      {
+        "topic": "接口工程条件",
+        "point": "接口位置、标高、非付费区关系、结构边界和防水节点决定推荐方式能否落地。",
+        "action": "深化阶段需核对车站接口条件、地块地下室平面和竖向标高。"
+      },
+      {
+        "topic": "消防与疏散",
+        "point": "地下或封闭连通空间涉及防火分区、排烟、疏散距离、运营管理边界。",
+        "action": "方案比选时同步校核消防专项和运营分界。"
+      },
+      {
+        "topic": "无障碍与导向",
+        "point": "步行接驳应保证连续无障碍、夜间照明、导向识别和客流组织清晰。",
+        "action": "近期实施方案应先落实连续路径和标识系统。"
+      },
+      {
+        "topic": "权属与施工界面",
+        "point": "红线、产权、管线迁改、施工组织和费用分摊可能改变方案优先级。",
+        "action": "把权属边界、施工时序和投资责任纳入补齐清单。"
+      },
+      {
+        "topic": "既有推进问题",
+        "point": "运营资料记录问题6条，可能影响接口开放或协议签署。",
+        "action": "优先复核问题记录、接口费、联通协议和建设状态。"
+      }
+    ],
+    "suggestedOutputSchema": [
+      "综合判断结论",
+      "主要依据与引用来源",
+      "推荐方案适用性说明",
+      "备选方案触发条件",
+      "风险与需补齐资料",
+      "近期/中期/远期实施建议",
+      "人工复核问题清单"
+    ]
+  },
+  "report": [
+    {
+      "title": "项目概况与资料边界",
+      "content": "金家堰邻里中心对应站点为金家堰，所属区划为工业园区，地块位置为金堰路东、东宏路北，圈层为200m核心开发区。地块业态为综合性社区邻里中心，用地面积约25000平方米，建筑面积约90000平方米，规划指标为容积率≤2.5，建筑密度≤50%，建筑限高60m。邻近出入口为3号口，日均客流为686 人次/日（每站每月日均进站.xlsx：2025-11日均进站）。站点侧已识别出入口 4 个，联通形式 地下通道、预留接口，问题记录 6 条。运营公司202604资料显示，站点出入口开放 4/4 个，运营管理 4 个；周边配套包括学校：人大附中苏州学校；住宅：仁恒华发雅苑\n（在建中 未开放）、月上海棠轩\n（在建中 未开放）；商业景点：玉皇宫。本段仅描述已入库事实和待补齐资料边界，不把周边配套线索直接等同为地块正式评分输入。"
+    },
+    {
+      "title": "评价口径与引用依据",
+      "content": "本次评价以PPT工作方案、评价因子赋值表和20260507反馈为主控口径，引用依据包括：互联互通智能体研发工作方案0318.pptx（确定近期目标、评价到报告的工作流、规则优先级和试点交付边界。）；评价因子赋值明细表.xlsx（确定功能、区位、交通、地下四类维度、因子权重和选项赋值。）；20260507反馈（确认评分口径以Excel/PPT为准，早期样例报告仅作章节和表达参考。）；车站TOD级别划分整理.xlsx（提供金家堰的TOD级别、线路和区位能级。）；每站每月日均进站.xlsx（提供站点日均进站客流，用于交通属性中的出行客流因子。）；苏州地铁运营站点出入口、联通接口情况梳理统计表20260128.xlsx（提供出入口、接口、联通形式、开发进度和推进问题线索。）；运营公司车站出入口开放及周边配套统计表202604.xlsx（提供出入口开放、运营管理、周边学校/商业/住宅/公共设施等配套线索。）；苏州轨道交通站点周边地下公共联通空间设计细则-结题评审修改稿.docx（作为地下联通空间、接口、无障碍、消防、运营界面等设计控制要求的知识库来源。）。其中评分因子、权重和等级阈值由结构化规则引擎计算；设计细则、运营资料和周边配套作为解释、比选、风险识别和补齐项提示依据。"
+    },
+    {
+      "title": "站点能级、客流与接口研判",
+      "content": "金家堰的区位能级为组团级TOD，线路/换乘信息为6，日均客流为686 人次/日（每站每月日均进站.xlsx：2025-11日均进站）。客流记录覆盖至 2025-11，平均日均进站 541.71 人次/日。站点侧已识别出入口 4 个，联通形式 地下通道、预留接口，问题记录 6 条。这些信息用于判断站点侧联通需求、接口成熟度和近期实施抓手；若后续接入客流预测、客流方向、分时段拥挤度，可进一步细化为路径级方案建议。"
+    },
+    {
+      "title": "周边功能与服务对象研判",
+      "content": "运营公司202604资料和站点周边索引显示，周边配套包括学校：人大附中苏州学校；住宅：仁恒华发雅苑\n（在建中 未开放）、月上海棠轩\n（在建中 未开放）；商业景点：玉皇宫。这些内容可辅助判断服务对象、全天候需求、导向标识和步行系统连续性，但仍需控规、规划条件和地块方案确认具体用地功能、开发强度和地下空间条件。"
+    },
+    {
+      "title": "多维度评分拆解",
+      "content": "本次按功能、区位、交通、地下四个维度进行参数化试算，维度得分为：功能属性 1.3359 分；区位属性 0.2814 分；交通属性 0.3417 分；地下属性 0.5716 分。维度解释为：功能属性：功能属性支撑度较强，对联通必要性形成正向贡献。；区位属性：区位属性贡献中等或偏弱，需结合工程条件和实施成本综合判断。；交通属性：交通属性贡献中等或偏弱，需结合工程条件和实施成本综合判断。；地下属性：地下属性支撑度较强，对联通必要性形成正向贡献。。对临时试算因子，系统保留1分保守值并在待补齐项中说明原因，避免用推断数据替代正式资料。"
+    },
+    {
+      "title": "联通必要性评估结论",
+      "content": "原始加权分为 2.5306/4.0795，折算百分制为 62.03 分，按 20260507 反馈的 80/60 阈值判定为尽连地块。必要性次之，应尽量联通；优先推动接口条件、建设协同和方案比选。客流记录覆盖至 2025-11，平均日均进站 541.71 人次/日。该结论表示当前资料条件下的必要性等级；若后续补齐地块规模、地下空间或接口条件，系统应重新计算并输出差异说明。"
+    },
+    {
+      "title": "推荐方案与方案比选",
+      "content": "系统推荐采用地下主通道，推荐理由为：地块公共属性较强且具备实施条件，优先推动地下通道连通。。备选方案包括地下次通道、风雨连廊。比选框架为：推荐方案地下主通道，适用：必连地块；尽连地块；商业公服；交通枢纽；地下公共空间，回避：无地下空间；接口条件不足；历史保护或地下遗址限制未论证；备选方案1地下次通道，适用：尽连地块；可连地块；停车接驳；接口预留，回避：地下空间缺失；工程经济性明显不足；备选方案2风雨连廊，适用：居住类；学校医院；青年公寓；社区公服；无地下公共空间，回避：人行道净宽不足；风貌管控严格且未论证。后续可按接口可达性、投资强度、施工影响、全天候服务、运营管理和城市风貌六类指标做专家复核。"
+    },
+    {
+      "title": "方案设计核心技术要求",
+      "content": "地下主通道属于地下联通方式。核心技术要求包括：通行功能净宽不小于 5.0m，净高不小于 3.0m。；通行兼休憩或商业功能净高不小于 3.5m。；路径宜短直，减少多次弯折，节点处设置集散空间。；与车站非付费区、地块地下公共空间、防火分隔和运营界面一体化设计。。深化设计还应明确通行净宽、净高、坡道/电梯、导向标识、照明、排水、防滑、运营管理界面和应急疏散组织。"
+    },
+    {
+      "title": "风险约束与专项复核",
+      "content": "重点风险和复核建议包括：正式地块资料：用地性质、建筑面积/容积率、地下空间功能缺失时，评分和推荐只能作为站点级预评估。建议：补齐控规图则、规划条件、地块指标和地下空间说明后复核。；接口工程条件：接口位置、标高、非付费区关系、结构边界和防水节点决定推荐方式能否落地。建议：深化阶段需核对车站接口条件、地块地下室平面和竖向标高。；消防与疏散：地下或封闭连通空间涉及防火分区、排烟、疏散距离、运营管理边界。建议：方案比选时同步校核消防专项和运营分界。；无障碍与导向：步行接驳应保证连续无障碍、夜间照明、导向识别和客流组织清晰。建议：近期实施方案应先落实连续路径和标识系统。；权属与施工界面：红线、产权、管线迁改、施工组织和费用分摊可能改变方案优先级。建议：把权属边界、施工时序和投资责任纳入补齐清单。；既有推进问题：运营资料记录问题6条，可能影响接口开放或协议签署。建议：优先复核问题记录、接口费、联通协议和建设状态。。上述风险不直接否定推荐方案，但会影响方案层级、接口形式、建设时序和投资责任划分。"
+    },
+    {
+      "title": "智能研究计划与能力状态",
+      "content": "系统按“规则保底、实时研究、本地知识兜底、模型增强”的策略生成研究计划，当前能力状态为：本地缓存cache，独立搜索not_configured，模型not_configured，模型联网not_configured。匹配标杆案例为地下联通商业公服标杆。本轮研究问题包括：金家堰在TOD等级、线路换乘、客流和片区功能中承担什么角色？；周边商业、公服、居住、学校、医院、枢纽等服务对象是否形成稳定联通需求？；车站非付费区、出入口、地块地下室和竖向标高是否支持推荐联通方式？；当前项目与“地下联通商业公服标杆”相比，哪些维度应借鉴、哪些条件需复核？；消防疏散、运营界面、管线权属、风貌景观和建设时序有哪些不确定性？；正式提资缺项会如何影响评分等级、方案优先级和实施建议？。模型可用时以模型综合研判为主，本地资料作为证据弹药；未连接模型时需用户确认后才使用离线兜底。"
+    },
+    {
+      "title": "证据包与来源置信度",
+      "content": "本轮证据包模式为offline_cache，共收集24条证据，其中缓存24条、实时0条。代表性证据包括：苏州地铁运营站点出入口、联通接口情况梳理统计表20260128.xlsx / Sheet1 / 行1-40（苏州地铁运营站点出入口、联通接口情况梳理统计表20260128.xlsx，置信度0.86，缓存）；苏州地铁运营站点出入口、联通接口情况梳理统计表20260128.xlsx / 6号线 / 行81-160（苏州地铁运营站点出入口、联通接口情况梳理统计表20260128.xlsx，置信度0.86，缓存）；苏州轨道交通6号线金家堰站东北象限邻里中心地块与车站互联互通必要性评估与设计方案报告.docx / 表格 5（苏州轨道交通6号线金家堰站东北象限邻里中心地块与车站互联互通必要性评估与设计方案报告.docx，置信度0.86，缓存）；（核心工作思路，最优先）互联互通智能体研发工作方案0318.pptx / 第4页（（核心工作思路，最优先）互联互通智能体研发工作方案0318.pptx，置信度0.86，缓存）；20231128苏州市轨道交通站城融合设计导则.pdf / 第3页（20231128苏州市轨道交通站城融合设计导则.pdf，置信度0.86，缓存）；苏州轨道交通站点周边地下公共联通空间设计细则-结题评审修改稿.docx / 表格 1（苏州轨道交通站点周边地下公共联通空间设计细则-结题评审修改稿.docx，置信度0.86，缓存）；苏州轨道交通4号线清树湾站东南象限青年公寓地块与车站互联互通必要性评估与设计方案报告.docx / 段落 50（苏州轨道交通4号线清树湾站东南象限青年公寓地块与车站互联互通必要性评估与设计方案报告.docx，置信度0.86，缓存）；苏州轨道交通4号线清树湾站东南象限青年公寓地块与车站互联互通必要性评估与设计方案报告.docx / 段落 56（苏州轨道交通4号线清树湾站东南象限青年公寓地块与车站互联互通必要性评估与设计方案报告.docx，置信度0.86，缓存）；苏州轨道交通6号线金家堰站东北象限邻里中心地块与车站互联互通必要性评估与设计方案报告.docx / 段落 55（苏州轨道交通6号线金家堰站东北象限邻里中心地块与车站互联互通必要性评估与设计方案报告.docx，置信度0.86，缓存）；规则评分与等级（评价因子赋值明细表.xlsx / 后端规则引擎，置信度1.0，缓存）。证据优先级为项目正式输入/规则源、本地标杆缓存、独立搜索、模型联网低置信补充；未被印证的外部信息只作为复核线索。"
+    },
+    {
+      "title": "模型导向多维研判",
+      "content": "尚未连接可用模型。系统已准备研究计划和本地证据包，但不会自动使用离线兜底生成综合研判。动态维度研判包括：。不确定性包括：未检测到可用模型或模型调用失败。；需要用户确认后，才会使用本地知识库和五类标杆案例缓存生成离线兜底研判。。人工复核问题包括：是否连接模型后重新运行评估？；是否确认使用离线兜底，由本地资料提供研判弹药？。上述模型导向研判以模型为最终综合判断，规则评分作为基线和差异检查坐标保留。"
+    },
+    {
+      "title": "模型主导综合研判",
+      "content": "模型主结论为：尽连地块，推荐方式为地下主通道。置信度约为0.05。判断理由：尚未连接可用模型。系统已准备研究计划和本地证据包，但不会自动使用离线兜底生成综合研判。差异状态：aligned；复核标签：依据充分；依据不足。"
+    },
+    {
+      "title": "资料补齐与复核路径",
+      "content": "资料完整性状态：当前核心评价字段完整。建议在方案深化前补齐站点客流、接口标高、出入口位置、地下空间功能、建设时序和特殊约束条件。补齐后应重新运行评分，并输出补齐前后等级、推荐方式和关键因子变化。"
+    },
+    {
+      "title": "实施时序与协同建议",
+      "content": "近期建议先形成可落地的步行接驳、导向标识、接口预留和资料补齐清单；中期结合地块方案、地下空间和接口标高做工程可行性比选；远期在片区更新或地块开发同步阶段推动站城一体化连通、运营管理界面和投资责任机制。责任协同建议覆盖轨道运营、规划设计、地块开发主体、道路/市政/管线单位和消防审查单位。"
+    },
+    {
+      "title": "LLM综合判断框架",
+      "content": "后续接入其他LLM时，建议把本次后端结果作为规则基线、证据包和差异检查输入，LLM负责最终综合研判、方案复核和专家式建议。输入应包括项目事实、引用依据、四维评分拆解、推荐与备选方案、风险复核点和待补齐资料。建议输出结构为：综合判断结论、主要依据与引用来源、推荐方案适用性说明、备选方案触发条件、风险与需补齐资料、近期/中期/远期实施建议、人工复核问题清单。模型可以在明确说明理由、证据和复核标签的前提下覆盖规则等级或推荐方案；规则评分作为基线和差异检查坐标保留。模型不得把缺失资料补成确定事实；所有新增判断应标注依据、置信度和需人工确认的问题。"
+    }
+  ]
+}

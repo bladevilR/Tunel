@@ -1,0 +1,52 @@
+{
+  "meta": {
+    "name": "legacy single-object schematic",
+    "center": [120.6656, 31.2798],
+    "version": "legacy-fixture"
+  },
+  "parcel": {
+    "name": "parcel redline",
+    "stroke": "#e1262f",
+    "fill": "#f8ed9a",
+    "path": [
+      [120.6646, 31.2806],
+      [120.6657, 31.2806],
+      [120.6657, 31.2795],
+      [120.6646, 31.2795]
+    ]
+  },
+  "underground": {
+    "name": "legacy underground outline",
+    "stroke": "#176bd6",
+    "path": [
+      [120.6648, 31.2804],
+      [120.6655, 31.2804],
+      [120.6655, 31.2797],
+      [120.6648, 31.2797]
+    ]
+  },
+  "station": {
+    "name": "station body",
+    "stroke": "#7d3f98",
+    "fill": "#8a58a5",
+    "body": [
+      [120.6638, 31.2799],
+      [120.6642, 31.2799],
+      [120.6642, 31.2796],
+      [120.6638, 31.2796]
+    ],
+    "exitName": "3号口",
+    "exitPoint": [120.6642, 31.2798]
+  },
+  "channel": {
+    "name": "channel 1",
+    "centerline": [
+      [120.6642, 31.2798],
+      [120.6648, 31.2798],
+      [120.6652, 31.2800]
+    ],
+    "spaceType": "underground",
+    "groundFloors": 0,
+    "undergroundFloors": 1
+  }
+}

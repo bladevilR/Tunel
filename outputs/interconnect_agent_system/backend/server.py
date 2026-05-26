@@ -29,6 +29,8 @@ DATA_DIR = ROOT / "data"
 FRONTEND_DIR = ROOT / "frontend"
 EXPORT_DIR = ROOT / "exports"
 PROJECTS_PATH = DATA_DIR / "projects.json"
+LOCAL_IDENTITY_PATH = DATA_DIR / "local_identity.json"
+ADMIN_STATION_OUTLINES_PATH = DATA_DIR / "admin_station_outlines.json"
 SCHEMATIC_DIR = FRONTEND_DIR / "schematic"
 SCHEMATIC_GEOMETRY_PATH = SCHEMATIC_DIR / "user_geometry.json"
 SCHEMATIC_EXPORT_DIR = SCHEMATIC_DIR / "exports"
@@ -61,6 +63,12 @@ def amap_credentials() -> tuple[str, str]:
     except Exception:
         pass
     return key, security_code
+
+
+def subprocess_output_text(completed: subprocess.CompletedProcess, fallback: str) -> str:
+    stderr = (completed.stderr or "").strip()
+    stdout = (completed.stdout or "").strip()
+    return stderr or stdout or fallback
 
 
 FACTORS = load_json("factors.json")
@@ -125,6 +133,11 @@ AMENITIES_INDEX = build_alias_index(
     STATION_AMENITIES.get("records", []),
     lambda item: [item.get("name", ""), *item.get("aliases", []), *item.get("displayNames", [])]
 )
+STATION_ALIAS_INDEX = build_alias_index(STATIONS.get("stations", []), lambda item: item.get("name", ""))
+STATION_KNOWLEDGE_LOOKUP = build_alias_index(
+    STATION_KNOWLEDGE_INDEX.get("records", []),
+    lambda item: [item.get("name", ""), *item.get("aliases", [])]
+)
 
 
 def lookup_station_context(index: dict[str, dict], name: str | None) -> dict | None:
@@ -143,6 +156,160 @@ def load_projects() -> dict:
 def save_projects(data: dict) -> None:
     DATA_DIR.mkdir(parents=True, exist_ok=True)
     PROJECTS_PATH.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+def truthy_env(name: str) -> bool:
+    return os.environ.get(name, "").strip().lower() in {"1", "true", "yes", "on"}
+
+
+def relative_to_root(path: Path) -> str:
+    try:
+        return path.relative_to(ROOT).as_posix()
+    except ValueError:
+        return str(path)
+
+
+def build_platform_capability_status() -> dict:
+    image_configured = truthy_env("GENERATED_IMAGE_API_ENABLED") and bool(os.environ.get("OPENAI_API_KEY"))
+    return {
+        "generatedImage": {
+            "enabled": image_configured,
+            "mode": "configured" if image_configured else "not_configured",
+            "endpoint": "/api/generated-images",
+            "requires": ["GENERATED_IMAGE_API_ENABLED=1", "OPENAI_API_KEY"],
+        },
+        "accounts": {
+            "enabled": False,
+            "mode": "local_anonymous",
+            "identityEndpoint": "/api/identity",
+            "upgradePath": "Attach saved projects, exports, and schematic geometry to a future authenticated owner id.",
+        },
+        "adminStationOutlines": {
+            "enabled": True,
+            "mode": "shared_local_json",
+            "storage": relative_to_root(ADMIN_STATION_OUTLINES_PATH),
+            "endpoints": ["/api/admin/station-outlines", "/api/admin/station-outlines/apply"],
+        },
+        "deployment": {
+            "enabled": True,
+            "mode": "local_http_server",
+            "host": os.environ.get("HOST", "127.0.0.1"),
+            "port": int(os.environ.get("PORT", "8765") or 8765),
+            "docs": "docs/deployment_server_migration.md",
+        },
+    }
+
+
+def generated_image_placeholder(payload: dict | None = None) -> dict:
+    return {
+        "ok": False,
+        "error": {
+            "code": "not_configured",
+            "message": "Generated-image API is not configured for this local delivery.",
+            "required": ["GENERATED_IMAGE_API_ENABLED=1", "OPENAI_API_KEY"],
+        },
+        "request": payload or {},
+        "capability": build_platform_capability_status()["generatedImage"],
+    }
+
+
+def local_identity_payload() -> dict:
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
+    if LOCAL_IDENTITY_PATH.exists():
+        data = json.loads(LOCAL_IDENTITY_PATH.read_text(encoding="utf-8-sig"))
+    else:
+        data = {
+            "version": "local-anonymous.v1",
+            "identity": {
+                "id": f"anon-{uuid.uuid4().hex[:12]}",
+                "type": "anonymous",
+                "scope": "local-workstation",
+                "createdAt": utc_now(),
+            },
+        }
+        LOCAL_IDENTITY_PATH.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+    data["capability"] = build_platform_capability_status()["accounts"]
+    return data
+
+
+def load_admin_station_outline_data() -> dict:
+    if not ADMIN_STATION_OUTLINES_PATH.exists():
+        return {"version": "admin-station-outlines.v1", "records": []}
+    return json.loads(ADMIN_STATION_OUTLINES_PATH.read_text(encoding="utf-8-sig"))
+
+
+def save_admin_station_outline_data(data: dict) -> None:
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
+    ADMIN_STATION_OUTLINES_PATH.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+def list_admin_station_outlines(station_name: str | None = None) -> list[dict]:
+    records = load_admin_station_outline_data().get("records", [])
+    if station_name:
+        records = [item for item in records if item.get("stationName") == station_name]
+    return sorted(records, key=lambda item: item.get("updatedAt") or item.get("createdAt") or "", reverse=True)
+
+
+def save_admin_station_outline(payload: dict) -> dict:
+    station_name = (payload.get("stationName") or "").strip()
+    outline = payload.get("outline") or {}
+    path = outline.get("path") or outline.get("body")
+    if not station_name:
+        raise ValueError("stationName is required")
+    if not isinstance(path, list) or len(path) < 3:
+        raise ValueError("outline.path must include at least three points")
+    data = load_admin_station_outline_data()
+    record_id = payload.get("id") or outline.get("id") or uuid.uuid4().hex[:12]
+    now = utc_now()
+    existing = next((item for item in data.get("records", []) if item.get("id") == record_id), None)
+    record = {
+        "id": record_id,
+        "stationName": station_name,
+        "outline": {
+            **outline,
+            "id": outline.get("id") or f"admin-outline-{record_id}",
+            "name": outline.get("name") or f"{station_name}站体轮廓",
+            "path": path,
+        },
+        "source": payload.get("source") or {"type": "admin"},
+        "createdAt": (existing or {}).get("createdAt") or now,
+        "updatedAt": now,
+    }
+    data["records"] = [item for item in data.get("records", []) if item.get("id") != record_id]
+    data["records"].append(record)
+    save_admin_station_outline_data(data)
+    return record
+
+
+def apply_admin_station_outline_to_geometry(geometry: dict | None, station_name: str, outline_id: str | None = None) -> dict:
+    geometry = json.loads(json.dumps(geometry or {}, ensure_ascii=False))
+    candidates = list_admin_station_outlines(station_name)
+    if outline_id:
+        candidates = [item for item in candidates if item.get("id") == outline_id]
+    if not candidates:
+        return {"applied": False, "geometry": geometry, "error": "admin station outline not found"}
+    record = candidates[0]
+    outline = {
+        **(record.get("outline") or {}),
+        "source": {
+            "kind": "admin_station_outline",
+            "recordId": record.get("id"),
+            "stationName": record.get("stationName"),
+            "snapshotAt": utc_now(),
+            "source": record.get("source") or {},
+        },
+    }
+    existing = [
+        item for item in geometry.get("stationOutlines", [])
+        if ((item.get("source") or {}).get("recordId") != record.get("id"))
+    ]
+    geometry["stationOutlines"] = [outline, *existing]
+    geometry["station"] = {
+        **(geometry.get("station") or {}),
+        "path": outline.get("path") or [],
+        "body": outline.get("path") or [],
+    }
+    return {"applied": True, "record": record, "geometry": geometry}
 
 
 def list_project_summaries() -> list[dict]:
@@ -364,7 +531,7 @@ def infer_transfer(station: dict, preset: dict | None) -> str | None:
     if station_type in {"current_transfer", "planned_transfer", "normal"}:
         return station_type
     lines = str(station.get("line") or (preset or {}).get("lines") or "")
-    if "/" in lines:
+    if parse_line_count(lines) >= 2:
         return "current_transfer"
     if station.get("name") or preset:
         return "normal"
@@ -399,6 +566,213 @@ def grade_score(score: float, score_percent: float | None = None) -> dict:
 def parse_line_count(value: str | None) -> int:
     parts = [item for item in re.split(r"[/、,，\s]+", str(value or "")) if item]
     return len(parts)
+
+
+def first_present(*values):
+    for value in values:
+        if value not in (None, "", []):
+            return value
+    return None
+
+
+def join_values(value) -> str:
+    if isinstance(value, list):
+        return "/".join(str(item).strip() for item in value if str(item).strip())
+    return str(value or "").strip()
+
+
+def station_context_records(name: str | None) -> dict:
+    return {
+        "station": lookup_station_context(STATION_ALIAS_INDEX, name),
+        "ridership": lookup_station_context(RIDERSHIP_INDEX, name),
+        "operations": lookup_station_context(OPERATIONS_INDEX, name),
+        "amenities": lookup_station_context(AMENITIES_INDEX, name),
+        "knowledge": lookup_station_context(STATION_KNOWLEDGE_LOOKUP, name),
+    }
+
+
+def canonical_station_name(name: str | None, records: dict) -> str:
+    station = records.get("station") or {}
+    ridership = records.get("ridership") or {}
+    operations = records.get("operations") or {}
+    amenities = records.get("amenities") or {}
+    knowledge = records.get("knowledge") or {}
+    return first_present(
+        station.get("name"),
+        ridership.get("stationName"),
+        knowledge.get("name"),
+        operations.get("name"),
+        amenities.get("name"),
+        name,
+    ) or ""
+
+
+def station_line_text(records: dict, overrides: dict | None = None) -> str:
+    overrides = overrides or {}
+    station = records.get("station") or {}
+    ridership = records.get("ridership") or {}
+    operations = records.get("operations") or {}
+    amenities = records.get("amenities") or {}
+    return join_values(first_present(
+        overrides.get("line"),
+        station.get("lines"),
+        ridership.get("lines"),
+        operations.get("lines"),
+        amenities.get("lines"),
+    ))
+
+
+def station_interface_summary(operations: dict | None, amenities: dict | None) -> str:
+    operations = operations or {}
+    amenities = amenities or {}
+    parts = []
+    if operations:
+        forms = "、".join(operations.get("connectionForms") or [])
+        parts.append(
+            f"已识别出入口{operations.get('exitCount') or 0}个"
+            f"；接口{operations.get('interfaceCount') or 0}个"
+            f"；联通形式：{forms or '暂无登记'}"
+        )
+    if amenities:
+        parts.append(
+            f"开放出入口{amenities.get('openExitCount') or 0}/{amenities.get('exitRows') or 0}个"
+            f"；运营管理{amenities.get('managedExitCount') or 0}个"
+        )
+    return "；".join(parts)
+
+
+def station_sources(records: dict) -> list[dict]:
+    labels = {
+        "station": "TOD station preset",
+        "ridership": "ridership workbook",
+        "operations": "station interface workbook",
+        "amenities": "station amenity workbook",
+        "knowledge": "station knowledge index",
+    }
+    return [
+        {"key": key, "label": label, "matched": bool(records.get(key))}
+        for key, label in labels.items()
+        if records.get(key)
+    ]
+
+
+def station_context_payload(name: str | None, overrides: dict | None = None) -> dict:
+    records = station_context_records(name)
+    resolved_name = canonical_station_name(name, records)
+    station = records.get("station") or {}
+    ridership = records.get("ridership") or {}
+    operations = records.get("operations") or {}
+    amenities = records.get("amenities") or {}
+    overrides = overrides or {}
+    line = station_line_text(records, overrides)
+    context_input = {"name": resolved_name, **overrides}
+    if line and not context_input.get("line"):
+        context_input["line"] = line
+    station_type = infer_transfer(context_input, station)
+    suggested_fields = {
+        "station.name": resolved_name,
+        "station.line": line,
+        "station.todLevel": first_present(overrides.get("todLevel"), station.get("todLevel")) or "",
+        "station.locationLevel": first_present(overrides.get("locationLevel"), station.get("locationLevel")) or "",
+        "station.stationType": station_type or "",
+        "station.dailyInbound": first_present(overrides.get("dailyInbound"), ridership.get("latestDailyInbound")) or "",
+        "station.district": first_present(
+            overrides.get("district"),
+            (operations.get("districts") or [None])[0],
+            amenities.get("district"),
+        ) or "",
+        "station.nearbyExit": first_present(
+            overrides.get("nearbyExit"),
+            ((amenities.get("sampleExits") or [{}])[0] or {}).get("exit"),
+        ) or "",
+        "station.interfaceCondition": first_present(
+            overrides.get("interfaceCondition"),
+            station_interface_summary(operations, amenities),
+        ) or "",
+    }
+    return {
+        "ok": any(records.values()),
+        "query": name or "",
+        "name": resolved_name,
+        "stationType": station_type,
+        "suggestedFields": suggested_fields,
+        "sources": station_sources(records),
+        **records,
+    }
+
+
+def iter_station_candidate_names() -> list[str]:
+    names: list[str] = []
+    for station in STATIONS.get("stations", []):
+        names.append(station.get("name", ""))
+    for record in RIDERSHIP.get("records", []):
+        names.append(record.get("stationName", ""))
+    for record in STATION_OPERATIONS.get("records", []):
+        names.extend([record.get("name", ""), *record.get("aliases", []), *record.get("displayNames", [])])
+    for record in STATION_AMENITIES.get("records", []):
+        names.extend([record.get("name", ""), *record.get("aliases", []), *record.get("displayNames", [])])
+    for record in STATION_KNOWLEDGE_INDEX.get("records", []):
+        names.extend([record.get("name", ""), *record.get("aliases", [])])
+    seen = set()
+    result = []
+    for name in names:
+        canonical = canonical_station_name(name, station_context_records(name))
+        if canonical and canonical not in seen:
+            seen.add(canonical)
+            result.append(canonical)
+    return result
+
+
+def station_match_score(query: str, name: str, context: dict) -> int:
+    aliases = station_aliases(name)
+    knowledge = context.get("knowledge") or {}
+    aliases.extend(knowledge.get("aliases") or [])
+    normalized_query = query.strip().lower()
+    if not normalized_query:
+        return 10 + len(context.get("sources") or [])
+    score = 0
+    for alias in aliases:
+        candidate = str(alias or "").strip().lower()
+        if candidate == normalized_query:
+            score = max(score, 1000)
+        elif candidate.startswith(normalized_query):
+            score = max(score, 760)
+        elif normalized_query in candidate:
+            score = max(score, 520)
+    if score:
+        score += len(context.get("sources") or []) * 20
+        if context.get("station"):
+            score += 30
+    return score
+
+
+def search_stations(query: str, limit: int = 12) -> dict:
+    query = (query or "").strip()
+    results = []
+    for name in iter_station_candidate_names():
+        context = station_context_payload(name)
+        score = station_match_score(query, name, context)
+        if not score:
+            continue
+        fields = context.get("suggestedFields") or {}
+        source_labels = [item["label"] for item in context.get("sources") or []]
+        results.append({
+            "name": context.get("name") or name,
+            "label": " / ".join(item for item in [
+                fields.get("station.line"),
+                fields.get("station.todLevel"),
+                fields.get("station.locationLevel"),
+            ] if item),
+            "line": fields.get("station.line") or "",
+            "todLevel": fields.get("station.todLevel") or "",
+            "locationLevel": fields.get("station.locationLevel") or "",
+            "stationType": fields.get("station.stationType") or "",
+            "sourceLabels": source_labels,
+            "matchScore": score,
+        })
+    results.sort(key=lambda item: (item["matchScore"], len(item["sourceLabels"]), item["name"]), reverse=True)
+    limit = min(max(int(limit or 12), 1), 50)
+    return {"query": query, "count": len(results), "results": results[:limit]}
 
 
 def numeric_value(value) -> float:
@@ -1311,7 +1685,6 @@ def export_report_file(result: dict) -> dict:
     files = []
     snapshot_file = EXPORT_DIR / f"{slug}-{stamp}-evaluation-snapshot.json"
     snapshot_file.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
-    files.append(file_info(snapshot_file))
     report_docx = create_docx_report(result, slug, stamp)
     score_docx = create_score_detail_docx(result, slug, stamp)
     for docx_file in [report_docx, score_docx]:
@@ -1322,12 +1695,17 @@ def export_report_file(result: dict) -> dict:
         if pdf_file:
             files.append(file_info(pdf_file))
 
-    return {
-        "filename": report_docx.name if report_docx else "",
-        "path": str(report_docx) if report_docx else "",
-        "relativePath": str(report_docx.relative_to(ROOT)) if report_docx else "",
-        "files": files
+    export = file_info(report_docx) if report_docx else {
+        "filename": "",
+        "path": "",
+        "relativePath": "",
+        "downloadUrl": "",
+        "contentType": "",
+        "size": 0,
     }
+    export["files"] = files
+    export["snapshot"] = file_info(snapshot_file)
+    return export
 
 
 def csv_escape(value: str) -> str:
@@ -1337,12 +1715,45 @@ def csv_escape(value: str) -> str:
 
 
 def file_info(path: Path) -> dict:
+    relative_path = path.relative_to(ROOT).as_posix()
+    content_type = mimetypes.guess_type(str(path))[0] or "application/octet-stream"
     return {
         "filename": path.name,
         "path": str(path),
-        "relativePath": str(path.relative_to(ROOT)),
+        "relativePath": relative_path,
+        "downloadUrl": f"/{relative_path}",
+        "contentType": content_type,
         "size": path.stat().st_size
     }
+
+
+def schematic_png_file_info(path: Path) -> dict:
+    target = path.resolve()
+    export_root = SCHEMATIC_EXPORT_DIR.resolve()
+    target.relative_to(export_root)
+    relative_path = target.relative_to(FRONTEND_DIR).as_posix()
+    return {
+        "filename": target.name,
+        "path": str(target),
+        "relativePath": relative_path,
+        "downloadUrl": f"/{relative_path}",
+        "contentType": mimetypes.guess_type(str(target))[0] or "image/png",
+        "size": target.stat().st_size,
+    }
+
+
+def schematic_png_export_response(result: dict) -> dict:
+    enriched = dict(result)
+    output_path = enriched.get("outputPath")
+    if enriched.get("ok") and output_path:
+        export = schematic_png_file_info(Path(output_path))
+        enriched["export"] = export
+        enriched["filename"] = export["filename"]
+        enriched["relativePath"] = export["relativePath"]
+        enriched["downloadUrl"] = export["downloadUrl"]
+        enriched["contentType"] = export["contentType"]
+        enriched["size"] = export["size"]
+    return enriched
 
 
 def export_kind(path: Path) -> str:
@@ -1583,6 +1994,8 @@ def create_pdf_from_docx(docx_path: Path) -> Path | None:
         return pdf_path
     if create_simple_pdf_from_docx_text(docx_path, pdf_path):
         return pdf_path
+    if create_minimal_pdf_placeholder(docx_path, pdf_path):
+        return pdf_path
     return None
 
 
@@ -1651,6 +2064,44 @@ def create_simple_pdf_from_docx_text(docx_path: Path, pdf_path: Path) -> bool:
     try:
         import fitz
         from docx import Document
+    except Exception:
+        return False
+
+
+def pdf_escape(value: str) -> str:
+    return value.replace("\\", "\\\\").replace("(", "\\(").replace(")", "\\)")
+
+
+def create_minimal_pdf_placeholder(docx_path: Path, pdf_path: Path) -> bool:
+    try:
+        line = pdf_escape(f"PDF fallback generated from DOCX: {docx_path.name}")
+        content = f"BT /F1 12 Tf 72 760 Td ({line}) Tj ET"
+        objects = [
+            "1 0 obj << /Type /Catalog /Pages 2 0 R >> endobj\n",
+            "2 0 obj << /Type /Pages /Kids [3 0 R] /Count 1 >> endobj\n",
+            "3 0 obj << /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] "
+            "/Resources << /Font << /F1 5 0 R >> >> /Contents 4 0 R >> endobj\n",
+            f"4 0 obj << /Length {len(content.encode('latin-1'))} >> stream\n{content}\nendstream endobj\n",
+            "5 0 obj << /Type /Font /Subtype /Type1 /BaseFont /Helvetica >> endobj\n",
+        ]
+        data = bytearray(b"%PDF-1.4\n")
+        offsets = [0]
+        for obj in objects:
+            offsets.append(len(data))
+            data.extend(obj.encode("latin-1"))
+        xref_offset = len(data)
+        data.extend(f"xref\n0 {len(objects) + 1}\n".encode("latin-1"))
+        data.extend(b"0000000000 65535 f \n")
+        for offset in offsets[1:]:
+            data.extend(f"{offset:010d} 00000 n \n".encode("latin-1"))
+        data.extend(
+            (
+                f"trailer << /Size {len(objects) + 1} /Root 1 0 R >>\n"
+                f"startxref\n{xref_offset}\n%%EOF\n"
+            ).encode("latin-1")
+        )
+        pdf_path.write_bytes(bytes(data))
+        return pdf_path.exists() and pdf_path.stat().st_size > 0
     except Exception:
         return False
 
@@ -1800,6 +2251,17 @@ class Handler(BaseHTTPRequestHandler):
         if route == "/api/health":
             self._json({"ok": True, "service": "interconnect-agent", "version": FACTORS["version"]})
             return
+        if route == "/api/capabilities":
+            self._json({"ok": True, "capabilities": build_platform_capability_status()})
+            return
+        if route == "/api/identity":
+            self._json({"ok": True, **local_identity_payload()})
+            return
+        if route == "/api/admin/station-outlines":
+            params = parse_qs(parsed.query)
+            station_name = (params.get("station") or params.get("stationName") or [""])[0] or None
+            self._json({"ok": True, "records": list_admin_station_outlines(station_name)})
+            return
         if route == "/api/knowledge":
             self._json({
                 "ok": True,
@@ -1837,6 +2299,20 @@ class Handler(BaseHTTPRequestHandler):
                 }
             })
             return
+        if route == "/api/stations/search":
+            params = parse_qs(parsed.query)
+            query = (params.get("q") or [""])[0]
+            try:
+                limit = int((params.get("limit") or ["12"])[0])
+            except ValueError:
+                limit = 12
+            self._json({"ok": True, **search_stations(query, limit)})
+            return
+        if route == "/api/stations/context":
+            params = parse_qs(parsed.query)
+            name = (params.get("name") or params.get("q") or [""])[0]
+            self._json(station_context_payload(name))
+            return
         if route == "/api/research/benchmark-cases":
             self._json({"ok": True, **benchmark_cases_status()})
             return
@@ -1853,6 +2329,7 @@ class Handler(BaseHTTPRequestHandler):
                 "knowledgeCatalog": KNOWLEDGE_CATALOG,
                 "sourceManifest": SOURCE_MANIFEST,
                 "unparsedSources": UNPARSED_SOURCES,
+                "platformCapabilities": build_platform_capability_status(),
                 "demos": DEMOS,
                 "projects": list_project_summaries(),
                 "exports": list_export_files(20)
@@ -1903,6 +2380,26 @@ class Handler(BaseHTTPRequestHandler):
         if route == "/api/schematic/export-png":
             self._export_schematic_png()
             return
+        if route in {"/api/generated-images", "/api/admin/station-outlines", "/api/admin/station-outlines/apply"}:
+            try:
+                payload = self._read_json_body()
+                if route == "/api/generated-images":
+                    self._json(generated_image_placeholder(payload), status=HTTPStatus.NOT_IMPLEMENTED)
+                    return
+                if route == "/api/admin/station-outlines":
+                    record = save_admin_station_outline(payload)
+                    self._json({"ok": True, "record": record, "records": list_admin_station_outlines(record["stationName"])})
+                    return
+                result = apply_admin_station_outline_to_geometry(
+                    payload.get("geometry") or {},
+                    payload.get("stationName") or "",
+                    payload.get("outlineId"),
+                )
+                self._json({"ok": result.get("applied", False), **result})
+                return
+            except Exception as exc:  # noqa: BLE001
+                self._json({"ok": False, "error": str(exc)}, status=HTTPStatus.BAD_REQUEST)
+                return
         if route not in {"/api/evaluate", "/api/projects", "/api/export"}:
             self.send_error(HTTPStatus.NOT_FOUND, "Not found")
             return
@@ -1978,6 +2475,19 @@ class Handler(BaseHTTPRequestHandler):
             return {}
         return json.loads(body.decode("utf-8") or "{}")
 
+    def _request_base_url(self) -> str:
+        proto = (self.headers.get("X-Forwarded-Proto") or "http").split(",")[0].strip() or "http"
+        host = (
+            self.headers.get("X-Forwarded-Host")
+            or self.headers.get("Host")
+            or os.environ.get("HOST")
+            or "127.0.0.1:8765"
+        )
+        host = str(host).split(",")[0].strip()
+        if ":" not in host and os.environ.get("PORT"):
+            host = f"{host}:{os.environ['PORT']}"
+        return f"{proto}://{host}"
+
     def _schematic_user_geometry(self) -> None:
         if not SCHEMATIC_GEOMETRY_PATH.exists():
             self._json({"ok": False, "geometry": None})
@@ -2002,7 +2512,10 @@ class Handler(BaseHTTPRequestHandler):
         try:
             SCHEMATIC_EXPORT_DIR.mkdir(parents=True, exist_ok=True)
             env = os.environ.copy()
-            env["AMAP_EXPORT_URL"] = "http://127.0.0.1:8765/schematic/index.html?view=3d&export=1"
+            env["AMAP_EXPORT_URL"] = env.get(
+                "AMAP_EXPORT_URL",
+                f"{self._request_base_url()}/schematic/index.html?view=3d&export=1",
+            )
             node_modules = Path.home() / ".cache" / "codex-runtimes" / "codex-primary-runtime" / "dependencies" / "node" / "node_modules"
             if node_modules.exists() and not env.get("NODE_PATH"):
                 env["NODE_PATH"] = str(node_modules)
@@ -2013,18 +2526,26 @@ class Handler(BaseHTTPRequestHandler):
                 check=False,
                 capture_output=True,
                 text=True,
+                encoding="utf-8",
+                errors="replace",
                 timeout=75,
             )
             if completed.returncode != 0:
                 self._json(
-                    {"ok": False, "error": completed.stderr.strip() or completed.stdout.strip()},
+                    {
+                        "ok": False,
+                        "error": subprocess_output_text(
+                            completed,
+                            f"PNG export process exited with code {completed.returncode} and produced no output",
+                        ),
+                    },
                     status=HTTPStatus.INTERNAL_SERVER_ERROR,
                 )
                 return
             stdout = completed.stdout or ""
             if not stdout.strip() and (SCHEMATIC_DIR / "last_export.json").exists():
                 stdout = (SCHEMATIC_DIR / "last_export.json").read_text(encoding="utf-8")
-            self._json(json.loads(stdout))
+            self._json(schematic_png_export_response(json.loads(stdout)))
         except Exception as exc:  # noqa: BLE001
             self._json({"ok": False, "error": str(exc)}, status=HTTPStatus.INTERNAL_SERVER_ERROR)
 
@@ -2077,7 +2598,7 @@ class Handler(BaseHTTPRequestHandler):
 
 
 def main() -> None:
-    host = "127.0.0.1"
+    host = "0.0.0.0"
     port = 8765
     if "--host" in sys.argv:
         host = sys.argv[sys.argv.index("--host") + 1]

@@ -56,11 +56,14 @@ async function main() {
     customModel: Boolean(document.querySelector("#customModelToggle")),
     perspective: Boolean(document.querySelector("#perspectiveDragButton")),
     buildingSelect: Boolean(document.querySelector("#buildingSelect")),
+    spaceType: Boolean(document.querySelector("#spaceTypeSelect")),
+    groundFloors: Boolean(document.querySelector("#groundFloorsInput")),
+    undergroundFloors: Boolean(document.querySelector("#undergroundFloorsInput")),
     autoChannel: Boolean(document.querySelector("#autoChannelButton")),
     summary: window.__AMAP_SYNC__?.getSummary()
   }));
-  assert(controls.customModel && controls.perspective && controls.buildingSelect && controls.autoChannel, "schematic controls missing");
-  assert(controls.summary && controls.summary.useCustomBuildingPrisms === false, "custom building prisms should be off by default");
+  assert(controls.customModel && controls.perspective && controls.buildingSelect && controls.spaceType && controls.groundFloors && controls.undergroundFloors && controls.autoChannel, "schematic controls missing");
+  assert(controls.summary && controls.summary.useCustomBuildingPrisms === true, "custom building prisms should be visible by default");
 
   const box = await page.locator("#map2d").boundingBox();
   assert(box, "2D map box missing");
@@ -79,11 +82,18 @@ async function main() {
 
   await drawTool("building", [[0.36, 0.34], [0.46, 0.34], [0.46, 0.45], [0.36, 0.45]]);
   await drawTool("building", [[0.58, 0.48], [0.70, 0.48], [0.70, 0.60], [0.58, 0.60]]);
-  await page.locator("#customModelToggle").click();
+  await page.locator("#spaceTypeSelect").selectOption("underground");
+  await page.locator("#groundFloorsInput").fill("2");
+  await page.locator("#undergroundFloorsInput").fill("3");
+  await page.locator("#undergroundFloorsInput").dispatchEvent("change");
   await page.evaluate(() => window.__AMAP_SYNC__.setModelPerspective(-24, 62));
   await page.locator('[data-draw-tool="exit"]').click();
   await clickPoint(0.82, 0.38);
   await page.waitForTimeout(250);
+  await page.locator("#autoChannelButton").click();
+  await page.waitForTimeout(350);
+  await page.locator("#buildingSelect").selectOption("building-1");
+  await page.waitForTimeout(150);
   await page.locator("#autoChannelButton").click();
   await page.waitForTimeout(350);
   await page.evaluate(() => window.__AMAP_SYNC__.saveUserGeometry());
@@ -92,10 +102,18 @@ async function main() {
     summary: window.__AMAP_SYNC__.getSummary(),
     channelCenterline: window.__AMAP_SYNC__.geometry.channel.centerline.length,
     channelFootprint: window.__AMAP_SYNC__.geometry.channel.path.length,
+    buildings: window.__AMAP_SYNC__.geometry.buildings,
+    channels: window.__AMAP_SYNC__.geometry.channels,
     selectOptions: Array.from(document.querySelector("#buildingSelect").options).map((option) => option.textContent)
   }));
   assert(state.summary.buildingCount === 2, `expected 2 buildings, got ${state.summary.buildingCount}`);
+  assert(state.summary.channelCount === 2, `expected 2 channels, got ${state.summary.channelCount}`);
   assert(state.summary.useCustomBuildingPrisms === true, "custom model toggle should work");
+  const undergroundBuilding = state.buildings.find((item) => item.id === "building-2");
+  assert(undergroundBuilding?.spaceType === "underground", "edited building should retain underground type");
+  assert(undergroundBuilding.groundFloors === 2 && undergroundBuilding.undergroundFloors === 3, "selected building floor counts should be editable");
+  assert(state.channels.some((item) => item.spaceType === "underground"), "one auto channel should inherit underground target type");
+  assert(state.channels.some((item) => item.spaceType === "ground"), "one auto channel should support ground target type");
   assert(Math.round(state.summary.modelExtrudeAngle) === -24, "manual perspective angle should be settable");
   assert(state.channelCenterline >= 3 && state.channelFootprint >= 6, "auto channel should generate centerline and footprint");
   assert(state.selectOptions.length === 2, "building select should list multiple buildings");
@@ -107,6 +125,8 @@ async function main() {
 
   const saved = JSON.parse(fs.readFileSync(path.join(root, "frontend", "schematic", "user_geometry.json"), "utf-8"));
   assert(saved.buildings.length === 2, "integrated schematic save should persist buildings");
+  assert(saved.channels.length === 2, "integrated schematic save should persist multiple channels");
+  assert(saved.channels.some((item) => item.spaceType === "underground"), "integrated schematic save should persist underground channel space type");
   console.log(JSON.stringify({ ok: true, schematicUrl, screenshotPath, failedRequests: failedRequests.slice(0, 8) }, null, 2));
 }
 
