@@ -51,8 +51,12 @@
           <button id="loadDemoBtn" class="secondary-btn" type="button" title="载入右侧选择的示例或模板">载入模板</button>
           <button id="saveProjectBtn" class="secondary-btn" type="button">保存</button>
           <button id="deleteProjectBtn" class="secondary-btn danger-btn" type="button">删除</button>
+          <button id="exportProjectIntakeBtn" class="secondary-btn" type="button">导出提资</button>
+          <button id="importProjectIntakeBtn" class="secondary-btn" type="button">导入提资</button>
+          <input id="importProjectIntakeFile" type="file" accept="application/json,.json" hidden>
           <button id="evaluateBtn" class="primary-btn" type="button">运行评估</button>
           <button id="exportBtn" class="secondary-btn" type="button">导出</button>
+          <span id="projectIntakeStatus" class="toolbar-status" aria-live="polite"></span>
         </div>
         <div id="evaluationProgress" class="evaluation-progress" hidden>
           <div>
@@ -110,6 +114,25 @@
             <div class="step-heading"><span>1</span><h2>评估结论</h2></div>
             <span id="currentProjectBadge" class="pill muted">待运行</span>
             <p id="dashboardPolicy" class="conclusion-copy">运行评估后展示联通等级、推荐方式与主要判断依据。</p>
+            <section class="model-judgement-card">
+              <div>
+                <span class="command-eyebrow">模型主导研判</span>
+                <h3 id="modelJudgementTitle">模型研判待运行</h3>
+                <p id="modelJudgementReason">运行评估后展示模型最终结论、覆盖理由和置信度。</p>
+              </div>
+              <div id="modelConfidence" class="confidence-meter">--</div>
+            </section>
+            <section id="modelDifferencePanel" class="model-difference-panel">规则基线与模型差异将在运行后展示。</section>
+            <div class="model-work-grid">
+              <section>
+                <h3>关键风险</h3>
+                <div id="modelRiskList" class="model-list"></div>
+              </section>
+              <section>
+                <h3>补资优先级</h3>
+                <div id="modelFundingList" class="model-list"></div>
+              </section>
+            </div>
             <div id="dashboardInputSummary" class="input-summary-grid"></div>
           </section>
 
@@ -224,7 +247,8 @@
 
               <div class="form-section wide">
                 <h3>车站信息</h3>
-                <label>车站名称<input name="station.name" type="text" list="stationList" placeholder="输入或选择车站"><datalist id="stationList"></datalist></label>
+                <label>车站名称<input name="station.name" type="text" list="stationList" autocomplete="off" placeholder="输入或选择车站"><datalist id="stationList"></datalist></label>
+                <div id="stationSearchResults" class="station-search-results wide" hidden></div>
                 <label>所属区划<input name="station.district" type="text" placeholder="如：工业园区"></label>
                 <label>线路<input name="station.line" type="text" placeholder="如：6"></label>
                 <label>TOD级别<input name="station.todLevel" type="text" placeholder="由预设站点库补齐或人工录入"></label>
@@ -357,6 +381,15 @@
                 <p>运行评估后生成完整综合性报告正文。</p>
               </div>
             </div>
+            <div id="reportModeTabs" class="report-mode-tabs"></div>
+            <p id="reportModeSummary" class="report-mode-summary">运行评估后可切换客户正式版、专家附录版和领导汇报版。</p>
+            <section class="diagram-brief-panel">
+              <div>
+                <span class="command-eyebrow">示意图 brief</span>
+                <h3 id="diagramBriefTitle">推荐联通路径示意</h3>
+              </div>
+              <div id="diagramBriefSvg" class="diagram-brief-svg"></div>
+            </section>
             <div id="reportPreview" class="report-preview empty-state">报告将在运行评估后生成。</div>
           </section>
 

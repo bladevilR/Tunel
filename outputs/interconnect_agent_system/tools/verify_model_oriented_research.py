@@ -74,9 +74,13 @@ def check_case(case_id, project):
     assert_true(capabilities.get("localCache", {}).get("available") is True, "本地缓存能力应可用", capabilities)
     assert_true("llm" in capabilities and "independentSearch" in capabilities and "modelWebSearch" in capabilities, "能力状态不完整", capabilities)
 
-    immutable = assessment.get("immutableFacts", {})
-    assert_true(immutable.get("score") == result.get("score"), "模型研判不得改写评分", immutable)
-    assert_true(immutable.get("level") == result.get("level"), "模型研判不得改写等级", immutable)
+    judgement = result.get("modelJudgement") or {}
+    difference = result.get("modelRuleDifference") or {}
+    assert_true(judgement.get("level"), "模型主导研判必须给出最终等级", judgement)
+    assert_true(judgement.get("recommendedType"), "模型主导研判必须给出最终推荐方式", judgement)
+    assert_true(difference.get("ruleLevel") == result.get("level"), "差异检查器必须保留规则等级基线", difference)
+    assert_true(difference.get("modelLevel") == judgement.get("level"), "差异检查器必须保留模型等级", difference)
+    assert_true(difference.get("reviewLabels"), "差异检查器必须输出复核标签", difference)
 
 
 def main():

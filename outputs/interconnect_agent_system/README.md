@@ -24,9 +24,14 @@ http://127.0.0.1:8765/
 - 联通必要性评分
 - 按 80/60 百分制阈值判定必连 / 尽连 / 可连
 - 联通方式推荐
+- 模型主导综合研判，可在保留理由和复核标签的前提下覆盖规则基线结论
+- 规则基线 / 模型结论差异说明
+- 资料补齐、风险项、证据覆盖和质量标签
+- 推荐联通路径示意图 brief
+- 客户正式版、专家附录版、领导汇报版三类报告模式
 - 规则追溯
 - 项目保存、读取、删除
-- 正式报告与打分明细 Word / PDF 导出
+- JSON 评估快照、正式报告与打分明细 Word / PDF 导出
 - 实时交付清单 API 与 zip 交付包下载
 - 浏览器端到端验收
 
@@ -60,11 +65,25 @@ http://127.0.0.1:8765/
 - `docs/mockups/`：四个理想页面视觉稿
 - `docs/product_page_mockup.png`：成品页面视觉稿
 - `docs/pilot_input_template.xlsx`：试点录入模板
+- `docs/superpowers/specs/2026-05-11-model-led-phase-one-design.md`：模型主导一期设计
+- `docs/superpowers/plans/2026-05-11-model-led-phase-one.md`：模型主导一期实施计划
 
 ## 验收
 
 ```powershell
-python -m py_compile .\backend\server.py .\tools\generate_delivery_assets.py .\tools\ingest_feedback_20260507.py .\tools\build_knowledge_database.py .\tools\build_delivery_manifest.py
+python -m py_compile .\backend\server.py .\backend\research_agent.py .\tools\verify_model_led_phase_one.py .\tools\verify_model_oriented_research.py
+python .\tools\verify_model_led_phase_one.py
+python .\tools\verify_model_oriented_research.py
 $env:NODE_PATH='C:\Users\R\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\node_modules'
 & 'C:\Users\R\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe' .\verify_system.cjs
+& 'C:\Users\R\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe' .\tools\verify_model_led_ui.cjs
 ```
+
+## 远端部署包
+
+```powershell
+python .\tools\build_windows_server_package.py
+python .\tools\verify_windows_server_package.py
+```
+
+默认生成 `dist/interconnect-agent-server-*-with-key.zip`，包含 `start_server.bat`、内置 Python 运行时和当前 `.env.local`。该包内含模型访问密钥，只用于受控分发。

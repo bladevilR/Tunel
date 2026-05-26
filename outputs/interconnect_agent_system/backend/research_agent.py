@@ -626,6 +626,161 @@ def fallback_assessment(
     }
 
 
+def clamp_confidence(value, fallback: float = 0.72) -> float:
+    try:
+        number = float(value)
+    except (TypeError, ValueError):
+        return fallback
+    return max(0.05, min(0.98, number))
+
+
+def first_text(values, fallback: str) -> str:
+    for value in values:
+        text = str(value or "").strip()
+        if text:
+            return text
+    return fallback
+
+
+def build_funding_requests(missing: list[dict], station_context: dict) -> list[dict]:
+    requests = []
+    for index, item in enumerate(missing[:5], 1):
+        requests.append({
+            "id": f"funding-{index}",
+            "title": item.get("name") or item.get("factorId") or "待补齐资料",
+            "priority": "高" if index <= 2 else "中",
+            "reason": item.get("message") or item.get("detail") or "该资料会影响模型对联通等级、接口条件和实施风险的判断。",
+            "reviewLabel": "需客户补资",
+        })
+    if len(requests) < 3:
+        requests.append({
+            "id": "funding-interface",
+            "title": "接口标高与运营边界",
+            "priority": "高",
+            "reason": "需明确车站非付费区、接口标高和运营管理界面，避免模型将预评估线索误写为工程事实。",
+            "reviewLabel": "需人工复核",
+        })
+    if len(requests) < 3:
+        requests.append({
+            "id": "funding-underground",
+            "title": "地下空间与消防分区",
+            "priority": "中",
+            "reason": "需补充地下层数、公共开放空间、消防分区和疏散条件，支撑后续方案深化。",
+            "reviewLabel": "模型推断",
+        })
+    if len(requests) < 3:
+        requests.append({
+            "id": "funding-implementation",
+            "title": "权属界面与实施时序",
+            "priority": "中",
+            "reason": "需明确产权边界、施工组织、投资分担和开放运营责任，支撑客户版成果落地。",
+            "reviewLabel": "需人工复核",
+        })
+    return requests[:5]
+
+
+def build_risk_items(assessment: dict, missing: list[dict], station_context: dict) -> list[dict]:
+    risks = []
+    for index, item in enumerate(assessment.get("risks") or [], 1):
+        if isinstance(item, dict):
+            title = item.get("title") or item.get("topic") or item.get("name") or f"模型风险{index}"
+            detail = item.get("detail") or item.get("description") or item.get("summary") or item.get("reason") or title
+            severity = item.get("severity") or item.get("level") or ("高" if index <= 2 else "中")
+        else:
+            title = f"模型风险{index}"
+            detail = str(item)
+            severity = "高" if index <= 2 else "中"
+        risks.append({
+            "id": f"risk-{index}",
+            "title": title,
+            "detail": detail,
+            "severity": severity,
+            "reviewLabel": "需人工复核",
+        })
+    for item in missing:
+        if len(risks) >= 5:
+            break
+        risks.append({
+            "id": f"risk-missing-{item.get('factorId') or len(risks) + 1}",
+            "title": item.get("name") or "资料缺项",
+            "detail": item.get("message") or "资料缺项会影响模型判断的稳定性。",
+            "severity": "高",
+            "reviewLabel": "缺项影响较大",
+        })
+    while len(risks) < 3:
+        risks.append({
+            "id": f"risk-review-{len(risks) + 1}",
+            "title": "工程边界复核",
+            "detail": "接口、管线、产权和消防条件需在深化阶段复核。",
+            "severity": "中",
+            "reviewLabel": "需人工复核",
+        })
+    return risks[:5]
+
+
+def build_model_judgement(result_facts: dict, project: dict, station_context: dict, missing: list[dict], assessment: dict) -> dict:
+    benchmark = assessment.get("benchmarkCase") or {}
+    dynamic_dimensions = assessment.get("dynamicDimensions") or []
+    primary_name = result_facts.get("primaryRecommendation")
+    summary = first_text([
+        assessment.get("summary"),
+        f"模型结合规则基线、站点资料和{benchmark.get('label') or '同类案例'}，建议按{result_facts.get('level')}控制，优先采用{primary_name}。"
+    ], "模型已生成综合研判。")
+    evidence_refs = []
+    for item in dynamic_dimensions[:4]:
+        evidence_refs.extend(item.get("evidenceRefs") or [])
+    is_model = assessment.get("status") == "model_generated" and not assessment.get("fallbackUsed")
+    return {
+        "status": "model_written" if is_model else "fallback_written",
+        "level": assessment.get("finalLevel") or result_facts.get("level"),
+        "recommendedType": assessment.get("recommendedType") or primary_name,
+        "confidence": clamp_confidence(assessment.get("confidence"), 0.76 if assessment.get("fallbackUsed") else 0.84),
+        "reason": summary,
+        "overrideReason": assessment.get("overrideReason") or "模型以规则评分为基线，结合站点上下文、案例经验和资料缺口形成最终判断。",
+        "evidenceRefs": list(dict.fromkeys(evidence_refs))[:8],
+        "riskItems": build_risk_items(assessment, missing, station_context),
+        "fundingRequests": build_funding_requests(missing, station_context),
+        "reviewQuestions": assessment.get("reviewQuestions") or [],
+    }
+
+
+def build_model_rule_difference(result_facts: dict, judgement: dict) -> dict:
+    rule_level = result_facts.get("level")
+    model_level = judgement.get("level")
+    rule_type = result_facts.get("primaryRecommendation")
+    model_type = judgement.get("recommendedType")
+    aligned = rule_level == model_level and rule_type == model_type
+    labels = ["依据充分"] if aligned else ["与规则不同", "需人工复核"]
+    if judgement.get("confidence", 0) < 0.7:
+        labels.append("依据不足")
+    return {
+        "status": "aligned" if aligned else "model_override",
+        "ruleLevel": rule_level,
+        "modelLevel": model_level,
+        "ruleRecommendedType": rule_type,
+        "modelRecommendedType": model_type,
+        "reason": "模型结论与规则基线一致。" if aligned else judgement.get("overrideReason"),
+        "reviewLabels": labels,
+    }
+
+
+def build_model_quality(judgement: dict, missing: list[dict], evidence_items: list[dict]) -> dict:
+    labels = []
+    if missing:
+        labels.append("缺项影响较大")
+    if judgement.get("confidence", 0) < 0.7:
+        labels.append("依据不足")
+    if not labels:
+        labels.append("依据充分")
+    return {
+        "factHonesty": "review" if missing else "pass",
+        "evidenceCoverage": "sufficient" if len(evidence_items) >= 8 else "partial",
+        "labels": labels,
+        "missingCount": len(missing),
+        "evidenceCount": len(evidence_items),
+    }
+
+
 def build_capability_status(
     evidence_items: list[dict],
     independent_status: dict,
@@ -733,6 +888,7 @@ def build_model_oriented_research(
 ) -> dict:
     options = options or {}
     allow_offline_fallback = bool(options.get("allowOfflineFallback"))
+    force_offline_fallback = bool(options.get("forceOfflineFallback"))
     plan = build_research_plan(project, station_context, dimensions, missing)
     immutable_facts = {
         "score": score,
@@ -750,7 +906,14 @@ def build_model_oriented_research(
     evidence_items.extend(live_items)
 
     evidence_items = dedupe_evidence(evidence_items)
-    model_data, llm_status, model_web_items = run_model_assessment(project, immutable_facts, plan, evidence_items)
+    if force_offline_fallback:
+        model_data, llm_status, model_web_items = None, {
+            "available": False,
+            "mode": "offline_forced",
+            "reason": "本次请求强制使用离线兜底，跳过外部模型调用。"
+        }, []
+    else:
+        model_data, llm_status, model_web_items = run_model_assessment(project, immutable_facts, plan, evidence_items)
     model_data = normalize_model_assessment_data(model_data)
     if model_web_items:
         evidence_items = dedupe_evidence(evidence_items + model_web_items)
@@ -784,6 +947,9 @@ def build_model_oriented_research(
         requires_offline_fallback_consent,
         allow_offline_fallback
     )
+    judgement = build_model_judgement(immutable_facts, project, station_context, missing, assessment)
+    difference = build_model_rule_difference(immutable_facts, judgement)
+    quality = build_model_quality(judgement, missing, evidence_items)
     mode = "live_plus_cache" if capability_status["liveEvidenceCount"] else "offline_cache"
     return {
         "researchPlan": plan,
@@ -800,7 +966,10 @@ def build_model_oriented_research(
             }
         },
         "modelAssessment": assessment,
-        "capabilityStatus": capability_status
+        "capabilityStatus": capability_status,
+        "modelJudgement": judgement,
+        "modelRuleDifference": difference,
+        "modelQuality": quality
     }
 
 
@@ -930,6 +1099,124 @@ def waiting_client_report() -> tuple[list[dict], str]:
     ], "awaiting_model_or_fallback_consent"
 
 
+LEGACY_REPORT_SECTION_TITLES = [
+    "项目概况",
+    "联通必要性评估结论",
+    "联通方式比选与推荐方案",
+    "方案设计核心技术要求",
+    "合规性校验说明",
+    "设计优化与实施建议",
+    "意向效果图输出指引",
+]
+
+
+def section_content(sections: list[dict], title_part: str) -> str:
+    for section in sections:
+        if title_part in str(section.get("title") or ""):
+            return str(section.get("content") or "").strip()
+    return ""
+
+
+def report_ridership_notice(station_context: dict) -> str:
+    daily = station_context.get("dailyInbound")
+    source = station_context.get("dailyInboundSource") or "每站每月日均进站.xlsx"
+    if isinstance(daily, (int, float)):
+        return (
+            f"客流判断影响：已匹配{source}，日均进站约{daily:.0f}人次/日；该指标用于判断联通设施的服务强度、"
+            "全天候接驳必要性、通道宽度弹性和高峰组织压力，但不单独决定是否联通，仍需与站点能级、周边功能、"
+            "接口成熟度和实施条件共同研判。"
+        )
+    return (
+        "客流判断影响：现阶段未匹配到可直接引用的每站每月日均进站.xlsx记录，客流仅能作为待补齐项；"
+        "在正式决策前应补充站点客流、方向分布和高峰时段数据，再复核通道尺度和实施优先级。"
+    )
+
+
+def old_city_protection_notice(project: dict) -> str:
+    station = project.get("station") or {}
+    parcel = project.get("parcel") or {}
+    location_text = " ".join(str(item or "") for item in [
+        station.get("district"),
+        station.get("name"),
+        parcel.get("location"),
+        parcel.get("quadrant"),
+        parcel.get("constraints"),
+    ])
+    likely_sensitive = any(token in location_text for token in ["姑苏", "古城", "平江", "观前", "山塘", "历史"])
+    if likely_sensitive:
+        return (
+            "古城保护与历史文化保护：项目文本含姑苏、古城、历史街区或相近敏感线索，需按苏州历史文化名城保护、"
+            "古城保护、文物保护和风貌管控要求进行人工复核；在权威范围线、控高、风貌和地下文保要求确认前，"
+            "不得把连通方式、出入口位置或地面构筑物形态作为最终方案。"
+        )
+    return (
+        "古城保护与历史文化保护：当前结构化数据未接入权威古城保护范围、历史文化街区、文物保护单位和建设控制地带图层，"
+        "因此本报告将其列为人工复核项；若后续核实项目位于苏州历史文化名城或古城保护相关范围内，应补充风貌、控高、"
+        "地下空间和施工扰动专项论证。"
+    )
+
+
+def safety_and_rail_protection_notice() -> str:
+    return (
+        "轨道交通保护区与安全保护区提示：涉及车站、区间、附属结构、出入口和地下连通空间时，应核对轨道交通保护区、"
+        "安全保护区及运营安全边界，明确结构安全、沉降控制、施工监测、接口封堵、防水和运营维保责任。"
+        "消防与疏散提示：地下或半地下连通空间必须同步校核防火分区、排烟、应急照明、疏散距离、疏散宽度、无障碍连续性和管理界面，"
+        "不得以商业展示、装修或导流需求削弱基本安全功能。"
+    )
+
+
+def build_legacy_ordered_report_sections(
+    base_sections: list[dict],
+    project: dict,
+    station_context: dict,
+    missing_text: str,
+) -> list[dict]:
+    overview = section_content(base_sections, "项目概况")
+    necessity = " ".join(filter(None, [
+        section_content(base_sections, "联通必要性评估结论"),
+        section_content(base_sections, "模型主导研判结论"),
+        section_content(base_sections, "结论核心依据说明"),
+        report_ridership_notice(station_context),
+    ]))
+    comparison = " ".join(filter(None, [
+        section_content(base_sections, "联通方式比选与推荐方案"),
+        section_content(base_sections, "推荐方案整体设计思路"),
+    ]))
+    technical = " ".join(filter(None, [
+        section_content(base_sections, "方案设计核心技术要求"),
+        "技术深化阶段应把客流判断影响转化为通道宽度、节点集散、导向标识、照明、无障碍、电扶梯或坡道组织等可校核指标。",
+    ]))
+    compliance = " ".join(filter(None, [
+        section_content(base_sections, "合规性校验说明"),
+        old_city_protection_notice(project),
+        safety_and_rail_protection_notice(),
+    ]))
+    optimization = " ".join(filter(None, [
+        section_content(base_sections, "设计优化与实施建议"),
+        section_content(base_sections, "资料补齐与复核问题"),
+        f"资料补齐要求：{missing_text}",
+    ]))
+    rendering = " ".join(filter(None, [
+        section_content(base_sections, "意向效果图") or section_content(base_sections, "示意图输出指引"),
+        "出图时应同步标注客流主方向、站厅非付费区接口、轨道交通保护区或安全保护区复核边界、消防疏散路径、"
+        "无障碍连续路径、近期可实施范围和远期预留接口；如涉及古城保护或历史文化风貌敏感范围，应在图面中单独标出需人工复核的控制线和说明文字。",
+    ]))
+
+    content_by_title = {
+        "项目概况": " ".join(filter(None, [overview, report_ridership_notice(station_context)])),
+        "联通必要性评估结论": necessity,
+        "联通方式比选与推荐方案": comparison,
+        "方案设计核心技术要求": technical,
+        "合规性校验说明": compliance,
+        "设计优化与实施建议": optimization,
+        "意向效果图输出指引": rendering,
+    }
+    return [
+        {"title": title, "content": content_by_title.get(title, "").strip()}
+        for title in LEGACY_REPORT_SECTION_TITLES
+    ]
+
+
 def fallback_client_report(
     project: dict,
     score: float,
@@ -950,6 +1237,9 @@ def fallback_client_report(
     rule = recommendation.get("rule") or {}
     context = compact_station_context(station_context)
     benchmark = ((research_bundle.get("researchPlan") or {}).get("benchmarkCase") or {})
+    judgement = research_bundle.get("modelJudgement") or {}
+    difference = research_bundle.get("modelRuleDifference") or {}
+    quality = research_bundle.get("modelQuality") or {}
     scheme = primary_scheme_detail(primary, station, parcel)
     dimension_text = "；".join(f"{item.get('name')}得分{item.get('score')}" for item in dimensions)
     missing_text = "；".join(item.get("message", "") for item in missing) if missing else "当前核心评分字段较完整，后续仍需结合工程资料复核。"
@@ -987,6 +1277,18 @@ def fallback_client_report(
                 f"本次建议以{primary_name}作为主要联通方式，并同步保留备选方案和接口预留条件。"
                 f"从案例经验看，{benchmark.get('label', '同类站点案例')}提示本项目不能只看客流大小，还要看服务对象、接口成熟度、全天候通行和后续运营分界。"
                 "该结论不以单一客流指标作为判断依据，而是综合考虑公共服务属性、站点可达性、工程接口、全天候通行需求和建设协同条件。"
+            )
+        },
+        {
+            "title": "模型主导研判结论",
+            "content": (
+                f"模型综合规则基线、站点资料、知识库证据和标杆案例后，给出的主结论为{judgement.get('level', grade.get('level'))}，"
+                f"推荐方式为{judgement.get('recommendedType', primary_name)}，置信度约为{judgement.get('confidence', 0):.2f}。"
+                f"模型判断理由为：{judgement.get('reason', '模型基于规则基线和现有资料形成综合判断。')}"
+                f"规则基线为{difference.get('ruleLevel', grade.get('level'))}/{difference.get('ruleRecommendedType', primary_name)}，"
+                f"模型结论为{difference.get('modelLevel', judgement.get('level', grade.get('level')))}/{difference.get('modelRecommendedType', judgement.get('recommendedType', primary_name))}。"
+                f"差异状态为{difference.get('status', 'aligned')}，复核标签包括{cn_join((difference.get('reviewLabels') or []) + (quality.get('labels') or []), '需复核')}。"
+                "模型可以覆盖规则口径，但不得把缺失的接口标高、消防分区、产权界面或管线条件写成已确认事实；相关内容均按需复核或模型推断处理。"
             )
         },
         {
@@ -1060,7 +1362,7 @@ def fallback_client_report(
             )
         }
     ]
-    return report, "offline_fallback_written"
+    return build_legacy_ordered_report_sections(report, project, station_context, missing_text), "offline_fallback_written"
 
 
 def split_report_text(text: str) -> list[dict]:
@@ -1249,7 +1551,12 @@ def build_client_report(
         research_bundle
     )
     llm_status = (research_bundle.get("capabilityStatus") or {}).get("llm") or {}
-    if llm_configured() and assessment.get("status") != "awaiting_offline_fallback_consent":
+    should_try_model_report = (
+        llm_configured()
+        and assessment.get("status") != "awaiting_offline_fallback_consent"
+        and llm_status.get("mode") != "offline_forced"
+    )
+    if should_try_model_report:
         model_report = model_client_report(
             project,
             score_percent,

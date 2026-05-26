@@ -31,7 +31,19 @@ http://127.0.0.1:8765
 
 ## POST /api/evaluate
 
-根据项目输入返回评估结果。请求体为项目 JSON。
+根据项目输入返回评估结果。请求体可直接传项目 JSON，也可传：
+
+```json
+{
+  "project": {},
+  "researchOptions": {
+    "allowOfflineFallback": true,
+    "forceOfflineFallback": false
+  }
+}
+```
+
+`allowOfflineFallback` 表示外部模型不可用时允许后端生成本地兜底研判；`forceOfflineFallback` 用于本地验收或演示，强制跳过外部模型调用。
 
 响应核心字段：
 
@@ -42,8 +54,17 @@ http://127.0.0.1:8765
 - `stationContext`：匹配到的客流、出入口接口、运营配套和周边配套。
 - `dimensions`：四维评分明细。
 - `recommendation`：推荐方案、备选方案和命中规则。
-- `report`：不少于 10 章的综合评价报告内容，覆盖评价口径、引用依据、站点研判、维度拆解、方案比选、风险复核、实施建议和 LLM 综合判断框架。
-- `llmReviewContext`：供后续接入其他 LLM 或人工专家复核的结构化上下文；包含不可篡改项目事实、引用依据、四维拆解、方案比选、风险复核点、输出结构约束和模型使用边界。
+- `researchPlan` / `evidencePack`：模型研判前的研究计划、标杆案例、本地知识库和可用外部检索证据。
+- `modelAssessment`：模型或本地兜底生成的动态维度、风险、不确定性和复核问题。
+- `modelJudgement`：一期主结论字段。包含 `level`、`recommendedType`、`confidence`、`reason`、`overrideReason`、`riskItems`、`fundingRequests`、`reviewQuestions` 和证据引用。该字段作为展示和报告生成的模型主导结论。
+- `modelRuleDifference`：规则基线与模型结论的差异说明。包含 `ruleLevel`、`modelLevel`、`ruleRecommendedType`、`modelRecommendedType`、`status`、`reason` 和 `reviewLabels`；模型可以覆盖规则结论，但必须保留理由与复核标签。
+- `modelQuality`：事实诚实、证据覆盖、缺失项数量、证据数量和质量标签。
+- `diagramBrief`：推荐联通路径示意图 brief，包含图类型、节点、边、标注和可导出格式。
+- `reportModes`：报告模式清单，当前包括客户正式版、专家附录版和领导汇报版。
+- `capabilityStatus`：本地知识库、独立搜索、模型调用和兜底状态。
+- `clientReport` / `clientReportMode`：客户可读报告章节与生成模式。
+- `report`：综合评价报告内容，覆盖评价口径、引用依据、站点研判、维度拆解、方案比选、风险复核、实施建议和模型主导综合研判。
+- `llmReviewContext`：供后续接入其他 LLM 或人工专家复核的结构化上下文；包含规则基线、引用依据、四维拆解、方案比选、风险复核点、输出结构约束和模型可覆盖规则结论的边界。
 - `missing`：评分字段待补齐项。
 
 ## GET /api/projects
@@ -104,17 +125,42 @@ http://127.0.0.1:8765
 
 ## POST /api/export
 
-根据传入项目数据或 `projectId` 生成交付文件。后端会重新调用 `/api/evaluate` 同一套规则计算评分、等级、推荐方式和报告章节；前端传入的历史 `result` 仅兼容旧调用中的 `result.project`，其中的评分和结论不会被采信。
+根据传入项目数据或 `projectId` 生成交付文件。后端会重新调用 `/api/evaluate` 同一套规则和模型主导研判链路计算评分、等级、推荐方式和报告章节；前端传入的历史 `result` 仅兼容旧调用中的 `result.project`，其中的评分和结论不会被采信。请求体同样支持 `researchOptions`。
 
-- Markdown 报告。
-- Word 报告。
-- JSON 评估快照。
-- JSON 中包含 `llmReviewContext`，可作为外部 LLM 综合判断的事实输入。
-- 评分明细 CSV。
-- 待补齐清单 CSV。
+- JSON 评估快照，包含 `modelJudgement`、`modelRuleDifference`、`modelQuality`、`diagramBrief`、`reportModes` 和 `llmReviewContext`。
+- 正式报告 Word。
+- 正式报告 PDF（可转换时生成）。
+- 评分明细 Word。
+- 评分明细 PDF（可转换时生成）。
 
 响应中的 `files[].relativePath` 可通过 `/exports/...` 下载。
 
 ## GET /exports/{filename}
 
 下载后端导出的报告文件。
+
+## Platform Readiness APIs
+
+### GET /api/capabilities
+
+Returns explicit capability flags for generated images, accounts, administrator station outlines, and deployment/runtime status. Each item includes at least `enabled` and `mode`.
+
+### GET /api/identity
+
+Returns the local anonymous identity contract. This keeps saved local data usable before account login is introduced and provides a stable owner id for future migration.
+
+### POST /api/generated-images
+
+Placeholder endpoint for future generated-image integration. When `GENERATED_IMAGE_API_ENABLED=1` and `OPENAI_API_KEY` are not configured, the endpoint returns a structured `not_configured` error.
+
+### GET /api/admin/station-outlines
+
+Lists shared administrator station outlines from `data/admin_station_outlines.json`. Optional query parameters: `station` or `stationName`.
+
+### POST /api/admin/station-outlines
+
+Saves a shared administrator station outline separately from user project data.
+
+### POST /api/admin/station-outlines/apply
+
+Applies an administrator station outline to a project geometry payload and writes source snapshot metadata, including `kind=admin_station_outline`, `recordId`, `stationName`, and `snapshotAt`.

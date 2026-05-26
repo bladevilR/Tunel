@@ -137,6 +137,32 @@
       max-width: none;
     }
 
+    .drawbar.is-collapsed {
+      grid-template-columns: 1fr;
+      width: auto;
+    }
+
+    .drawbar.is-collapsed::before {
+      display: none;
+    }
+
+    .drawbar.is-collapsed > :not(#toggleDrawbarButton) {
+      display: none;
+    }
+
+    .view-control {
+      display: grid;
+      gap: 2px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .view-control input {
+      width: 88px;
+      min-height: 34px;
+    }
+
     button {
       min-width: 64px;
       min-height: 36px;
@@ -447,6 +473,11 @@
       color: #0b5f91;
     }
 
+    .label.selected {
+      border-color: rgba(11, 95, 145, 0.72);
+      box-shadow: 0 0 0 3px rgba(29, 140, 207, 0.18), 0 4px 14px rgba(15, 23, 42, 0.16);
+    }
+
     .label.parcel {
       border-color: rgba(225, 38, 47, 0.42);
       color: #b91c1c;
@@ -473,6 +504,7 @@
 
     body[data-export="true"] .topbar,
     body[data-export="true"] .legend,
+    body[data-export="true"] .drawbar,
     body[data-export="true"] .draw-panel,
     body[data-export="true"] .view-badge,
     body[data-export="true"] .status {
@@ -484,6 +516,10 @@
     }
 
     @media (max-width: 860px) {
+      #app {
+        grid-template-rows: auto auto minmax(320px, 1fr);
+      }
+
       .topbar {
         align-items: flex-start;
         grid-template-columns: 1fr;
@@ -512,6 +548,7 @@
       .maps {
         grid-template-columns: 1fr;
         grid-template-rows: 1fr 1fr;
+        min-height: 320px;
       }
     }
   </style>
@@ -540,23 +577,33 @@
         <button type="button" data-mode-button="split" aria-pressed="true">双视图</button>
         <button type="button" data-mode-button="2d" aria-pressed="false">只看2D</button>
         <button type="button" data-mode-button="3d" aria-pressed="false">只看3D</button>
+        <label class="view-control">Pitch<input id="viewPitchInput" type="number" min="0" max="75" step="1" value="38"></label>
+        <label class="view-control">Rotation<input id="viewRotationInput" type="number" min="-180" max="180" step="1" value="0"></label>
         <button type="button" id="fitButton">回到范围</button>
       </div>
     </header>
     <div class="drawbar" aria-label="手动画线工具">
+      <button type="button" id="toggleDrawbarButton" class="wide-action" aria-expanded="true">收起绘图工具</button>
       <button type="button" data-draw-tool="parcel">画红线</button>
-      <button type="button" data-draw-tool="underground">画地下轮廓</button>
       <button type="button" data-draw-tool="channel">画通道线</button>
       <button type="button" data-draw-tool="building">画建筑</button>
       <button type="button" data-draw-tool="station">画站体</button>
       <button type="button" data-draw-tool="exit">点1号口</button>
+      <button type="button" id="deleteSelectedObjectButton" class="danger">删除选中</button>
       <button type="button" id="finishDrawButton">完成绘制</button>
       <button type="button" id="undoDrawButton">撤销上一点</button>
       <button type="button" id="cancelDrawButton">取消本次</button>
       <button type="button" id="clearLayerButton">清空当前图层</button>
       <select id="buildingSelect" aria-label="选择建筑"></select>
+      <select id="channelSelect" aria-label="选择通道"></select>
+      <select id="spaceTypeSelect" aria-label="空间类型">
+        <option value="ground">地上空间</option>
+        <option value="underground">地下空间</option>
+      </select>
+      <input id="groundFloorsInput" type="number" min="0" max="30" value="4" aria-label="地上层数" title="地上层数" />
+      <input id="undergroundFloorsInput" type="number" min="0" max="12" value="1" aria-label="地下层数" title="地下层数" />
       <button type="button" id="autoChannelButton">自动通道</button>
-      <button type="button" id="customModelToggle" aria-pressed="false">自建体块</button>
+      <button type="button" id="customModelToggle" aria-pressed="true">自建体块</button>
       <button type="button" id="perspectiveDragButton" aria-pressed="false">拖拽透视</button>
       <button type="button" id="saveGeometryButton" class="primary wide-action">保存草图</button>
       <button type="button" id="exportPngButton" class="primary">导出PNG</button>
@@ -602,21 +649,27 @@
       securityJsCode: "__AMAP_SECURITY_CODE__"
     };
   </script>
+  <script src="./space_model.js"></script>
   <script src="./geometry.js"></script>
   <script>
     const config = window.AMAP_SYNC_CONFIG || {};
     const defaultGeometry = window.AMAP_SYNC_GEOMETRY;
+    const spaceModel = window.SCHEMATIC_SPACE_MODEL;
     let geometry = cloneGeometry(defaultGeometry);
     let activeDrawTool = "";
     let lastSelectedTool = "";
     let drawingPoints = [];
+    let drawingPreviewPoint = null;
     let drawingOverlay = null;
+    let selectedDrawObject = null;
     let isDrawingInteractionLocked = false;
     let buildingSerial = 0;
-    let useCustomBuildingPrisms = false;
+    let channelSerial = 0;
+    let useCustomBuildingPrisms = true;
     let modelExtrudeAngle = -58;
     let modelExtrudeHeight = 44;
     let isPerspectiveDragMode = false;
+    let pendingBuildingDefaults = { spaceType: "ground", groundFloors: 4, undergroundFloors: 1 };
     const query = new URLSearchParams(window.location.search);
     let linkedProjectRecord = null;
     let loadedProjectGeometry = false;
@@ -645,6 +698,28 @@
         .replaceAll(">", "&gt;")
         .replaceAll('"', "&quot;")
         .replaceAll("'", "&#039;");
+    }
+
+    function normalizeSpatialItem(item, defaults) {
+      return spaceModel.normalizeSpatialItem(item, defaults);
+    }
+
+    function currentSpaceType() {
+      const select = document.getElementById("spaceTypeSelect");
+      return spaceModel.normalizeSpaceType(select ? select.value : "ground");
+    }
+
+    function activeFloorsFor(item) {
+      const normalized = normalizeSpatialItem(item);
+      return normalized.spaceType === "underground"
+        ? Math.max(1, normalized.undergroundFloors)
+        : Math.max(1, normalized.groundFloors);
+    }
+
+    function recommendedSpaceType(record) {
+      const primary = record?.result?.recommendation?.primary?.name || record?.project?.recommendation?.primary?.name || "";
+      const text = `${primary} ${record?.project?.parcel?.undergroundDescription || ""} ${record?.project?.parcel?.undergroundSpace || ""}`;
+      return text.includes("地下") ? "underground" : "ground";
     }
 
     function projectLabel(project) {
@@ -720,6 +795,7 @@
       const innerInterfacePoint = offsetPoint(parcelCenter, -dir.x * 0.00018, -dir.y * 0.00010);
       const buildingCenter = offsetPoint(parcelCenter, dir.x * 0.00008, dir.y * 0.00004);
       const projectName = project.name || query.get("project") || "目标地块";
+      const channelSpaceType = recommendedSpaceType(record);
       geometry.meta = {
         ...(geometry.meta || {}),
         name: `${station.name || "站点"} / ${projectName} 联通概念示意`,
@@ -748,7 +824,10 @@
         fill: "#ffffff",
         path: rectAround(buildingCenter, 0.00025, 0.00015),
         rotation: 0,
-        extrudeAngle: -58
+        extrudeAngle: -58,
+        spaceType: "ground",
+        groundFloors: 4,
+        undergroundFloors: channelSpaceType === "underground" ? 1 : 0
       }];
       geometry.selectedBuildingId = "building-1";
       geometry.station = {
@@ -759,13 +838,19 @@
         body: rectAround(center, 0.00024, 0.00015),
         path: rectAround(center, 0.00024, 0.00015),
         exitName: station.nearbyExit || "邻近出入口",
-        exitPoint
+        exitPoint,
+        spaceType: "underground",
+        groundFloors: 0,
+        undergroundFloors: 2
       };
       geometry.channel = {
         ...(geometry.channel || {}),
         name: "推荐联通路径",
         stroke: "#0b77bd",
         fill: "#1d8ccf",
+        spaceType: channelSpaceType,
+        groundFloors: channelSpaceType === "ground" ? 1 : 0,
+        undergroundFloors: channelSpaceType === "underground" ? 1 : 0,
         centerline: [
           exitPoint,
           offsetPoint(center, dir.x * 0.00072, dir.y * 0.00032),
@@ -775,6 +860,12 @@
         path: []
       };
       geometry.channel.path = makeChannelFootprint(geometry.channel.centerline);
+      geometry.channels = [{
+        ...geometry.channel,
+        id: "channel-1",
+        name: "通道 1"
+      }];
+      geometry.selectedChannelId = "channel-1";
       geometry.labels = [
         { id: "parcel", text: "目标地块", position: centroid(geometry.parcel.path), className: "parcel" },
         { id: "exit", text: `${station.name || "车站"} ${geometry.station.exitName}`, position: exitPoint, className: "exit" },
@@ -873,8 +964,30 @@
     }
 
     function ensureGeometryV2() {
+      geometry = spaceModel.normalizeGeometryV2(geometry);
       if (!Array.isArray(geometry.buildings)) {
         geometry.buildings = [];
+      }
+      geometry.station = normalizeSpatialItem(geometry.station || {}, {
+        spaceType: "underground",
+        groundFloors: 0,
+        undergroundFloors: 2
+      });
+      geometry.channel = normalizeSpatialItem(geometry.channel || {}, {
+        spaceType: "underground",
+        groundFloors: 0,
+        undergroundFloors: 1
+      });
+      if (!Array.isArray(geometry.channels)) {
+        geometry.channels = [];
+      }
+      if ((geometry.channel.path?.length || geometry.channel.centerline?.length) && geometry.channels.length === 0) {
+        geometry.channels.push({
+          ...geometry.channel,
+          id: "channel-1",
+          name: geometry.channel.name || "通道 1"
+        });
+        geometry.selectedChannelId = "channel-1";
       }
       if (geometry.proposedBuilding && geometry.proposedBuilding.path && geometry.proposedBuilding.path.length >= 3 && geometry.buildings.length === 0) {
         geometry.buildings.push({
@@ -884,7 +997,10 @@
           fill: geometry.proposedBuilding.fill || "#ffffff",
           path: geometry.proposedBuilding.path,
           rotation: 0,
-          extrudeAngle: -58
+          extrudeAngle: -58,
+          spaceType: "ground",
+          groundFloors: 4,
+          undergroundFloors: 1
         });
         geometry.selectedBuildingId = "building-1";
       }
@@ -895,6 +1011,27 @@
       if (geometry.buildings.length > 0 && !geometry.selectedBuildingId) {
         geometry.selectedBuildingId = geometry.buildings[geometry.buildings.length - 1].id;
       }
+      channelSerial = geometry.channels.reduce((max, channel) => {
+        const match = String(channel.id || "").match(/channel-(\d+)/);
+        return Math.max(max, match ? Number(match[1]) : 0);
+      }, 0);
+      if (geometry.channels.length > 0 && !geometry.selectedChannelId) {
+        geometry.selectedChannelId = geometry.channels[geometry.channels.length - 1].id;
+      }
+      geometry.channels.forEach((channel, index) => {
+        channel.id = channel.id || `channel-${index + 1}`;
+        channel.name = channel.name || `通道 ${index + 1}`;
+        channel.stroke = channel.stroke || "#0b77bd";
+        channel.fill = channel.fill || "#1d8ccf";
+        if ((!channel.path || channel.path.length < 3) && channel.centerline && channel.centerline.length >= 2) {
+          channel.path = makeChannelFootprint(channel.centerline);
+        }
+        Object.assign(channel, normalizeSpatialItem(channel, {
+          spaceType: "underground",
+          groundFloors: 0,
+          undergroundFloors: 1
+        }));
+      });
       geometry.buildings.forEach((building, index) => {
         building.id = building.id || `building-${index + 1}`;
         building.name = building.name || `建筑 ${index + 1}`;
@@ -902,7 +1039,13 @@
         building.fill = building.fill || "#ffffff";
         building.rotation = building.rotation || 0;
         building.extrudeAngle = Number.isFinite(building.extrudeAngle) ? building.extrudeAngle : -58;
+        Object.assign(building, normalizeSpatialItem(building, {
+          spaceType: "ground",
+          groundFloors: 4,
+          undergroundFloors: 1
+        }));
       });
+      syncLegacyChannel();
       syncLegacyBuilding();
       syncBuildingLabels();
     }
@@ -910,6 +1053,20 @@
     function getSelectedBuilding() {
       ensureGeometryV2();
       return geometry.buildings.find((building) => building.id === geometry.selectedBuildingId) || geometry.buildings[0] || null;
+    }
+
+    function getSelectedChannel() {
+      ensureGeometryV2();
+      return geometry.channels.find((channel) => channel.id === geometry.selectedChannelId) || geometry.channels[0] || null;
+    }
+
+    function syncLegacyChannel() {
+      const selected = geometry.channels.find((channel) => channel.id === geometry.selectedChannelId) || geometry.channels[0] || null;
+      geometry.channel = normalizeSpatialItem({
+        ...(selected || geometry.channel || {}),
+        path: selected ? selected.path : [],
+        centerline: selected ? selected.centerline : []
+      }, { spaceType: "underground", groundFloors: 0, undergroundFloors: 1 });
     }
 
     function syncLegacyBuilding() {
@@ -930,7 +1087,7 @@
         if (building.path && building.path.length >= 3) {
           geometry.labels.push({
             id: building.id,
-            text: `${building.name}<br>地上4层 / 地下1层`,
+            text: `${building.name}<br>${spaceModel.spaceTypeLabel(building.spaceType)}体块 · ${spaceModel.floorSummary(building)}`,
             position: centroid(building.path),
             className: "building"
           });
@@ -1073,6 +1230,7 @@
       }));
 
       ctx.save();
+      ctx.setLineDash(options.dash || []);
       for (let i = 0; i < points.length; i += 1) {
         const next = (i + 1) % points.length;
         const face = new Path2D();
@@ -1116,6 +1274,21 @@
       ctx.restore();
     }
 
+    function drawSpacePrism(ctx, points, item, options) {
+      const projection = spaceModel.volumeProjection({
+        spaceType: item?.spaceType,
+        angleDegrees: options.angleDegrees ?? modelExtrudeAngle,
+        height: options.height
+      });
+      drawPrism(ctx, points, {
+        ...options,
+        offsetX: projection.offsetX,
+        offsetY: projection.offsetY,
+        dash: projection.dashed ? [9, 6] : [],
+        lineWidth: options.lineWidth || 2
+      });
+    }
+
     function drawProjectedLine(ctx, points, style) {
       if (!points || points.length < 2) {
         return;
@@ -1142,15 +1315,14 @@
     function renderCanvas3d(map) {
       const canvas = document.getElementById("overlay3d");
       const ctx = setupCanvas(canvas);
+      ensureGeometryV2();
       const parcel = projectPath(map, geometry.parcel.path || []);
       const station = projectPath(map, geometry.station.body || []);
-      const channel = geometry.channel.path && geometry.channel.path.length >= 3
-        ? projectPath(map, geometry.channel.path)
-        : [];
-      const channelLine = geometry.channel.centerline && geometry.channel.centerline.length >= 2
-        ? projectPath(map, geometry.channel.centerline)
-        : [];
-      ensureGeometryV2();
+      const channels = geometry.channels.map((channel) => ({
+        data: channel,
+        footprint: channel.path && channel.path.length >= 3 ? projectPath(map, channel.path) : [],
+        line: channel.centerline && channel.centerline.length >= 2 ? projectPath(map, channel.centerline) : []
+      }));
       const isConceptGeometry = document.body.dataset.conceptGeometry === "true";
       const buildings = geometry.buildings.map((building) => ({
         data: building,
@@ -1176,22 +1348,24 @@
           stroke: "rgba(94, 48, 119, 0.72)",
           lineWidth: 2.2
         });
-        drawProjectedLine(ctx, channelLine, {
-          stroke: "rgba(255, 255, 255, 0.86)",
-          lineWidth: 15,
-          lineCap: "round",
-          lineJoin: "round"
-        });
-        drawProjectedLine(ctx, channelLine, {
-          stroke: "rgba(10, 100, 166, 0.90)",
-          lineWidth: 9,
-          lineCap: "round",
-          lineJoin: "round"
+        channels.forEach(({ line }) => {
+          drawProjectedLine(ctx, line, {
+            stroke: "rgba(255, 255, 255, 0.86)",
+            lineWidth: 15,
+            lineCap: "round",
+            lineJoin: "round"
+          });
+          drawProjectedLine(ctx, line, {
+            stroke: "rgba(10, 100, 166, 0.90)",
+            lineWidth: 9,
+            lineCap: "round",
+            lineJoin: "round"
+          });
         });
       } else {
-        drawPrism(ctx, station, {
-          offsetX: -7,
-          offsetY: -18,
+        drawSpacePrism(ctx, station, geometry.station, {
+          angleDegrees: -58,
+          height: 22 + activeFloorsFor(geometry.station) * 4,
           top: "rgba(188, 143, 210, 0.36)",
           sideA: "rgba(117, 68, 145, 0.28)",
           sideB: "rgba(154, 101, 177, 0.24)",
@@ -1199,19 +1373,22 @@
           lineWidth: 1.7
         });
 
-        const channelAngle = (modelExtrudeAngle * Math.PI) / 180;
-        drawPrism(ctx, channel, {
-          offsetX: Math.cos(channelAngle) * 13,
-          offsetY: Math.sin(channelAngle) * 13,
-          top: "rgba(91, 185, 234, 0.44)",
-          sideA: "rgba(29, 140, 207, 0.26)",
-          sideB: "rgba(11, 119, 189, 0.22)",
-          stroke: "rgba(10, 100, 166, 0.72)",
-          lineWidth: 1.6
-        });
-        drawProjectedLine(ctx, channelLine, {
-          stroke: "rgba(10, 100, 166, 0.92)",
-          lineWidth: 7
+        channels.forEach(({ data, footprint, line }) => {
+          const selected = data.id === geometry.selectedChannelId;
+          drawSpacePrism(ctx, footprint, data, {
+            angleDegrees: modelExtrudeAngle,
+            height: selected ? 17 : 14,
+            top: "rgba(91, 185, 234, 0.44)",
+            sideA: "rgba(29, 140, 207, 0.26)",
+            sideB: "rgba(11, 119, 189, 0.22)",
+            stroke: selected ? "rgba(10, 100, 166, 0.94)" : "rgba(10, 100, 166, 0.66)",
+            lineWidth: selected ? 2.1 : 1.5
+          });
+          drawProjectedLine(ctx, line, {
+            stroke: selected ? "rgba(10, 100, 166, 0.96)" : "rgba(10, 100, 166, 0.74)",
+            lineWidth: selected ? 7 : 5,
+            dash: data.spaceType === "underground" ? [12, 8] : []
+          });
         });
       }
 
@@ -1225,17 +1402,17 @@
           lineWidth: data.id === geometry.selectedBuildingId ? 2.6 : 1.7
         });
         if (useCustomBuildingPrisms) {
-          const angle = (modelExtrudeAngle * Math.PI) / 180;
-          const height = data.id === geometry.selectedBuildingId ? modelExtrudeHeight + 8 : modelExtrudeHeight;
-          drawPrism(ctx, points, {
-            offsetX: Math.cos(angle) * height,
-            offsetY: Math.sin(angle) * height,
-            top: "rgba(255, 255, 255, 0.90)",
-            sideA: "rgba(214, 221, 226, 0.84)",
-            sideB: "rgba(184, 195, 204, 0.78)",
-            stroke: data.id === geometry.selectedBuildingId ? "rgba(11, 95, 145, 0.92)" : "rgba(17, 24, 39, 0.66)",
+          const floorHeight = 14 + activeFloorsFor(data) * 8;
+          const height = data.id === geometry.selectedBuildingId ? floorHeight + 8 : floorHeight;
+          drawSpacePrism(ctx, points, data, {
+            angleDegrees: modelExtrudeAngle,
+            height,
+            top: data.spaceType === "underground" ? "rgba(255, 244, 242, 0.88)" : "rgba(255, 255, 255, 0.90)",
+            sideA: data.spaceType === "underground" ? "rgba(225, 38, 47, 0.20)" : "rgba(225, 38, 47, 0.28)",
+            sideB: data.spaceType === "underground" ? "rgba(185, 28, 28, 0.16)" : "rgba(185, 28, 28, 0.24)",
+            stroke: data.id === geometry.selectedBuildingId ? "rgba(185, 28, 28, 0.92)" : "rgba(127, 29, 29, 0.66)",
             floorLines: true,
-            floorStroke: "rgba(17, 24, 39, 0.28)",
+            floorStroke: "rgba(127, 29, 29, 0.24)",
             lineWidth: data.id === geometry.selectedBuildingId ? 2.2 : 1.7
           });
         }
@@ -1248,7 +1425,7 @@
       if (!item.path || item.path.length < 3) {
         return null;
       }
-      return new AMap.Polygon({
+      const layer = new AMap.Polygon({
         path: item.path,
         strokeColor: options.strokeColor || item.stroke,
         strokeWeight: options.strokeWeight || 4,
@@ -1259,6 +1436,7 @@
         fillOpacity: options.fillOpacity ?? 0.16,
         zIndex: options.zIndex || 80
       });
+      return attachSelectionHandler(layer, options.objectType, options.objectId);
     }
 
     function createPolylineLayer(map, item, options = {}) {
@@ -1266,7 +1444,7 @@
       if (!path || path.length < 2) {
         return null;
       }
-      return new AMap.Polyline({
+      const layer = new AMap.Polyline({
         path,
         strokeColor: item.stroke,
         strokeWeight: options.strokeWeight || 4,
@@ -1275,44 +1453,69 @@
         strokeDasharray: options.strokeDasharray,
         zIndex: options.zIndex || 100
       });
+      return attachSelectionHandler(layer, options.objectType, options.objectId);
     }
 
     function addSharedLayers(map, view) {
       ensureGeometryV2();
       const layers = [
-        createPolygonLayer(map, geometry.parcel, {
-          strokeWeight: view === "2d" ? 5 : 4,
+        ...geometry.parcels.map((parcel, index) => createPolygonLayer(map, parcel, {
+          objectType: "parcel",
+          objectId: parcel.id,
+          strokeWeight: isSelectedDrawObject("parcel", parcel.id) ? 7 : (view === "2d" ? 5 : 4),
           fillOpacity: view === "2d" ? 0.20 : 0.10,
-          zIndex: 90
-        }),
-        createPolygonLayer(map, geometry.underground, {
-          strokeWeight: 3,
+          zIndex: 90 + index
+        })),
+        ...geometry.spatialItems.map((item, index) => createPolygonLayer(map, item, {
+          objectType: "spatialItem",
+          objectId: item.id,
+          strokeWeight: isSelectedDrawObject("spatialItem", item.id) ? 5 : (item.spaceType === "underground" ? 3 : 2),
           strokeOpacity: 0.86,
-          strokeStyle: "dashed",
-          strokeDasharray: [12, 8],
-          fillOpacity: 0.04,
-          zIndex: 92
-        }),
-        createPolygonLayer(map, geometry.channel, {
-          strokeWeight: 3,
-          fillOpacity: view === "2d" ? 0.30 : 0.18,
-          zIndex: 96
-        }),
-        createPolylineLayer(map, geometry.channel, {
-          strokeWeight: view === "2d" ? 5 : 4,
-          strokeOpacity: 0.95,
-          zIndex: 104
-        }),
-        createPolygonLayer(map, geometry.station, {
-          strokeWeight: 2,
+          strokeStyle: item.spaceType === "underground" ? "dashed" : "solid",
+          strokeDasharray: item.spaceType === "underground" ? [12, 8] : undefined,
+          fillOpacity: item.spaceType === "underground" ? 0.04 : 0.12,
+          zIndex: 92 + index
+        })),
+        ...geometry.stationOutlines.map((station, index) => createPolygonLayer(map, station, {
+          objectType: "station",
+          objectId: station.id,
+          strokeWeight: isSelectedDrawObject("station", station.id) ? 4 : 2,
+          strokeStyle: station.spaceType === "underground" ? "dashed" : "solid",
+          strokeDasharray: station.spaceType === "underground" ? [12, 8] : undefined,
           fillOpacity: view === "2d" ? 0.30 : 0.16,
-          zIndex: 94
-        })
+          zIndex: 94 + index
+        }))
       ].filter(Boolean);
+      geometry.channels.forEach((channel) => {
+        const selected = channel.id === geometry.selectedChannelId;
+        const dashed = channel.spaceType === "underground";
+        layers.push(createPolygonLayer(map, channel, {
+          objectType: "channel",
+          objectId: channel.id,
+          strokeWeight: selected ? 4 : 3,
+          strokeStyle: dashed ? "dashed" : "solid",
+          strokeDasharray: dashed ? [12, 8] : undefined,
+          fillOpacity: view === "2d" ? 0.30 : 0.18,
+          zIndex: selected ? 106 : 96
+        }));
+        layers.push(createPolylineLayer(map, channel, {
+          objectType: "channel",
+          objectId: channel.id,
+          strokeWeight: selected ? (view === "2d" ? 6 : 5) : (view === "2d" ? 5 : 4),
+          strokeOpacity: selected ? 0.98 : 0.82,
+          strokeStyle: dashed ? "dashed" : "solid",
+          strokeDasharray: dashed ? [12, 8] : undefined,
+          zIndex: selected ? 112 : 104
+        }));
+      });
       geometry.buildings.forEach((building) => {
         layers.push(createPolygonLayer(map, building, {
+          objectType: "building",
+          objectId: building.id,
           strokeWeight: building.id === geometry.selectedBuildingId ? 4 : 2,
           strokeColor: building.id === geometry.selectedBuildingId ? "#0b77bd" : undefined,
+          strokeStyle: building.spaceType === "underground" ? "dashed" : "solid",
+          strokeDasharray: building.spaceType === "underground" ? [12, 8] : undefined,
           fillOpacity: view === "2d" ? 0.60 : 0.22,
           zIndex: building.id === geometry.selectedBuildingId ? 101 : 98
         }));
@@ -1332,6 +1535,18 @@
           offset: new AMap.Pixel(0, -10),
           zIndex: 160
         }));
+      });
+
+      geometry.exits.forEach((exit) => {
+        const marker = new AMap.Marker({
+          position: exit.point,
+          content: makeLabel(exit.name || "出入口", isSelectedDrawObject("exit", exit.id) ? "exit selected" : "exit"),
+          anchor: "bottom-center",
+          offset: new AMap.Pixel(0, -10),
+          zIndex: isSelectedDrawObject("exit", exit.id) ? 182 : 172
+        });
+        attachSelectionHandler(marker, "exit", exit.id);
+        markers.push(marker);
       });
 
       if (view === "2d") {
@@ -1441,10 +1656,121 @@
       const finishButton = document.getElementById("finishDrawButton");
       const cancelButton = document.getElementById("cancelDrawButton");
       const clearButton = document.getElementById("clearLayerButton");
+      const deleteButton = document.getElementById("deleteSelectedObjectButton");
       if (undoButton) undoButton.disabled = !(isLineTool && drawingPoints.length > 0);
       if (finishButton) finishButton.disabled = !isLineTool;
       if (cancelButton) cancelButton.disabled = !hasActiveTool;
       if (clearButton) clearButton.disabled = !(activeDrawTool || lastSelectedTool);
+      if (deleteButton) deleteButton.disabled = !resolveSelectedDrawObject();
+    }
+
+    function isSelectedDrawObject(type, id) {
+      const selected = resolveSelectedDrawObject();
+      return Boolean(selected && selected.type === type && selected.id === id);
+    }
+
+    function resolveSelectedDrawObject() {
+      ensureGeometryV2();
+      if (selectedDrawObject && findDrawObject(selectedDrawObject.type, selectedDrawObject.id)) {
+        return selectedDrawObject;
+      }
+      if (geometry.selectedBuildingId && findDrawObject("building", geometry.selectedBuildingId)) {
+        return { type: "building", id: geometry.selectedBuildingId };
+      }
+      if (geometry.selectedChannelId && findDrawObject("channel", geometry.selectedChannelId)) {
+        return { type: "channel", id: geometry.selectedChannelId };
+      }
+      return null;
+    }
+
+    function findDrawObject(type, id) {
+      const collections = {
+        parcel: geometry.parcels,
+        station: geometry.stationOutlines,
+        exit: geometry.exits,
+        channel: geometry.channels,
+        building: geometry.buildings,
+        spatialItem: geometry.spatialItems
+      };
+      return (collections[type] || []).find((item) => item.id === id) || null;
+    }
+
+    function selectDrawObject(type, id, state) {
+      const object = findDrawObject(type, id);
+      if (!object) return;
+      selectedDrawObject = { type, id };
+      if (type === "building") {
+        geometry.selectedBuildingId = id;
+        syncLegacyBuilding();
+        lastSelectedTool = "building";
+      }
+      if (type === "channel") {
+        geometry.selectedChannelId = id;
+        syncLegacyChannel();
+        lastSelectedTool = "channel";
+      }
+      if (type === "parcel") lastSelectedTool = "parcel";
+      if (type === "station") lastSelectedTool = "station";
+      if (type === "exit") lastSelectedTool = "exit";
+      if (type === "spatialItem") lastSelectedTool = "underground";
+      updateSpaceControls();
+      updateDrawingControls();
+      if (state) refreshScene(state);
+      setWorkflowGuide(`已选中${object.name || type}。可点击“删除选中”，或继续编辑空间类型/层数。`);
+    }
+
+    function attachSelectionHandler(layer, type, id) {
+      if (!layer || !type || !id || typeof layer.on !== "function") return layer;
+      layer.on("click", (event) => {
+        selectDrawObject(type, id, window.__AMAP_SYNC_STATE__);
+        event?.originEvent?.stopPropagation?.();
+      });
+      return layer;
+    }
+
+    function deleteSelectedObject(state) {
+      const selected = resolveSelectedDrawObject();
+      if (!selected) return false;
+      const object = findDrawObject(selected.type, selected.id);
+      if (!object) return false;
+      const removeById = (items) => items.filter((item) => item.id !== selected.id);
+      if (selected.type === "parcel") {
+        geometry.parcels = removeById(geometry.parcels);
+        geometry.parcel = geometry.parcels[0] || { id: "parcel-1", name: "地块红线", path: [] };
+        geometry.labels = geometry.labels.filter((item) => item.id !== "parcel");
+      }
+      if (selected.type === "station") {
+        geometry.stationOutlines = removeById(geometry.stationOutlines);
+        const first = geometry.stationOutlines[0] || { id: "station-1", name: "站体", path: [] };
+        geometry.station.path = first.path || [];
+        geometry.station.body = first.path || [];
+      }
+      if (selected.type === "exit") {
+        geometry.exits = removeById(geometry.exits);
+        geometry.station.exitPoint = geometry.exits[0]?.point || null;
+        geometry.labels = geometry.labels.filter((item) => item.id !== "exit");
+      }
+      if (selected.type === "channel") {
+        geometry.channels = removeById(geometry.channels);
+        geometry.selectedChannelId = geometry.channels[0]?.id || "";
+        syncLegacyChannel();
+      }
+      if (selected.type === "building") {
+        geometry.buildings = removeById(geometry.buildings);
+        geometry.selectedBuildingId = geometry.buildings[0]?.id || "";
+        syncLegacyBuilding();
+        syncBuildingLabels();
+      }
+      if (selected.type === "spatialItem") {
+        geometry.spatialItems = removeById(geometry.spatialItems);
+        geometry.underground = geometry.spatialItems.find((item) => item.spaceType === "underground") || { path: [] };
+      }
+      selectedDrawObject = null;
+      refreshScene(state);
+      updateDrawingControls();
+      setWorkflowGuide(`已删除${object.name || selected.type}。如需恢复，请重新绘制对应对象。`);
+      setStatus(`已删除${object.name || selected.type}。`);
+      return true;
     }
 
     function clearCommittedLayer(tool) {
@@ -1469,8 +1795,12 @@
         geometry.station.body = [];
       }
       if (tool === "channel") {
-        geometry.channel.path = [];
-        geometry.channel.centerline = [];
+        const selected = getSelectedChannel();
+        if (selected) {
+          geometry.channels = geometry.channels.filter((channel) => channel.id !== selected.id);
+          geometry.selectedChannelId = geometry.channels.length ? geometry.channels[geometry.channels.length - 1].id : null;
+        }
+        syncLegacyChannel();
       }
       if (tool === "exit") {
         geometry.station.exitPoint = null;
@@ -1496,7 +1826,90 @@
       const autoButton = document.getElementById("autoChannelButton");
       const perspectiveButton = document.getElementById("perspectiveDragButton");
       if (autoButton) autoButton.disabled = geometry.buildings.length === 0 || !geometry.station.exitPoint;
-      if (perspectiveButton) perspectiveButton.disabled = geometry.buildings.length === 0 && !geometry.channel.path.length;
+      if (perspectiveButton) perspectiveButton.disabled = geometry.buildings.length === 0 && !geometry.channels.some((channel) => channel.path && channel.path.length);
+      updateChannelSelect();
+      updateSpaceControls();
+    }
+
+    function updateChannelSelect() {
+      const select = document.getElementById("channelSelect");
+      if (!select) {
+        return;
+      }
+      select.innerHTML = "";
+      geometry.channels.forEach((channel) => {
+        const option = document.createElement("option");
+        option.value = channel.id;
+        option.textContent = `${channel.name} · ${spaceModel.spaceTypeLabel(channel.spaceType)}`;
+        option.selected = channel.id === geometry.selectedChannelId;
+        select.appendChild(option);
+      });
+      select.disabled = geometry.channels.length === 0;
+    }
+
+    function selectedSpatialTarget() {
+      ensureGeometryV2();
+      const tool = activeDrawTool || lastSelectedTool;
+      if (tool === "station") return geometry.station;
+      if (tool === "channel") return getSelectedChannel() || geometry.channel;
+      if (tool === "building") return getSelectedBuilding() || pendingBuildingDefaults;
+      return getSelectedBuilding() || geometry.station || geometry.channel;
+    }
+
+    function updateSpaceControls() {
+      const target = selectedSpatialTarget();
+      const typeSelect = document.getElementById("spaceTypeSelect");
+      const groundInput = document.getElementById("groundFloorsInput");
+      const undergroundInput = document.getElementById("undergroundFloorsInput");
+      if (!typeSelect || !groundInput || !undergroundInput || !target) {
+        return;
+      }
+      const normalized = normalizeSpatialItem(target, {
+        spaceType: "ground",
+        groundFloors: 4,
+        undergroundFloors: 1
+      });
+      typeSelect.value = normalized.spaceType;
+      groundInput.value = normalized.groundFloors;
+      undergroundInput.value = normalized.undergroundFloors;
+    }
+
+    function applySpaceControlsToTarget(state) {
+      const target = selectedSpatialTarget();
+      const typeSelect = document.getElementById("spaceTypeSelect");
+      const groundInput = document.getElementById("groundFloorsInput");
+      const undergroundInput = document.getElementById("undergroundFloorsInput");
+      if (!target || !typeSelect || !groundInput || !undergroundInput) {
+        return;
+      }
+      const normalized = normalizeSpatialItem({
+        ...target,
+        spaceType: typeSelect.value,
+        groundFloors: groundInput.value,
+        undergroundFloors: undergroundInput.value
+      });
+      if (target === pendingBuildingDefaults) {
+        pendingBuildingDefaults = normalized;
+        setWorkflowGuide(`已设置新建筑默认值：${spaceModel.spaceTypeLabel(normalized.spaceType)}；${spaceModel.floorSummary(normalized)}。`);
+        return;
+      }
+      Object.assign(target, normalizeSpatialItem({
+        ...target,
+        spaceType: typeSelect.value,
+        groundFloors: groundInput.value,
+        undergroundFloors: undergroundInput.value
+      }));
+      if (target.id && String(target.id).startsWith("building")) {
+        syncLegacyBuilding();
+        syncBuildingLabels();
+      }
+      if (target.id && String(target.id).startsWith("channel")) {
+        syncLegacyChannel();
+        updateChannelSelect();
+      }
+      refreshScene(state);
+      setWorkflowGuide(`已设置为空间类型：${spaceModel.spaceTypeLabel(target.spaceType)}；${spaceModel.floorSummary(target)}。`);
+      setStatus("已更新地上/地下空间和层数。");
     }
 
     function rotatePath(path, degrees) {
@@ -1553,6 +1966,30 @@
       return best;
     }
 
+    function addChannel(payload, state) {
+      ensureGeometryV2();
+      channelSerial += 1;
+      const channel = normalizeSpatialItem({
+        id: `channel-${channelSerial}`,
+        name: `通道 ${channelSerial}`,
+        stroke: "#0b77bd",
+        fill: "#1d8ccf",
+        ...payload
+      }, { spaceType: "underground", groundFloors: 0, undergroundFloors: 1 });
+      if ((!channel.path || channel.path.length < 3) && channel.centerline && channel.centerline.length >= 2) {
+        channel.path = makeChannelFootprint(channel.centerline);
+      }
+      geometry.channels.push(channel);
+      geometry.selectedChannelId = channel.id;
+      syncLegacyChannel();
+      updateChannelSelect();
+      updateSpaceControls();
+      if (state) {
+        refreshScene(state);
+      }
+      return channel;
+    }
+
     function autoGenerateChannel(state) {
       const building = getSelectedBuilding();
       if (!geometry.station.exitPoint) {
@@ -1569,11 +2006,14 @@
         Number(((start[0] + end[0]) / 2).toFixed(8)),
         Number((start[1]).toFixed(8))
       ];
-      geometry.channel.centerline = [start, mid, [Number(end[0].toFixed(8)), Number(end[1].toFixed(8))]];
-      geometry.channel.path = makeChannelFootprint(geometry.channel.centerline);
-      refreshScene(state);
-      setWorkflowGuide(`已自动生成通道：1号口连接到${building.name}最近边。若不满意，可手动画通道线覆盖。`);
-      setStatus(`已自动生成通道到${building.name}。`);
+      const channel = addChannel({
+        centerline: [start, mid, [Number(end[0].toFixed(8)), Number(end[1].toFixed(8))]],
+        spaceType: building.spaceType || currentSpaceType(),
+        groundFloors: building.spaceType === "ground" ? 1 : 0,
+        undergroundFloors: building.spaceType === "underground" ? 1 : 0
+      }, state);
+      setWorkflowGuide(`已新增${channel.name}：1号口连接到${building.name}最近边。可继续选择其他建筑生成多条通道。`);
+      setStatus(`已新增${channel.name}到${building.name}。`);
       return true;
     }
 
@@ -1600,10 +2040,12 @@
       activeDrawTool = tool;
       lastSelectedTool = tool;
       drawingPoints = [];
+      drawingPreviewPoint = null;
       updateLastDraw(tool);
       clearDrawingOverlay(state.map2d);
       setDrawingInteractionLocked(state, true);
       updateDrawingControls();
+      updateSpaceControls();
       setWorkflowGuide(tool === "exit"
         ? "正在点 1号口：在左侧 2D 地图点击出入口位置。点错可点“取消本次”重新来。"
         : `正在画${toolNames[tool]}：已取 0 点，至少需要 ${minPointsForTool(tool)} 点。点错可撤销上一点，整笔不满意可取消本次。`);
@@ -1619,9 +2061,12 @@
         return;
       }
       const style = drawStyle(activeDrawTool);
-      if (activeDrawTool === "channel" || drawingPoints.length < 3) {
+      const previewPath = drawingPreviewPoint
+        ? [...drawingPoints, drawingPreviewPoint]
+        : drawingPoints;
+      if (activeDrawTool === "channel" || previewPath.length < 3) {
         drawingOverlay = new AMap.Polyline({
-          path: drawingPoints,
+          path: previewPath,
           strokeColor: style.strokeColor,
           strokeWeight: style.strokeWeight || 4,
           strokeOpacity: 0.95,
@@ -1631,7 +2076,7 @@
         });
       } else {
         drawingOverlay = new AMap.Polygon({
-          path: drawingPoints,
+          path: previewPath,
           strokeColor: style.strokeColor,
           strokeWeight: style.strokeWeight || 4,
           strokeOpacity: 1,
@@ -1643,6 +2088,11 @@
         });
       }
       state.map2d.add(drawingOverlay);
+    }
+
+    function updateDrawingPreviewOverlay(state, point = drawingPreviewPoint) {
+      drawingPreviewPoint = point;
+      updateDrawingOverlay(state);
     }
 
     function finishManualDrawing(state) {
@@ -1660,6 +2110,7 @@
       applyDrawPath(tool, drawingPoints);
       activeDrawTool = "";
       drawingPoints = [];
+      drawingPreviewPoint = null;
       updateLastDraw(tool);
       clearDrawingOverlay(state.map2d);
       setDrawingInteractionLocked(state, false);
@@ -1682,15 +2133,18 @@
       }
       if (tool === "building" && path.length >= 3) {
         buildingSerial += 1;
-        const building = {
+        const building = normalizeSpatialItem({
           id: `building-${buildingSerial}`,
           name: `建筑 ${buildingSerial}`,
           stroke: "#111827",
           fill: "#ffffff",
           path,
           rotation: 0,
-          extrudeAngle: -58
-        };
+          extrudeAngle: -58,
+          spaceType: currentSpaceType(),
+          groundFloors: document.getElementById("groundFloorsInput")?.value,
+          undergroundFloors: document.getElementById("undergroundFloorsInput")?.value
+        }, { spaceType: "ground", groundFloors: 4, undergroundFloors: 1 });
         geometry.buildings.push(building);
         geometry.selectedBuildingId = building.id;
         syncLegacyBuilding();
@@ -1699,10 +2153,21 @@
       if (tool === "station" && path.length >= 3) {
         geometry.station.path = path;
         geometry.station.body = path;
+        Object.assign(geometry.station, normalizeSpatialItem({
+          ...geometry.station,
+          spaceType: currentSpaceType(),
+          groundFloors: document.getElementById("groundFloorsInput")?.value,
+          undergroundFloors: document.getElementById("undergroundFloorsInput")?.value
+        }, { spaceType: "underground", groundFloors: 0, undergroundFloors: 2 }));
       }
       if (tool === "channel" && path.length >= 2) {
-        geometry.channel.centerline = path;
-        geometry.channel.path = makeChannelFootprint(path);
+        addChannel({
+          centerline: path,
+          path: makeChannelFootprint(path),
+          spaceType: currentSpaceType(),
+          groundFloors: document.getElementById("groundFloorsInput")?.value,
+          undergroundFloors: document.getElementById("undergroundFloorsInput")?.value
+        });
       }
     }
 
@@ -1764,8 +2229,87 @@
       updateBuildingSelect();
     }
 
-    async function saveUserGeometry() {
+    function normalizeRotation(value) {
+      const number = Number(value);
+      if (!Number.isFinite(number)) return 0;
+      return Math.max(-180, Math.min(180, Math.round(number)));
+    }
+
+    function normalizePitch(value) {
+      const number = Number(value);
+      if (!Number.isFinite(number)) return 38;
+      return Math.max(0, Math.min(75, Math.round(number)));
+    }
+
+    function captureViewState(map3d) {
       ensureGeometryV2();
+      if (!map3d) return geometry.viewState;
+      const center = map3d.getCenter();
+      geometry.viewState = {
+        ...(geometry.viewState || {}),
+        center: [Number(center.lng), Number(center.lat)],
+        zoom: Number(map3d.getZoom ? map3d.getZoom() : geometry.viewState?.zoom || 16.72),
+        pitch: normalizePitch(map3d.getPitch ? map3d.getPitch() : geometry.viewState?.pitch),
+        rotation: normalizeRotation(map3d.getRotation ? map3d.getRotation() : geometry.viewState?.rotation)
+      };
+      geometry.meta.center = geometry.viewState.center;
+      syncViewStateControls();
+      return geometry.viewState;
+    }
+
+    function applyViewStateToMap(map3d, viewState = geometry.viewState || {}) {
+      if (!map3d) return;
+      const center = viewState.center || geometry.meta.center;
+      const zoom = Number(viewState.zoom || 16.72);
+      map3d.setZoomAndCenter(zoom, center, false);
+      if (map3d.setPitch) map3d.setPitch(normalizePitch(viewState.pitch));
+      if (map3d.setRotation) map3d.setRotation(normalizeRotation(viewState.rotation));
+      syncViewStateControls();
+      renderCanvas3d(map3d);
+    }
+
+    function syncViewStateControls() {
+      const pitch = document.getElementById("viewPitchInput");
+      const rotation = document.getElementById("viewRotationInput");
+      if (pitch) pitch.value = normalizePitch(geometry.viewState?.pitch);
+      if (rotation) rotation.value = normalizeRotation(geometry.viewState?.rotation);
+    }
+
+    function applyViewControls(map3d) {
+      ensureGeometryV2();
+      geometry.viewState = {
+        ...(geometry.viewState || {}),
+        pitch: normalizePitch(document.getElementById("viewPitchInput")?.value),
+        rotation: normalizeRotation(document.getElementById("viewRotationInput")?.value)
+      };
+      applyViewStateToMap(map3d, geometry.viewState);
+      setStatus(`已更新3D视角：pitch ${geometry.viewState.pitch} / rotation ${geometry.viewState.rotation}。`);
+    }
+
+    function setDrawbarCollapsed(collapsed) {
+      const drawbar = document.querySelector(".drawbar");
+      const button = document.getElementById("toggleDrawbarButton");
+      if (!drawbar || !button) return;
+      drawbar.classList.toggle("is-collapsed", collapsed);
+      button.setAttribute("aria-expanded", String(!collapsed));
+      button.textContent = collapsed ? "展开绘图工具" : "收起绘图工具";
+    }
+
+    function bindDrawbarToggle() {
+      const button = document.getElementById("toggleDrawbarButton");
+      if (!button || button.dataset.bound === "true") return;
+      button.dataset.bound = "true";
+      button.addEventListener("click", () => {
+        const drawbar = document.querySelector(".drawbar");
+        setDrawbarCollapsed(!drawbar.classList.contains("is-collapsed"));
+      });
+    }
+
+    async function saveUserGeometry(state = window.__AMAP_SYNC_STATE__) {
+      ensureGeometryV2();
+      if (state?.map3d) {
+        captureViewState(state.map3d);
+      }
       geometry.meta = {
         ...(geometry.meta || {}),
         linkedProjectId: linkedProjectId(),
@@ -1783,8 +2327,8 @@
       return result;
     }
 
-    async function exportPng() {
-      await saveUserGeometry();
+    async function exportPng(state = window.__AMAP_SYNC_STATE__) {
+      await saveUserGeometry(state);
       const response = await fetch("/api/schematic/export-png", { method: "POST" });
       const result = await response.json();
       if (!response.ok || !result.ok) {
@@ -1794,10 +2338,14 @@
     }
 
     function fitBoth(map2d, map3d) {
-      map2d.setZoomAndCenter(16.72, geometry.meta.center, false);
-      map3d.setZoomAndCenter(16.72, geometry.meta.center, false);
-      map3d.setPitch(38);
-      map3d.setRotation(0);
+      ensureGeometryV2();
+      const viewState = {
+        ...(geometry.viewState || {}),
+        center: geometry.viewState?.center || geometry.meta.center,
+        zoom: geometry.viewState?.zoom || 16.72
+      };
+      map2d.setZoomAndCenter(viewState.zoom, viewState.center, false);
+      applyViewStateToMap(map3d, viewState);
     }
 
     function lngLatFromPoi(poi) {
@@ -1809,10 +2357,15 @@
     }
 
     function moveBothTo(map2d, map3d, center, zoom = 17.2) {
+      ensureGeometryV2();
+      geometry.viewState = {
+        ...(geometry.viewState || {}),
+        center,
+        zoom
+      };
+      geometry.meta.center = center;
       map2d.setZoomAndCenter(zoom, center, false);
-      map3d.setZoomAndCenter(zoom, center, false);
-      map3d.setPitch(38);
-      renderCanvas3d(map3d);
+      applyViewStateToMap(map3d, geometry.viewState);
     }
 
     function setupPlaceSearch(map2d, map3d, state) {
@@ -1956,6 +2509,15 @@
         renderCanvas3d(map3d);
       });
 
+      ["viewPitchInput", "viewRotationInput"].forEach((id) => {
+        document.getElementById(id).addEventListener("change", () => applyViewControls(map3d));
+      });
+      ["moveend", "zoomend", "rotatechange", "pitchchange"].forEach((eventName) => {
+        map3d.on(eventName, () => captureViewState(map3d));
+      });
+
+      bindDrawbarToggle();
+
       document.getElementById("toggleGuideButton").addEventListener("click", () => {
         const panel = document.getElementById("drawPanel");
         const button = document.getElementById("toggleGuideButton");
@@ -1966,9 +2528,29 @@
       document.getElementById("buildingSelect").addEventListener("change", (event) => {
         geometry.selectedBuildingId = event.target.value;
         syncLegacyBuilding();
+        lastSelectedTool = "building";
+        updateSpaceControls();
         refreshScene(state);
         const building = getSelectedBuilding();
+        selectedDrawObject = building ? { type: "building", id: building.id } : null;
+        updateDrawingControls();
         setWorkflowGuide(building ? `已选中${building.name}。可以点“自动通道”连接 1号口；3D 建筑优先使用高德默认模型。` : "暂无建筑。");
+      });
+
+      document.getElementById("channelSelect").addEventListener("change", (event) => {
+        geometry.selectedChannelId = event.target.value;
+        syncLegacyChannel();
+        lastSelectedTool = "channel";
+        updateSpaceControls();
+        refreshScene(state);
+        const channel = getSelectedChannel();
+        selectedDrawObject = channel ? { type: "channel", id: channel.id } : null;
+        updateDrawingControls();
+        setWorkflowGuide(channel ? `已选中${channel.name}。可以把它设为地上或地下空间，或用“清空当前图层”删除。` : "暂无通道。");
+      });
+
+      ["spaceTypeSelect", "groundFloorsInput", "undergroundFloorsInput"].forEach((id) => {
+        document.getElementById(id).addEventListener("change", () => applySpaceControlsToTarget(state));
       });
 
       document.getElementById("autoChannelButton").addEventListener("click", () => {
@@ -2012,9 +2594,14 @@
         }
         if (activeDrawTool === "exit") {
           geometry.station.exitPoint = point;
+          const exit = geometry.exits.find((item) => item.id === "exit-1") || { id: "exit-1", name: "1号口" };
+          exit.point = point;
+          exit.stationOutlineId = geometry.stationOutlines[0]?.id || "";
+          geometry.exits = [exit, ...geometry.exits.filter((item) => item.id !== exit.id)];
           moveExitLabel(point);
           activeDrawTool = "";
           drawingPoints = [];
+          drawingPreviewPoint = null;
           updateLastDraw("exit");
           setDrawingInteractionLocked(state, false);
           document.querySelectorAll("[data-draw-tool]").forEach((item) => item.setAttribute("aria-pressed", "false"));
@@ -2025,6 +2612,7 @@
           return;
         }
         drawingPoints.push(point);
+        drawingPreviewPoint = null;
         updateLastDraw(activeDrawTool);
         updateDrawingOverlay(state);
         updateDrawingControls();
@@ -2055,6 +2643,11 @@
         const point = drawingPointerPoint(event);
         if (Math.hypot(point.x - drawingPointerStart.x, point.y - drawingPointerStart.y) > 4) {
           ignoreNextDrawingClick = true;
+        }
+        if (activeDrawTool && activeDrawTool !== "exit" && drawingPoints.length > 0) {
+          const rect = mapContainer.getBoundingClientRect();
+          const pixel = new AMap.Pixel(point.x - rect.left, point.y - rect.top);
+          updateDrawingPreviewOverlay(state, lngLatToArray(map2d.containerToLngLat(pixel)));
         }
         event.preventDefault();
         event.stopPropagation();
@@ -2127,6 +2720,10 @@
         finishManualDrawing(state);
       });
 
+      document.getElementById("deleteSelectedObjectButton").addEventListener("click", () => {
+        deleteSelectedObject(state);
+      });
+
       document.getElementById("undoDrawButton").addEventListener("click", () => {
         if (!activeDrawTool || activeDrawTool === "exit" || drawingPoints.length === 0) {
           return;
@@ -2146,6 +2743,7 @@
         const tool = activeDrawTool;
         activeDrawTool = "";
         drawingPoints = [];
+        drawingPreviewPoint = null;
         updateLastDraw(tool);
         clearDrawingOverlay(state.map2d);
         setDrawingInteractionLocked(state, false);
@@ -2162,6 +2760,7 @@
         }
         activeDrawTool = "";
         drawingPoints = [];
+        drawingPreviewPoint = null;
         updateLastDraw(tool);
         clearDrawingOverlay(state.map2d);
         clearCommittedLayer(tool);
@@ -2179,6 +2778,7 @@
         activeDrawTool = "";
         lastSelectedTool = "";
         drawingPoints = [];
+        drawingPreviewPoint = null;
         updateLastDraw("");
         clearDrawingOverlay(state.map2d);
         setDrawingInteractionLocked(state, false);
@@ -2190,7 +2790,7 @@
 
       document.getElementById("saveGeometryButton").addEventListener("click", async () => {
         try {
-          await saveUserGeometry();
+          await saveUserGeometry(state);
           setWorkflowGuide("草图已保存。还可以继续调整图层；确认出图范围后点“导出PNG”。");
           setStatus("已保存手动画线数据。");
         } catch (error) {
@@ -2202,9 +2802,10 @@
         const resultNode = document.getElementById("exportResult");
         resultNode.textContent = "正在导出 PNG...";
         try {
-          const result = await exportPng();
-          const relativePath = result.outputPath.split("\\outputs\\").pop();
-          resultNode.innerHTML = `已导出：<a href="./${relativePath ? relativePath.replace(/^amap_2d_3d_sync\\?/, "").replace(/\\/g, "/") : "exports/"}" target="_blank">${result.outputPath}</a>`;
+          const result = await exportPng(state);
+          const href = result.export?.downloadUrl || result.downloadUrl || "#";
+          const filename = result.export?.filename || result.filename || "amap-3d-export.png";
+          resultNode.innerHTML = `已导出：<a href="${escapeHtml(href)}" target="_blank" download="${escapeHtml(filename)}">${escapeHtml(filename)}</a>`;
           setWorkflowGuide("PNG 已导出。还需要改线时，选择对应工具重新画，或用“清空当前图层”后再画。");
           setStatus("PNG 已导出。");
         } catch (error) {
@@ -2221,9 +2822,11 @@
         return;
       }
 
+      ensureGeometryV2();
+      const initialViewState = geometry.viewState || {};
       const common = {
-        center: geometry.meta.center,
-        zoom: 16.65,
+        center: initialViewState.center || geometry.meta.center,
+        zoom: initialViewState.zoom || 16.65,
         resizeEnable: true,
         mapStyle: "amap://styles/whitesmoke",
         features: ["bg", "road", "building", "point"],
@@ -2240,8 +2843,8 @@
       const map3d = new AMap.Map("map3d", {
         ...common,
         viewMode: "3D",
-        pitch: 38,
-        rotation: 0,
+        pitch: normalizePitch(initialViewState.pitch),
+        rotation: normalizeRotation(initialViewState.rotation),
         showBuildingBlock: true,
         buildingAnimation: true
       });
@@ -2268,6 +2871,8 @@
         markers2d: [],
         markers3d: []
       };
+      window.__AMAP_SYNC_STATE__ = state;
+      syncViewStateControls();
       refreshScene(state);
       bindSync(map2d, map3d);
       bindCanvasRenderer(map3d);
@@ -2290,6 +2895,7 @@
       window.__AMAP_SYNC__ = {
         map2d,
         map3d,
+        state,
         geometry,
         saveUserGeometry,
         exportPng,
@@ -2302,9 +2908,15 @@
             sameParcelReference: geometry.parcel.path.length,
             buildingCount: geometry.buildings.length,
             selectedBuildingId: geometry.selectedBuildingId,
+            channelCount: geometry.channels.length,
+            selectedChannelId: geometry.selectedChannelId,
             useCustomBuildingPrisms,
             modelExtrudeAngle,
             modelExtrudeHeight,
+            viewState: geometry.viewState,
+            stationSpaceType: geometry.station?.spaceType,
+            channelSpaceType: geometry.channel?.spaceType,
+            selectedBuildingSpaceType: getSelectedBuilding()?.spaceType || null,
             perspectiveDragMode: isPerspectiveDragMode,
             canDraw: Boolean(AMap.MouseTool),
             hasManualTools: document.querySelectorAll("[data-draw-tool]").length,
@@ -2341,6 +2953,7 @@
         applyProjectContextToGeometry(record);
       }))
       .finally(loadAmap);
+    bindDrawbarToggle();
   </script>
 </body>
 </html>

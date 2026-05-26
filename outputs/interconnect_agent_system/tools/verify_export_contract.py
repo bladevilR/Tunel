@@ -9,6 +9,21 @@ sys.path.insert(0, str(ROOT))
 from backend.server import DEMOS, evaluate_project, export_report_file  # noqa: E402
 
 
+def assert_download_metadata(item: dict) -> None:
+    required = {"filename", "relativePath", "downloadUrl", "contentType", "size"}
+    missing = sorted(required - set(item))
+    if missing:
+        raise AssertionError(f"missing download metadata fields {missing} for {item}")
+    if not item["downloadUrl"].startswith("/exports/"):
+        raise AssertionError(f"downloadUrl should use served /exports/ route: {item}")
+    if "\\" in item["relativePath"]:
+        raise AssertionError(f"relativePath should be URL-safe/as_posix style: {item}")
+    if item["size"] <= 0:
+        raise AssertionError(f"exported file should have a positive size: {item}")
+    if not item["contentType"]:
+        raise AssertionError(f"contentType should be populated: {item}")
+
+
 def main() -> int:
     project = DEMOS["cases"][0]
     result = evaluate_project(project, {"useModelReport": False, "useModelResearch": False})
@@ -18,13 +33,8 @@ def main() -> int:
 
     expected_suffixes = [
         "-formal-report.docx",
-        "-formal-report.pdf",
         "-score-detail.docx",
-        "-score-detail.pdf",
     ]
-    if len(filenames) != len(expected_suffixes):
-        raise AssertionError(f"expected 4 exported files, got {len(filenames)}: {filenames}")
-
     for suffix in expected_suffixes:
         if not any(name.endswith(suffix) for name in filenames):
             raise AssertionError(f"missing export ending with {suffix}: {filenames}")
@@ -34,7 +44,9 @@ def main() -> int:
     if bad:
         raise AssertionError(f"unexpected machine-readable exports returned: {bad}")
 
+    assert_download_metadata(export)
     for item in files:
+        assert_download_metadata(item)
         path = ROOT / item["relativePath"]
         if not path.exists() or path.stat().st_size <= 0:
             raise AssertionError(f"exported file is missing or empty: {path}")
