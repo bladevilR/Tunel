@@ -434,14 +434,88 @@ def run_independent_search(plan: dict) -> tuple[list[dict], dict]:
     }
 
 
+def llm_config() -> dict:
+    anthropic_key = os.environ.get("ANTHROPIC_API_KEY", "").strip() or os.environ.get("CLAUDE_API_KEY", "").strip()
+    if anthropic_key:
+        return {
+            "provider": "anthropic",
+            "base_url": (os.environ.get("ANTHROPIC_BASE_URL", "").strip() or "https://api.anthropic.com/v1").rstrip("/"),
+            "api_key": anthropic_key,
+            "model": (
+                os.environ.get("ANTHROPIC_MODEL", "").strip()
+                or os.environ.get("CLAUDE_MODEL", "").strip()
+                or os.environ.get("CLAUDE_CODE_MODEL", "").strip()
+            ),
+        }
+    return {
+        "provider": "openai_compatible",
+        "base_url": os.environ.get("LLM_BASE_URL", "").strip().rstrip("/"),
+        "api_key": os.environ.get("LLM_API_KEY", "").strip(),
+        "model": os.environ.get("LLM_MODEL", "").strip(),
+    }
+
+
 def llm_configured() -> bool:
-    return all(os.environ.get(name, "").strip() for name in ("LLM_BASE_URL", "LLM_API_KEY", "LLM_MODEL"))
+    config = llm_config()
+    return bool(config.get("base_url") and config.get("api_key") and config.get("model"))
+
+
+def anthropic_messages_url(base_url: str) -> str:
+    if base_url.endswith("/messages"):
+        return base_url
+    if base_url.endswith("/v1"):
+        return f"{base_url}/messages"
+    return f"{base_url}/v1/messages"
+
+
+def anthropic_messages_payload(messages: list[dict], max_tokens: int) -> dict:
+    system_messages = []
+    conversation = []
+    for message in messages:
+        role = message.get("role")
+        content = message.get("content") or ""
+        if role == "system":
+            system_messages.append(str(content))
+            continue
+        if role not in {"user", "assistant"}:
+            role = "user"
+        conversation.append({"role": role, "content": str(content)})
+    return {
+        "messages": conversation or [{"role": "user", "content": "{}"}],
+        "system": "\n\n".join(item for item in system_messages if item),
+        "temperature": 0.2,
+        "max_tokens": max_tokens,
+    }
 
 
 def call_llm_json(messages: list[dict], timeout: float = 8.0, max_tokens: int = 1200) -> dict:
-    base_url = os.environ.get("LLM_BASE_URL", "").rstrip("/")
-    api_key = os.environ.get("LLM_API_KEY", "")
-    model = os.environ.get("LLM_MODEL", "")
+    config = llm_config()
+    base_url = config["base_url"]
+    api_key = config["api_key"]
+    model = config["model"]
+    if config["provider"] == "anthropic":
+        url = anthropic_messages_url(base_url)
+        payload = {
+            "model": model,
+            **anthropic_messages_payload(messages, max_tokens),
+        }
+        response = http_json(
+            url,
+            {
+                "x-api-key": api_key,
+                "anthropic-version": os.environ.get("ANTHROPIC_VERSION", "2023-06-01"),
+            },
+            payload,
+            timeout=timeout
+        )
+        content_items = response.get("content") or []
+        content = "\n".join(
+            str(item.get("text") or "")
+            for item in content_items
+            if isinstance(item, dict) and item.get("type") in {None, "text"}
+        )
+        return parse_llm_json_content(content or "{}")
+
     url = base_url
     if not url.endswith("/chat/completions"):
         url = f"{url}/chat/completions"
@@ -487,7 +561,7 @@ def run_model_assessment(
     evidence_items: list[dict]
 ) -> tuple[dict | None, dict, list[dict]]:
     if not llm_configured():
-        return None, {"available": False, "mode": "not_configured", "reason": "LLM_BASE_URL、LLM_API_KEY 或 LLM_MODEL 未配置"}, []
+        return None, {"available": False, "mode": "not_configured", "reason": "未配置可用模型：请设置 ANTHROPIC_API_KEY + ANTHROPIC_MODEL，或继续使用 LLM_BASE_URL、LLM_API_KEY、LLM_MODEL"}, []
 
     compact_plan = {
         "strategy": plan.get("strategy"),
@@ -923,7 +997,7 @@ def build_model_oriented_research(
     if model_data and isinstance(model_data.get("dynamicDimensions"), list):
         assessment = {
             "generatedAt": utc_now(),
-            "provider": os.environ.get("LLM_MODEL", "configured_llm"),
+            "provider": llm_config().get("model") or "configured_llm",
             "status": "model_generated",
             "fallbackUsed": False,
             "immutableFacts": immutable_facts,

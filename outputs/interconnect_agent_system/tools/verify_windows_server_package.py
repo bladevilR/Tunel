@@ -61,8 +61,10 @@ def assert_required_files(package_root: Path) -> None:
         raise AssertionError(f"部署包包含不应分发的本地文件: {leaked}")
 
     env_local = (package_root / ".env.local").read_text(encoding="utf-8", errors="replace")
-    required_env = ["LLM_API_KEY=", "AMAP_JS_KEY=", "AMAP_SECURITY_CODE="]
+    required_env = ["AMAP_JS_KEY=", "AMAP_SECURITY_CODE="]
     missing_env = [name for name in required_env if name not in env_local]
+    if "LLM_API_KEY=" not in env_local and "ANTHROPIC_API_KEY=" not in env_local:
+        missing_env.append("ANTHROPIC_API_KEY= or LLM_API_KEY=")
     if missing_env:
         raise AssertionError(f".env.local 缺少必要密钥配置: {missing_env}")
 

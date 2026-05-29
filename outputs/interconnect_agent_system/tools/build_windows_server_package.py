@@ -35,6 +35,9 @@ PACKAGE_FILES = [
 ]
 
 SECRET_ENV_NAMES = [
+    "ANTHROPIC_API_KEY",
+    "ANTHROPIC_MODEL",
+    "ANTHROPIC_BASE_URL",
     "LLM_BASE_URL",
     "LLM_API_KEY",
     "LLM_MODEL",
@@ -184,7 +187,10 @@ def write_env_local(stage_root: Path, include_key: bool) -> None:
             value = user_environment_value(name)
             if value:
                 merged[name] = value
-    missing = [name for name in SECRET_ENV_NAMES if name in {"LLM_API_KEY", "AMAP_JS_KEY", "AMAP_SECURITY_CODE"} and not merged.get(name)]
+    missing = [name for name in ("AMAP_JS_KEY", "AMAP_SECURITY_CODE") if not merged.get(name)]
+    has_model_key = bool(merged.get("ANTHROPIC_API_KEY") or merged.get("LLM_API_KEY"))
+    if not has_model_key:
+        missing.append("ANTHROPIC_API_KEY or LLM_API_KEY")
     if missing:
         raise FileNotFoundError(f"要求包含密钥，但缺少环境变量: {', '.join(missing)}")
     lines = [f"{name}={merged[name]}" for name in SECRET_ENV_NAMES if merged.get(name)]

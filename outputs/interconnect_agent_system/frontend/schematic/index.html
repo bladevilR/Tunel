@@ -109,41 +109,117 @@
       top: 104px;
       right: 18px;
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 7px;
-      width: 312px;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      width: 340px;
       max-width: calc(100% - 36px);
-      padding: 10px;
+      max-height: calc(100vh - 128px);
+      padding: 12px;
       border: 1px solid rgba(17, 24, 39, 0.12);
       border-radius: 8px;
       background: rgba(255, 255, 255, 0.94);
       box-shadow: 0 8px 28px rgba(15, 23, 42, 0.14);
-    }
-
-    .drawbar::before {
-      grid-column: 1 / -1;
-      color: #344054;
-      content: "绘图工具";
-      font-size: 13px;
-      font-weight: 900;
+      overflow-y: auto;
     }
 
     .drawbar .wide-action {
       grid-column: 1 / -1;
     }
 
-    .drawbar select {
+    .drawbar select,
+    .drawbar input {
       width: 100%;
       max-width: none;
+    }
+
+    .sketchbar-header,
+    .sketch-section,
+    .tool-palette,
+    .sketch-actions,
+    .context-actions,
+    .output-actions {
+      display: grid;
+      gap: 7px;
+      min-width: 0;
+    }
+
+    .sketchbar-header {
+      grid-template-columns: 1fr auto;
+      align-items: start;
+      gap: 8px;
+    }
+
+    .sketch-status {
+      min-width: 0;
+    }
+
+    .section-kicker {
+      display: block;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 900;
+      line-height: 1.2;
+    }
+
+    .mode-label {
+      display: block;
+      margin-top: 2px;
+      color: #111827;
+      font-size: 16px;
+      font-weight: 900;
+      line-height: 1.25;
+    }
+
+    .mode-hint,
+    .selection-summary {
+      color: #475467;
+      font-size: 12px;
+      font-weight: 700;
+      line-height: 1.45;
+    }
+
+    .tool-palette {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .tool-palette button {
+      min-width: 0;
+    }
+
+    .sketch-actions,
+    .context-actions,
+    .output-actions {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .selection-inspector {
+      display: grid;
+      gap: 8px;
+      min-width: 0;
+      padding-top: 9px;
+      border-top: 1px solid rgba(17, 24, 39, 0.10);
+    }
+
+    .selection-grid,
+    .space-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 7px;
+      min-width: 0;
+    }
+
+    .space-grid .wide-action {
+      grid-column: 1 / -1;
+    }
+
+    .output-actions {
+      padding-top: 9px;
+      border-top: 1px solid rgba(17, 24, 39, 0.10);
     }
 
     .drawbar.is-collapsed {
       grid-template-columns: 1fr;
       width: auto;
-    }
-
-    .drawbar.is-collapsed::before {
-      display: none;
     }
 
     .drawbar.is-collapsed > :not(#toggleDrawbarButton) {
@@ -516,8 +592,17 @@
     }
 
     @media (max-width: 860px) {
+      html,
+      body {
+        height: auto;
+        min-height: 100%;
+        overflow: auto;
+      }
+
       #app {
-        grid-template-rows: auto auto minmax(320px, 1fr);
+        height: auto;
+        min-height: 100vh;
+        grid-template-rows: auto auto minmax(680px, auto);
       }
 
       .topbar {
@@ -537,6 +622,8 @@
         position: static;
         max-width: none;
         width: auto;
+        max-height: min(52vh, 420px);
+        overflow-y: auto;
         grid-template-columns: repeat(2, minmax(0, 1fr));
         margin: 8px;
       }
@@ -548,7 +635,7 @@
       .maps {
         grid-template-columns: 1fr;
         grid-template-rows: 1fr 1fr;
-        min-height: 320px;
+        min-height: 680px;
       }
     }
   </style>
@@ -582,32 +669,56 @@
         <button type="button" id="fitButton">回到范围</button>
       </div>
     </header>
-    <div class="drawbar" aria-label="手动画线工具">
+    <div class="drawbar sketchbar" aria-label="手动画线工具">
       <button type="button" id="toggleDrawbarButton" class="wide-action" aria-expanded="true">收起绘图工具</button>
-      <button type="button" data-draw-tool="parcel">画红线</button>
-      <button type="button" data-draw-tool="channel">画通道线</button>
-      <button type="button" data-draw-tool="building">画建筑</button>
-      <button type="button" data-draw-tool="station">画站体</button>
-      <button type="button" data-draw-tool="exit">点1号口</button>
-      <button type="button" id="deleteSelectedObjectButton" class="danger">删除选中</button>
-      <button type="button" id="finishDrawButton">完成绘制</button>
-      <button type="button" id="undoDrawButton">撤销上一点</button>
-      <button type="button" id="cancelDrawButton">取消本次</button>
-      <button type="button" id="clearLayerButton">清空当前图层</button>
-      <select id="buildingSelect" aria-label="选择建筑"></select>
-      <select id="channelSelect" aria-label="选择通道"></select>
-      <select id="spaceTypeSelect" aria-label="空间类型">
-        <option value="ground">地上空间</option>
-        <option value="underground">地下空间</option>
-      </select>
-      <input id="groundFloorsInput" type="number" min="0" max="30" value="4" aria-label="地上层数" title="地上层数" />
-      <input id="undergroundFloorsInput" type="number" min="0" max="12" value="1" aria-label="地下层数" title="地下层数" />
-      <button type="button" id="autoChannelButton">自动通道</button>
-      <button type="button" id="customModelToggle" aria-pressed="true">自建体块</button>
-      <button type="button" id="perspectiveDragButton" aria-pressed="false">拖拽透视</button>
-      <button type="button" id="saveGeometryButton" class="primary wide-action">保存草图</button>
-      <button type="button" id="exportPngButton" class="primary">导出PNG</button>
-      <button type="button" id="resetGeometryButton" class="danger">恢复默认</button>
+      <div class="sketchbar-header wide-action">
+        <div class="sketch-status">
+          <span class="section-kicker">当前模式</span>
+          <span id="activeModeLabel" class="mode-label">选择</span>
+          <span id="activeModeHint" class="mode-hint">点击图形选中对象；按 Delete 删除，或选择工具开始绘制。</span>
+        </div>
+      </div>
+      <div class="tool-palette wide-action" role="toolbar" aria-label="绘图模式">
+        <button type="button" id="selectModeButton" data-sketch-mode="select" aria-pressed="true">选择</button>
+        <button type="button" data-sketch-mode="parcel" data-draw-tool="parcel" aria-pressed="false">红线</button>
+        <button type="button" data-sketch-mode="station" data-draw-tool="station" aria-pressed="false">站体</button>
+        <button type="button" data-sketch-mode="building" data-draw-tool="building" aria-pressed="false">建筑</button>
+        <button type="button" data-sketch-mode="exit" data-draw-tool="exit" aria-pressed="false">1号口</button>
+        <button type="button" data-sketch-mode="channel" data-draw-tool="channel" aria-pressed="false">通道</button>
+      </div>
+      <div class="sketch-actions wide-action" aria-label="当前绘制动作">
+        <button type="button" id="finishDrawButton">完成</button>
+        <button type="button" id="undoDrawButton">撤销点</button>
+        <button type="button" id="cancelDrawButton">取消</button>
+        <button type="button" id="clearLayerButton" class="wide-action">清空当前图层</button>
+      </div>
+      <div class="selection-inspector wide-action" aria-label="选中对象检查器">
+        <span class="section-kicker">选中对象</span>
+        <div id="selectionSummary" class="selection-summary">未选中对象。可在 2D 图上点击红线、站体、建筑、出入口或通道。</div>
+        <div class="selection-grid">
+          <select id="buildingSelect" aria-label="选择建筑"></select>
+          <select id="channelSelect" aria-label="选择通道"></select>
+        </div>
+        <div class="space-grid">
+          <select id="spaceTypeSelect" class="wide-action" aria-label="空间类型">
+            <option value="ground">地上空间</option>
+            <option value="underground">地下空间</option>
+          </select>
+          <input id="groundFloorsInput" type="number" min="0" max="30" value="4" aria-label="地上层数" title="地上层数" />
+          <input id="undergroundFloorsInput" type="number" min="0" max="12" value="1" aria-label="地下层数" title="地下层数" />
+        </div>
+        <button type="button" id="deleteSelectedObjectButton" class="danger">删除选中</button>
+      </div>
+      <div class="context-actions wide-action" aria-label="上下文动作">
+        <button type="button" id="autoChannelButton">自动通道</button>
+        <button type="button" id="customModelToggle" aria-pressed="true">自建体块</button>
+        <button type="button" id="perspectiveDragButton" aria-pressed="false">拖拽透视</button>
+      </div>
+      <div class="output-actions wide-action" aria-label="保存与导出">
+        <button type="button" id="saveGeometryButton" class="primary">保存草图</button>
+        <button type="button" id="exportPngButton" class="primary">导出PNG</button>
+        <button type="button" id="resetGeometryButton" class="danger">恢复默认</button>
+      </div>
     </div>
 
     <main class="maps">
@@ -656,6 +767,33 @@
     const defaultGeometry = window.AMAP_SYNC_GEOMETRY;
     const spaceModel = window.SCHEMATIC_SPACE_MODEL;
     let geometry = cloneGeometry(defaultGeometry);
+    const sketchModes = Object.freeze({
+      select: {
+        label: "选择",
+        hint: "点击图形选中对象；按 Delete 删除，或选择工具开始绘制。"
+      },
+      parcel: {
+        label: "画红线",
+        hint: "在 2D 图上逐点点击地块红线；Enter 或双击完成，Esc 取消，Z 撤销上一点。"
+      },
+      station: {
+        label: "画站体",
+        hint: "沿车站范围逐点点击；完成后会同步刷新 2D/3D。"
+      },
+      building: {
+        label: "画建筑",
+        hint: "逐点圈出接口建筑；完成后会自动选中并继承当前空间类型与层数。"
+      },
+      exit: {
+        label: "点 1号口",
+        hint: "在 2D 图上点击出入口位置；点完即完成，Esc 可取消。"
+      },
+      channel: {
+        label: "画通道",
+        hint: "从站口到建筑逐点点击通道中心线；Enter 或双击完成。"
+      }
+    });
+    let sketchMode = "select";
     let activeDrawTool = "";
     let lastSelectedTool = "";
     let drawingPoints = [];
@@ -1649,6 +1787,71 @@
       }
     }
 
+    function updateSketchModeUi() {
+      const mode = sketchModes[sketchMode] ? sketchMode : "select";
+      const config = sketchModes[mode];
+      document.body.removeAttribute("data-sketch-mode");
+      document.body.dataset.activeSketchMode = mode;
+      document.querySelectorAll("button[data-sketch-mode]").forEach((button) => {
+        button.setAttribute("aria-pressed", String(button.dataset.sketchMode === mode));
+      });
+      const label = document.getElementById("activeModeLabel");
+      const hint = document.getElementById("activeModeHint");
+      if (label) {
+        label.textContent = config.label;
+      }
+      if (hint) {
+        if (activeDrawTool && activeDrawTool !== "exit") {
+          hint.textContent = `${config.hint} 已取 ${drawingPoints.length} 点，至少 ${minPointsForTool(activeDrawTool)} 点。`;
+        } else {
+          hint.textContent = config.hint;
+        }
+      }
+    }
+
+    function drawObjectTypeLabel(type) {
+      const labels = {
+        parcel: "红线",
+        station: "站体",
+        exit: "出入口",
+        channel: "通道",
+        building: "建筑",
+        spatialItem: "空间"
+      };
+      return labels[type] || type || "对象";
+    }
+
+    function geometryPointCount(type, object) {
+      if (!object) return 0;
+      if (type === "exit") return object.point ? 1 : 0;
+      const path = object.centerline || object.path || object.body || [];
+      return Array.isArray(path) ? path.length : 0;
+    }
+
+    function updateSelectionInspector() {
+      const summary = document.getElementById("selectionSummary");
+      if (!summary) {
+        return;
+      }
+      const selected = resolveSelectedDrawObject();
+      if (!selected) {
+        summary.textContent = "未选中对象。可在 2D 图上点击红线、站体、建筑、出入口或通道。";
+        document.body.dataset.hasSelection = "false";
+        return;
+      }
+      const object = findDrawObject(selected.type, selected.id);
+      if (!object) {
+        summary.textContent = "未选中对象。可在 2D 图上点击红线、站体、建筑、出入口或通道。";
+        document.body.dataset.hasSelection = "false";
+        return;
+      }
+      document.body.dataset.hasSelection = "true";
+      const typeLabel = drawObjectTypeLabel(selected.type);
+      const points = geometryPointCount(selected.type, object);
+      const spaceText = object.spaceType ? ` · ${spaceModel.spaceTypeLabel(object.spaceType)} · ${spaceModel.floorSummary(object)}` : "";
+      summary.textContent = `${typeLabel}：${object.name || selected.id}${points ? ` · ${points} 点` : ""}${spaceText}`;
+    }
+
     function updateDrawingControls() {
       const isLineTool = activeDrawTool && activeDrawTool !== "exit";
       const hasActiveTool = Boolean(activeDrawTool);
@@ -1658,10 +1861,12 @@
       const clearButton = document.getElementById("clearLayerButton");
       const deleteButton = document.getElementById("deleteSelectedObjectButton");
       if (undoButton) undoButton.disabled = !(isLineTool && drawingPoints.length > 0);
-      if (finishButton) finishButton.disabled = !isLineTool;
+      if (finishButton) finishButton.disabled = !(isLineTool && drawingPoints.length >= minPointsForTool(activeDrawTool));
       if (cancelButton) cancelButton.disabled = !hasActiveTool;
       if (clearButton) clearButton.disabled = !(activeDrawTool || lastSelectedTool);
       if (deleteButton) deleteButton.disabled = !resolveSelectedDrawObject();
+      updateSketchModeUi();
+      updateSelectionInspector();
     }
 
     function isSelectedDrawObject(type, id) {
@@ -1698,6 +1903,10 @@
     function selectDrawObject(type, id, state) {
       const object = findDrawObject(type, id);
       if (!object) return;
+      if (activeDrawTool) {
+        cancelActiveDrawing(state);
+      }
+      sketchMode = "select";
       selectedDrawObject = { type, id };
       if (type === "building") {
         geometry.selectedBuildingId = id;
@@ -1716,7 +1925,7 @@
       updateSpaceControls();
       updateDrawingControls();
       if (state) refreshScene(state);
-      setWorkflowGuide(`已选中${object.name || type}。可点击“删除选中”，或继续编辑空间类型/层数。`);
+      setWorkflowGuide(`已选中${object.name || type}。可点击“删除选中”，或在检查器里编辑空间类型/层数。`);
     }
 
     function attachSelectionHandler(layer, type, id) {
@@ -1775,11 +1984,21 @@
 
     function clearCommittedLayer(tool) {
       if (tool === "parcel") {
-        geometry.parcel.path = [];
+        const selected = selectedDrawObject?.type === "parcel" ? findDrawObject("parcel", selectedDrawObject.id) : geometry.parcels[0];
+        if (selected) {
+          geometry.parcels = geometry.parcels.filter((parcel) => parcel.id !== selected.id);
+        } else {
+          geometry.parcels = [];
+        }
+        geometry.parcel = geometry.parcels[0] || { id: "parcel-1", name: "地块红线", stroke: "#e1262f", fill: "#f8ed9a", path: [] };
         geometry.labels = geometry.labels.filter((item) => item.id !== "parcel");
       }
       if (tool === "underground") {
-        geometry.underground.path = [];
+        const selected = selectedDrawObject?.type === "spatialItem" ? findDrawObject("spatialItem", selectedDrawObject.id) : geometry.spatialItems.find((item) => item.spaceType === "underground");
+        if (selected) {
+          geometry.spatialItems = geometry.spatialItems.filter((item) => item.id !== selected.id);
+        }
+        geometry.underground = geometry.spatialItems.find((item) => item.spaceType === "underground") || { path: [] };
       }
       if (tool === "building") {
         const selected = getSelectedBuilding();
@@ -1791,8 +2010,15 @@
         syncBuildingLabels();
       }
       if (tool === "station") {
-        geometry.station.path = [];
-        geometry.station.body = [];
+        const selected = selectedDrawObject?.type === "station" ? findDrawObject("station", selectedDrawObject.id) : geometry.stationOutlines[0];
+        if (selected) {
+          geometry.stationOutlines = geometry.stationOutlines.filter((station) => station.id !== selected.id);
+        } else {
+          geometry.stationOutlines = [];
+        }
+        const first = geometry.stationOutlines[0] || { id: "station-1", name: "站体", path: [] };
+        geometry.station.path = first.path || [];
+        geometry.station.body = first.path || [];
       }
       if (tool === "channel") {
         const selected = getSelectedChannel();
@@ -1803,9 +2029,11 @@
         syncLegacyChannel();
       }
       if (tool === "exit") {
+        geometry.exits = [];
         geometry.station.exitPoint = null;
         geometry.labels = geometry.labels.filter((item) => item.id !== "exit");
       }
+      selectedDrawObject = null;
     }
 
     function updateBuildingSelect() {
@@ -1829,6 +2057,7 @@
       if (perspectiveButton) perspectiveButton.disabled = geometry.buildings.length === 0 && !geometry.channels.some((channel) => channel.path && channel.path.length);
       updateChannelSelect();
       updateSpaceControls();
+      updateSelectionInspector();
     }
 
     function updateChannelSelect() {
@@ -1845,14 +2074,20 @@
         select.appendChild(option);
       });
       select.disabled = geometry.channels.length === 0;
+      updateSelectionInspector();
     }
 
     function selectedSpatialTarget() {
       ensureGeometryV2();
-      const tool = activeDrawTool || lastSelectedTool;
+      const tool = activeDrawTool || (selectedDrawObject ? "" : lastSelectedTool);
       if (tool === "station") return geometry.station;
       if (tool === "channel") return getSelectedChannel() || geometry.channel;
       if (tool === "building") return getSelectedBuilding() || pendingBuildingDefaults;
+      const selected = resolveSelectedDrawObject();
+      if (selected?.type === "station") return geometry.station;
+      if (selected?.type === "channel") return getSelectedChannel() || geometry.channel;
+      if (selected?.type === "building") return getSelectedBuilding() || pendingBuildingDefaults;
+      if (selected?.type === "spatialItem") return findDrawObject("spatialItem", selected.id) || geometry.underground;
       return getSelectedBuilding() || geometry.station || geometry.channel;
     }
 
@@ -2012,6 +2247,9 @@
         groundFloors: building.spaceType === "ground" ? 1 : 0,
         undergroundFloors: building.spaceType === "underground" ? 1 : 0
       }, state);
+      selectedDrawObject = { type: "channel", id: channel.id };
+      lastSelectedTool = "channel";
+      updateDrawingControls();
       setWorkflowGuide(`已新增${channel.name}：1号口连接到${building.name}最近边。可继续选择其他建筑生成多条通道。`);
       setStatus(`已新增${channel.name}到${building.name}。`);
       return true;
@@ -2036,7 +2274,73 @@
       });
     }
 
+    function resetDrawingState(state, mode = "select") {
+      const previousTool = activeDrawTool;
+      activeDrawTool = "";
+      sketchMode = sketchModes[mode] ? mode : "select";
+      drawingPoints = [];
+      drawingPreviewPoint = null;
+      if (previousTool) {
+        updateLastDraw(previousTool);
+      }
+      if (state?.map2d) {
+        clearDrawingOverlay(state.map2d);
+      }
+      setDrawingInteractionLocked(state, false);
+      updateDrawingControls();
+    }
+
+    function setSketchMode(mode, state = window.__AMAP_SYNC_STATE__, options = {}) {
+      const nextMode = sketchModes[mode] ? mode : "select";
+      if (nextMode === "select") {
+        resetDrawingState(state, "select");
+        if (!options.silent) {
+          setWorkflowGuide("选择模式：点击已有红线、站体、建筑、出入口或通道进行检查；Delete 删除选中对象。");
+          setStatus("已切换到选择模式。");
+        }
+        return true;
+      }
+      beginDrawing(nextMode, state);
+      return true;
+    }
+
+    function cancelActiveDrawing(state = window.__AMAP_SYNC_STATE__) {
+      if (!activeDrawTool) {
+        setSketchMode("select", state, { silent: true });
+        return false;
+      }
+      const tool = activeDrawTool;
+      resetDrawingState(state, "select");
+      setWorkflowGuide(`已取消本次${toolNames[tool]}绘制。可以重新选择工具再画，已有保存的图层不受影响。`);
+      setStatus(`已取消本次${toolNames[tool]}绘制。`);
+      return true;
+    }
+
+    function undoLastDrawingPoint(state = window.__AMAP_SYNC_STATE__) {
+      if (!activeDrawTool || activeDrawTool === "exit" || drawingPoints.length === 0) {
+        return false;
+      }
+      drawingPoints.pop();
+      updateLastDraw(activeDrawTool);
+      updateDrawingOverlay(state);
+      updateDrawingControls();
+      setWorkflowGuide(`已撤销上一点。正在画${toolNames[activeDrawTool]}：当前 ${drawingPoints.length} 点，至少需要 ${minPointsForTool(activeDrawTool)} 点。`);
+      setStatus(`已撤销上一点，当前 ${drawingPoints.length} 点。`);
+      return true;
+    }
+
     function beginDrawing(tool, state) {
+      if (!state?.map2d) {
+        return;
+      }
+      if (!sketchModes[tool] || tool === "select") {
+        setSketchMode("select", state, { silent: true });
+        return;
+      }
+      if (activeDrawTool && activeDrawTool !== tool) {
+        resetDrawingState(state, tool);
+      }
+      sketchMode = tool;
       activeDrawTool = tool;
       lastSelectedTool = tool;
       drawingPoints = [];
@@ -2108,16 +2412,10 @@
         return false;
       }
       applyDrawPath(tool, drawingPoints);
-      activeDrawTool = "";
-      drawingPoints = [];
-      drawingPreviewPoint = null;
-      updateLastDraw(tool);
-      clearDrawingOverlay(state.map2d);
-      setDrawingInteractionLocked(state, false);
-      document.querySelectorAll("[data-draw-tool]").forEach((item) => item.setAttribute("aria-pressed", "false"));
+      resetDrawingState(state, "select");
       refreshScene(state);
       updateDrawingControls();
-      setWorkflowGuide(`已完成${toolNames[tool]}。下一步可以继续画其他图层，或点“保存草图”，确认无误后点“导出PNG”。`);
+      setWorkflowGuide(`已完成${toolNames[tool]}并自动选中。下一步可以继续画其他图层，或在检查器里调整空间类型/层数。`);
       setStatus(`已完成${toolNames[tool]}，2D/3D 预览已刷新。`);
       return true;
     }
@@ -2125,11 +2423,36 @@
     function applyDrawPath(tool, path) {
       ensureGeometryV2();
       if (tool === "parcel" && path.length >= 3) {
-        geometry.parcel.path = path;
+        const parcel = {
+          ...(geometry.parcels[0] || geometry.parcel || {}),
+          id: geometry.parcels[0]?.id || geometry.parcel?.id || "parcel-1",
+          name: geometry.parcels[0]?.name || geometry.parcel?.name || "地块红线",
+          stroke: "#e1262f",
+          fill: "#f8ed9a",
+          path
+        };
+        geometry.parcels = [parcel, ...geometry.parcels.filter((item) => item.id !== parcel.id)];
+        geometry.parcel = { ...parcel };
+        selectedDrawObject = { type: "parcel", id: parcel.id };
+        lastSelectedTool = "parcel";
         upsertLabel("parcel", "地块红线", centroid(path), "parcel");
       }
       if (tool === "underground" && path.length >= 3) {
-        geometry.underground.path = path;
+        const item = normalizeSpatialItem({
+          ...(geometry.spatialItems.find((candidate) => candidate.spaceType === "underground") || geometry.underground || {}),
+          id: geometry.underground?.id || "space-underground-1",
+          name: geometry.underground?.name || "地下空间",
+          stroke: "#176bd6",
+          fill: "#ffffff",
+          path,
+          spaceType: "underground",
+          groundFloors: 0,
+          undergroundFloors: document.getElementById("undergroundFloorsInput")?.value
+        }, { spaceType: "underground", groundFloors: 0, undergroundFloors: 1 });
+        geometry.spatialItems = [item, ...geometry.spatialItems.filter((candidate) => candidate.id !== item.id)];
+        geometry.underground = { ...item };
+        selectedDrawObject = { type: "spatialItem", id: item.id };
+        lastSelectedTool = "underground";
       }
       if (tool === "building" && path.length >= 3) {
         buildingSerial += 1;
@@ -2147,27 +2470,42 @@
         }, { spaceType: "ground", groundFloors: 4, undergroundFloors: 1 });
         geometry.buildings.push(building);
         geometry.selectedBuildingId = building.id;
+        selectedDrawObject = { type: "building", id: building.id };
+        lastSelectedTool = "building";
         syncLegacyBuilding();
         syncBuildingLabels();
       }
       if (tool === "station" && path.length >= 3) {
-        geometry.station.path = path;
-        geometry.station.body = path;
-        Object.assign(geometry.station, normalizeSpatialItem({
+        const station = {
           ...geometry.station,
+          id: geometry.stationOutlines[0]?.id || geometry.station?.id || "station-1",
+          name: geometry.station?.name || "站体",
+          stroke: "#7d3f98",
+          fill: "#8a58a5",
+          path
+        };
+        geometry.stationOutlines = [station, ...geometry.stationOutlines.filter((item) => item.id !== station.id)];
+        Object.assign(geometry.station, normalizeSpatialItem({
+          ...station,
+          body: path,
+          path,
           spaceType: currentSpaceType(),
           groundFloors: document.getElementById("groundFloorsInput")?.value,
           undergroundFloors: document.getElementById("undergroundFloorsInput")?.value
         }, { spaceType: "underground", groundFloors: 0, undergroundFloors: 2 }));
+        selectedDrawObject = { type: "station", id: station.id };
+        lastSelectedTool = "station";
       }
       if (tool === "channel" && path.length >= 2) {
-        addChannel({
+        const channel = addChannel({
           centerline: path,
           path: makeChannelFootprint(path),
           spaceType: currentSpaceType(),
           groundFloors: document.getElementById("groundFloorsInput")?.value,
           undergroundFloors: document.getElementById("undergroundFloorsInput")?.value
         });
+        selectedDrawObject = { type: "channel", id: channel.id };
+        lastSelectedTool = "channel";
       }
     }
 
@@ -2488,6 +2826,46 @@
       redraw();
     }
 
+    function isEditableKeyboardTarget(target) {
+      const tagName = String(target?.tagName || "").toLowerCase();
+      return tagName === "input" || tagName === "select" || tagName === "textarea" || Boolean(target?.isContentEditable);
+    }
+
+    function bindSketchKeyboardShortcuts(state) {
+      if (document.body.dataset.sketchKeyboardBound === "true") {
+        return;
+      }
+      document.body.dataset.sketchKeyboardBound = "true";
+      document.addEventListener("keydown", (event) => {
+        if (isEditableKeyboardTarget(event.target)) {
+          return;
+        }
+        if (event.key === "Escape") {
+          event.preventDefault();
+          if (activeDrawTool) {
+            cancelActiveDrawing(state);
+          } else {
+            setSketchMode("select", state, { silent: false });
+          }
+          return;
+        }
+        if (event.key === "Enter" && activeDrawTool && activeDrawTool !== "exit") {
+          event.preventDefault();
+          finishManualDrawing(state);
+          return;
+        }
+        if ((event.key === "z" || event.key === "Z") && activeDrawTool && activeDrawTool !== "exit") {
+          event.preventDefault();
+          undoLastDrawingPoint(state);
+          return;
+        }
+        if ((event.key === "Delete" || event.key === "Backspace") && !activeDrawTool && resolveSelectedDrawObject()) {
+          event.preventDefault();
+          deleteSelectedObject(state);
+        }
+      });
+    }
+
     function setupButtons(map2d, map3d, state) {
       document.querySelectorAll("[data-mode-button]").forEach((button) => {
         button.addEventListener("click", () => {
@@ -2517,6 +2895,7 @@
       });
 
       bindDrawbarToggle();
+      bindSketchKeyboardShortcuts(state);
 
       document.getElementById("toggleGuideButton").addEventListener("click", () => {
         const panel = document.getElementById("drawPanel");
@@ -2526,6 +2905,7 @@
       });
 
       document.getElementById("buildingSelect").addEventListener("change", (event) => {
+        setSketchMode("select", state, { silent: true });
         geometry.selectedBuildingId = event.target.value;
         syncLegacyBuilding();
         lastSelectedTool = "building";
@@ -2538,6 +2918,7 @@
       });
 
       document.getElementById("channelSelect").addEventListener("change", (event) => {
+        setSketchMode("select", state, { silent: true });
         geometry.selectedChannelId = event.target.value;
         syncLegacyChannel();
         lastSelectedTool = "channel";
@@ -2574,17 +2955,14 @@
           : "已退出透视调整。");
       });
 
-      document.querySelectorAll("[data-draw-tool]").forEach((button) => {
+      document.querySelectorAll("button[data-sketch-mode]").forEach((button) => {
         button.addEventListener("click", () => {
-          const tool = button.dataset.drawTool;
+          const mode = button.dataset.sketchMode;
           document.body.dataset.mode = "split";
           document.querySelectorAll("[data-mode-button]").forEach((item) => {
             item.setAttribute("aria-pressed", String(item.dataset.modeButton === "split"));
           });
-          document.querySelectorAll("[data-draw-tool]").forEach((item) => {
-            item.setAttribute("aria-pressed", String(item === button));
-          });
-          beginDrawing(tool, state);
+          setSketchMode(mode, state);
         });
       });
 
@@ -2598,16 +2976,13 @@
           exit.point = point;
           exit.stationOutlineId = geometry.stationOutlines[0]?.id || "";
           geometry.exits = [exit, ...geometry.exits.filter((item) => item.id !== exit.id)];
+          selectedDrawObject = { type: "exit", id: exit.id };
+          lastSelectedTool = "exit";
           moveExitLabel(point);
-          activeDrawTool = "";
-          drawingPoints = [];
-          drawingPreviewPoint = null;
-          updateLastDraw("exit");
-          setDrawingInteractionLocked(state, false);
-          document.querySelectorAll("[data-draw-tool]").forEach((item) => item.setAttribute("aria-pressed", "false"));
+          resetDrawingState(state, "select");
           refreshScene(state);
           updateDrawingControls();
-          setWorkflowGuide("已完成 1号口。下一步可以继续画通道线，或点“保存草图”，确认无误后点“导出PNG”。");
+          setWorkflowGuide("已完成并选中 1号口。下一步可以继续画通道线，或点“保存草图”，确认无误后点“导出PNG”。");
           setStatus("已接收 1 号口点位，2D/3D 预览已刷新。");
           return;
         }
@@ -2725,32 +3100,11 @@
       });
 
       document.getElementById("undoDrawButton").addEventListener("click", () => {
-        if (!activeDrawTool || activeDrawTool === "exit" || drawingPoints.length === 0) {
-          return;
-        }
-        drawingPoints.pop();
-        updateLastDraw(activeDrawTool);
-        updateDrawingOverlay(state);
-        updateDrawingControls();
-        setWorkflowGuide(`已撤销上一点。正在画${toolNames[activeDrawTool]}：当前 ${drawingPoints.length} 点，至少需要 ${minPointsForTool(activeDrawTool)} 点。`);
-        setStatus(`已撤销上一点，当前 ${drawingPoints.length} 点。`);
+        undoLastDrawingPoint(state);
       });
 
       document.getElementById("cancelDrawButton").addEventListener("click", () => {
-        if (!activeDrawTool) {
-          return;
-        }
-        const tool = activeDrawTool;
-        activeDrawTool = "";
-        drawingPoints = [];
-        drawingPreviewPoint = null;
-        updateLastDraw(tool);
-        clearDrawingOverlay(state.map2d);
-        setDrawingInteractionLocked(state, false);
-        document.querySelectorAll("[data-draw-tool]").forEach((item) => item.setAttribute("aria-pressed", "false"));
-        updateDrawingControls();
-        setWorkflowGuide(`已取消本次${toolNames[tool]}绘制。可以重新选择工具再画，已有保存的图层不受影响。`);
-        setStatus(`已取消本次${toolNames[tool]}绘制。`);
+        cancelActiveDrawing(state);
       });
 
       document.getElementById("clearLayerButton").addEventListener("click", () => {
@@ -2758,14 +3112,8 @@
         if (!tool) {
           return;
         }
-        activeDrawTool = "";
-        drawingPoints = [];
-        drawingPreviewPoint = null;
-        updateLastDraw(tool);
-        clearDrawingOverlay(state.map2d);
+        resetDrawingState(state, "select");
         clearCommittedLayer(tool);
-        setDrawingInteractionLocked(state, false);
-        document.querySelectorAll("[data-draw-tool]").forEach((item) => item.setAttribute("aria-pressed", "false"));
         refreshScene(state);
         updateDrawingControls();
         setWorkflowGuide(`已清空${toolNames[tool]}。需要重新画时，点上方“画${toolNames[tool]}”再在 2D 地图上采点。`);
@@ -2775,16 +3123,12 @@
       document.getElementById("resetGeometryButton").addEventListener("click", () => {
         geometry = cloneGeometry(defaultGeometry);
         ensureGeometryV2();
-        activeDrawTool = "";
+        selectedDrawObject = null;
         lastSelectedTool = "";
-        drawingPoints = [];
-        drawingPreviewPoint = null;
-        updateLastDraw("");
-        clearDrawingOverlay(state.map2d);
-        setDrawingInteractionLocked(state, false);
+        resetDrawingState(state, "select");
         refreshScene(state);
         updateDrawingControls();
-        setWorkflowGuide("已恢复默认。先选择一个工具，例如画红线；在左侧 2D 地图上逐点点击。");
+        setWorkflowGuide("已恢复默认。当前为选择模式；可直接选择工具开始画红线、站体、建筑、出入口和通道。");
         setStatus("已恢复默认几何。");
       });
 

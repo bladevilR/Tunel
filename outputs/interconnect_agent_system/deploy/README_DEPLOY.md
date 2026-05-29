@@ -11,7 +11,14 @@
 
 ## 可选配置
 
-如需接入外部模型，将 `.env.example` 复制为 `.env`，填写：
+如需接入 Claude Code 同一组 Anthropic Key，将 `.env.example` 复制为 `.env`，填写：
+
+```text
+ANTHROPIC_API_KEY=...
+ANTHROPIC_MODEL=...
+```
+
+系统也保留 OpenAI 兼容接口配置：
 
 ```text
 LLM_BASE_URL=...
@@ -21,7 +28,7 @@ AMAP_JS_KEY=...
 AMAP_SECURITY_CODE=...
 ```
 
-不配置模型时，系统仍可使用本地知识库和离线兜底研判；带模型配置时，模型主导研判会优先调用外部模型。
+同时配置 `ANTHROPIC_*` 和 `LLM_*` 时，报告研判优先使用 `ANTHROPIC_API_KEY`。不配置模型时，系统仍可使用本地知识库和离线兜底研判；带模型配置时，模型主导研判会优先调用外部模型。
 
 本交付包按当前打包要求已包含 `.env.local`。该文件内含模型访问密钥和高德地图 Key，请只在受控服务器和受控渠道分发。
 
