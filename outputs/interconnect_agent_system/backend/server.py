@@ -31,9 +31,11 @@ EXPORT_DIR = ROOT / "exports"
 PROJECTS_PATH = DATA_DIR / "projects.json"
 LOCAL_IDENTITY_PATH = DATA_DIR / "local_identity.json"
 ADMIN_STATION_OUTLINES_PATH = DATA_DIR / "admin_station_outlines.json"
+STATION_MEMORY_PATH = DATA_DIR / "station_memory.json"
 SCHEMATIC_DIR = FRONTEND_DIR / "schematic"
 SCHEMATIC_GEOMETRY_PATH = SCHEMATIC_DIR / "user_geometry.json"
 SCHEMATIC_EXPORT_DIR = SCHEMATIC_DIR / "exports"
+GENERATED_IMAGE_DIR = EXPORT_DIR / "generated-images"
 
 
 def load_json(name: str) -> dict:
@@ -76,6 +78,7 @@ RULES = load_json("design_rules.json")
 STATIONS = load_json("stations.json")
 DEMOS = load_json("demo_cases.json")
 RIDERSHIP = load_json_optional("ridership.json", {"records": []})
+RIDERSHIP_FORECAST = load_json_optional("ridership_forecast.json", {"records": []})
 STATION_OPERATIONS = load_json_optional("station_operations.json", {"records": []})
 STATION_AMENITIES = load_json_optional("station_amenities.json", {"records": []})
 INPUT_SCHEMA = load_json_optional("input_schema.json", {"fields": []})
@@ -86,6 +89,30 @@ STATION_KNOWLEDGE_INDEX = load_json_optional("knowledge/station_index.json", {"r
 SOURCE_MANIFEST = load_json_optional("knowledge/source_manifest.json", [])
 UNPARSED_SOURCES = load_json_optional("knowledge/unparsed_sources.json", [])
 STATION_INDEX = {item["name"]: item for item in STATIONS.get("stations", [])}
+
+
+def source_manifest_records() -> list[dict]:
+    records = list(SOURCE_MANIFEST if isinstance(SOURCE_MANIFEST, list) else [])
+    if not (RIDERSHIP_FORECAST.get("records") or []):
+        return records
+    if any(item.get("id") == "ridership-forecast-0528-xls" for item in records):
+        return records
+    source = RIDERSHIP_FORECAST.get("source") or {}
+    records.append({
+        "id": "ridership-forecast-0528-xls",
+        "path": "0528既有线路客流预测数据.xls",
+        "name": source.get("fileName") or "0528既有线路客流预测数据.xls",
+        "suffix": ".xls",
+        "size": source.get("sizeBytes") or 0,
+        "parseStatus": "parsed",
+        "usefulness": "核心",
+        "priority": 91,
+        "category": "ridership",
+        "reason": "既有线路全日客流量预测，用于站点上下文与报告中的未来客流证据，不替代现状日均进站数据",
+        "counts": RIDERSHIP_FORECAST.get("counts") or {},
+        "note": "解析说明见 docs/ridership_forecast_source.md；运行时使用 data/ridership_forecast.json",
+    })
+    return records
 
 
 def utc_now() -> str:
@@ -124,7 +151,23 @@ def build_alias_index(records: list[dict], name_getter) -> dict[str, dict]:
     return index
 
 
+def build_alias_multi_index(records: list[dict], name_getter) -> dict[str, list[dict]]:
+    index: dict[str, list[dict]] = {}
+    for record in records:
+        names = name_getter(record)
+        if isinstance(names, str):
+            names = [names]
+        for name in names or []:
+            for alias in station_aliases(name):
+                index.setdefault(alias, []).append(record)
+    return index
+
+
 RIDERSHIP_INDEX = build_alias_index(RIDERSHIP.get("records", []), lambda item: item.get("stationName", ""))
+RIDERSHIP_FORECAST_INDEX = build_alias_multi_index(
+    RIDERSHIP_FORECAST.get("records", []),
+    lambda item: [item.get("stationName", ""), item.get("stationDisplayName", "")]
+)
 OPERATIONS_INDEX = build_alias_index(
     STATION_OPERATIONS.get("records", []),
     lambda item: [item.get("name", ""), *item.get("aliases", []), *item.get("displayNames", [])]
@@ -147,6 +190,18 @@ def lookup_station_context(index: dict[str, dict], name: str | None) -> dict | N
     return None
 
 
+def lookup_station_context_list(index: dict[str, list[dict]], name: str | None) -> list[dict]:
+    matches: list[dict] = []
+    seen: set[int] = set()
+    for alias in station_aliases(name):
+        for record in index.get(alias, []):
+            marker = id(record)
+            if marker not in seen:
+                seen.add(marker)
+                matches.append(record)
+    return matches
+
+
 def load_projects() -> dict:
     if not PROJECTS_PATH.exists():
         return {"version": "1.0", "projects": []}
@@ -162,6 +217,22 @@ def truthy_env(name: str) -> bool:
     return os.environ.get(name, "").strip().lower() in {"1", "true", "yes", "on"}
 
 
+def env_first(*names: str, default: str = "") -> str:
+    for name in names:
+        value = os.environ.get(name)
+        if value not in (None, ""):
+            return str(value)
+    return default
+
+
+def int_env(*names: str, default: int) -> int:
+    value = env_first(*names, default=str(default))
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return default
+
+
 def relative_to_root(path: Path) -> str:
     try:
         return path.relative_to(ROOT).as_posix()
@@ -169,32 +240,114 @@ def relative_to_root(path: Path) -> str:
         return str(path)
 
 
+def server_config() -> dict:
+    image_provider = env_first("GENERATED_IMAGE_PROVIDER", default="disabled").strip().lower() or "disabled"
+    image_enabled = truthy_env("GENERATED_IMAGE_API_ENABLED") or image_provider not in {"disabled", "none", "off"}
+    account_mode = env_first("INTERCONNECT_ACCOUNT_MODE", "ACCOUNT_MODE", default="local_anonymous").strip() or "local_anonymous"
+    return {
+        "host": env_first("INTERCONNECT_HOST", "HOST", default="0.0.0.0"),
+        "port": int_env("INTERCONNECT_PORT", "PORT", default=8765),
+        "dataDir": DATA_DIR,
+        "exportDir": EXPORT_DIR,
+        "stationMemoryPath": STATION_MEMORY_PATH,
+        "localIdentityPath": LOCAL_IDENTITY_PATH,
+        "secretKeyConfigured": bool(env_first("INTERCONNECT_SECRET_KEY", "SECRET_KEY")),
+        "accountMode": account_mode,
+        "accountsEnabled": account_mode not in {"", "local_anonymous", "anonymous", "disabled", "off"},
+        "generatedImage": {
+            "enabled": image_enabled,
+            "provider": image_provider,
+            "apiKeyConfigured": bool(os.environ.get("OPENAI_API_KEY")),
+            "artifactDir": GENERATED_IMAGE_DIR,
+        },
+        "amap": {
+            "jsKeyConfigured": bool(env_first("AMAP_JS_KEY")),
+            "securityCodeConfigured": bool(env_first("AMAP_SECURITY_CODE")),
+        },
+        "exportPdfEnabled": export_pdf_enabled(),
+    }
+
+
+def path_writable(path: Path) -> bool:
+    try:
+        path.mkdir(parents=True, exist_ok=True)
+        probe = path / ".write-test"
+        probe.write_text("ok", encoding="utf-8")
+        probe.unlink()
+        return True
+    except Exception:
+        return False
+
+
+def validate_server_configuration() -> dict:
+    config = server_config()
+    issues = []
+    warnings = []
+    for key in ("dataDir", "exportDir"):
+        if not path_writable(config[key]):
+            issues.append({"key": key, "message": f"{relative_to_root(config[key])} is not writable"})
+    image = config["generatedImage"]
+    if image["enabled"] and image["provider"] not in {"local", "local_placeholder", "mock"} and not image["apiKeyConfigured"]:
+        issues.append({"key": "generatedImage", "message": "configured generated-image provider requires OPENAI_API_KEY or local provider"})
+    if config["accountsEnabled"] and not config["secretKeyConfigured"]:
+        warnings.append({"key": "accounts", "message": "account mode is enabled without INTERCONNECT_SECRET_KEY; use only for local validation"})
+    return {
+        "ok": not issues,
+        "issues": issues,
+        "warnings": warnings,
+        "resolved": {
+            "host": config["host"],
+            "port": config["port"],
+            "dataDir": relative_to_root(config["dataDir"]),
+            "exportDir": relative_to_root(config["exportDir"]),
+            "accountMode": config["accountMode"],
+            "generatedImageProvider": config["generatedImage"]["provider"],
+            "exportPdfEnabled": config["exportPdfEnabled"],
+        },
+    }
+
+
 def build_platform_capability_status() -> dict:
-    image_configured = truthy_env("GENERATED_IMAGE_API_ENABLED") and bool(os.environ.get("OPENAI_API_KEY"))
+    config = server_config()
+    validation = validate_server_configuration()
+    image = config["generatedImage"]
+    image_configured = image["enabled"] and (
+        image["provider"] in {"local", "local_placeholder", "mock"}
+        or image["apiKeyConfigured"]
+    )
     return {
         "generatedImage": {
             "enabled": image_configured,
             "mode": "configured" if image_configured else "not_configured",
             "endpoint": "/api/generated-images",
-            "requires": ["GENERATED_IMAGE_API_ENABLED=1", "OPENAI_API_KEY"],
+            "provider": image["provider"],
+            "artifactDir": relative_to_root(image["artifactDir"]),
+            "requires": ["GENERATED_IMAGE_PROVIDER=local"] if image["provider"] in {"disabled", "none", "off"} else ["OPENAI_API_KEY or local provider"],
         },
         "accounts": {
-            "enabled": False,
-            "mode": "local_anonymous",
+            "enabled": config["accountsEnabled"],
+            "mode": config["accountMode"] if config["accountsEnabled"] else "local_anonymous",
             "identityEndpoint": "/api/identity",
+            "ownerMode": config["accountMode"],
             "upgradePath": "Attach saved projects, exports, and schematic geometry to a future authenticated owner id.",
         },
         "adminStationOutlines": {
             "enabled": True,
             "mode": "shared_local_json",
-            "storage": relative_to_root(ADMIN_STATION_OUTLINES_PATH),
-            "endpoints": ["/api/admin/station-outlines", "/api/admin/station-outlines/apply"],
+            "storage": relative_to_root(STATION_MEMORY_PATH),
+            "legacyStorage": relative_to_root(ADMIN_STATION_OUTLINES_PATH),
+            "endpoints": ["/api/station-memory", "/api/station-memory/apply", "/api/admin/station-outlines", "/api/admin/station-outlines/apply"],
         },
         "deployment": {
             "enabled": True,
             "mode": "local_http_server",
-            "host": os.environ.get("HOST", "127.0.0.1"),
-            "port": int(os.environ.get("PORT", "8765") or 8765),
+            "host": config["host"],
+            "port": config["port"],
+            "dataDir": relative_to_root(config["dataDir"]),
+            "exportDir": relative_to_root(config["exportDir"]),
+            "exportPdfEnabled": config["exportPdfEnabled"],
+            "secretKeyConfigured": config["secretKeyConfigured"],
+            "validation": validation,
             "docs": "docs/deployment_server_migration.md",
         },
     }
@@ -213,8 +366,87 @@ def generated_image_placeholder(payload: dict | None = None) -> dict:
     }
 
 
+def xml_escape(value: str | None) -> str:
+    return (
+        str(value or "")
+        .replace("&", "&amp;")
+        .replace("<", "&lt;")
+        .replace(">", "&gt;")
+        .replace('"', "&quot;")
+    )
+
+
+def generated_image_provider_failure(payload: dict, message: str) -> dict:
+    return {
+        "ok": False,
+        "error": {
+            "code": "provider_failure",
+            "message": message,
+        },
+        "request": payload,
+        "capability": build_platform_capability_status()["generatedImage"],
+    }
+
+
+def create_local_generated_image(payload: dict) -> dict:
+    prompt = str(payload.get("prompt") or payload.get("description") or "station connection rendering").strip()
+    GENERATED_IMAGE_DIR.mkdir(parents=True, exist_ok=True)
+    stamp = datetime.now().strftime("%Y%m%d-%H%M%S-%f")
+    slug = safe_slug(prompt, "generated-image")
+    image_path = GENERATED_IMAGE_DIR / f"{slug}-{stamp}.svg"
+    metadata_path = GENERATED_IMAGE_DIR / f"{slug}-{stamp}.metadata.json"
+    title = xml_escape(prompt[:80])
+    subtitle = xml_escape(payload.get("stationName") or payload.get("projectName") or "Interconnect generated-image local provider")
+    svg = f"""<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720">
+  <rect width="1280" height="720" fill="#f7fbfd"/>
+  <rect x="72" y="84" width="1136" height="552" rx="28" fill="#ffffff" stroke="#b8d4df" stroke-width="4"/>
+  <path d="M170 470 C330 320 430 530 570 360 S820 270 1010 420" fill="none" stroke="#0f79b5" stroke-width="24" stroke-linecap="round"/>
+  <path d="M170 500 C330 350 430 560 570 390 S820 300 1010 450" fill="none" stroke="#d1495b" stroke-width="10" stroke-linecap="round" stroke-dasharray="26 20"/>
+  <circle cx="170" cy="470" r="42" fill="#0f79b5"/>
+  <circle cx="1010" cy="420" r="42" fill="#d1495b"/>
+  <text x="116" y="162" font-family="Microsoft YaHei, Arial, sans-serif" font-size="42" font-weight="700" fill="#16323f">{title}</text>
+  <text x="116" y="220" font-family="Microsoft YaHei, Arial, sans-serif" font-size="24" fill="#5f7480">{subtitle}</text>
+  <text x="116" y="594" font-family="Microsoft YaHei, Arial, sans-serif" font-size="22" fill="#5f7480">local generated-image provider artifact</text>
+</svg>
+"""
+    image_path.write_text(svg, encoding="utf-8")
+    metadata = {
+        "provider": "local",
+        "prompt": prompt,
+        "createdAt": utc_now(),
+        "owner": current_owner_metadata("generated_image"),
+        "request": payload,
+        "image": relative_to_root(image_path),
+    }
+    metadata_path.write_text(json.dumps(metadata, ensure_ascii=False, indent=2), encoding="utf-8")
+    return {
+        "ok": True,
+        "provider": "local",
+        "image": file_info(image_path),
+        "metadataFile": file_info(metadata_path),
+        "metadata": metadata,
+        "capability": build_platform_capability_status()["generatedImage"],
+    }
+
+
+def generated_image_response(payload: dict | None = None) -> dict:
+    payload = payload or {}
+    config = server_config()["generatedImage"]
+    capability = build_platform_capability_status()["generatedImage"]
+    if not capability["enabled"]:
+        return generated_image_placeholder(payload)
+    provider = config["provider"]
+    if provider in {"local", "local_placeholder", "mock"}:
+        return create_local_generated_image(payload)
+    return generated_image_provider_failure(
+        payload,
+        f"Generated-image provider '{provider}' is configured but no runtime adapter is installed in this local delivery.",
+    )
+
+
 def local_identity_payload() -> dict:
     DATA_DIR.mkdir(parents=True, exist_ok=True)
+    config = server_config()
     if LOCAL_IDENTITY_PATH.exists():
         data = json.loads(LOCAL_IDENTITY_PATH.read_text(encoding="utf-8-sig"))
     else:
@@ -228,8 +460,51 @@ def local_identity_payload() -> dict:
             },
         }
         LOCAL_IDENTITY_PATH.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+    if config["accountsEnabled"]:
+        account_id = env_first("INTERCONNECT_ACCOUNT_ID", "ACCOUNT_ID", default="")
+        existing_account = next((item for item in data.get("accounts", []) if item.get("type") == "local_user"), None)
+        if not account_id:
+            account_id = (existing_account or {}).get("id") or f"local-user-{uuid.uuid4().hex[:12]}"
+        account = {
+            "id": account_id,
+            "type": "local_user",
+            "scope": config["accountMode"],
+            "displayName": env_first("INTERCONNECT_ACCOUNT_NAME", "ACCOUNT_NAME", default=(existing_account or {}).get("displayName") or "Local User"),
+            "createdAt": (existing_account or data.get("identity", {})).get("createdAt") or utc_now(),
+        }
+        data["identity"] = account
+        data.setdefault("accounts", [])
+        if not any(item.get("id") == account_id for item in data["accounts"]):
+            data["accounts"].append(account)
+            LOCAL_IDENTITY_PATH.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
     data["capability"] = build_platform_capability_status()["accounts"]
     return data
+
+
+def current_owner_metadata(action: str = "local") -> dict:
+    identity = local_identity_payload().get("identity") or {}
+    config = server_config()
+    return {
+        "ownerId": identity.get("id") or "anonymous",
+        "ownerType": identity.get("type") or "anonymous",
+        "accountMode": config["accountMode"] if config["accountsEnabled"] else "local_anonymous",
+        "scope": identity.get("scope") or "local-workstation",
+        "action": action,
+        "recordedAt": utc_now(),
+    }
+
+
+def migrate_owner_metadata(record: dict, target_owner: dict | None = None) -> dict:
+    target = target_owner or current_owner_metadata("ownership_migration")
+    previous = record.get("owner") or {"ownerId": "anonymous", "ownerType": "anonymous"}
+    return {
+        **target,
+        "migration": {
+            "from": previous,
+            "migratedAt": utc_now(),
+            "mode": "anonymous_to_account",
+        },
+    }
 
 
 def load_admin_station_outline_data() -> dict:
@@ -312,6 +587,302 @@ def apply_admin_station_outline_to_geometry(geometry: dict | None, station_name:
     return {"applied": True, "record": record, "geometry": geometry}
 
 
+def default_station_memory_data() -> dict:
+    return {"version": "station-memory.v1", "records": []}
+
+
+def load_station_memory_data() -> dict:
+    if not STATION_MEMORY_PATH.exists():
+        return default_station_memory_data()
+    data = json.loads(STATION_MEMORY_PATH.read_text(encoding="utf-8-sig"))
+    if not isinstance(data.get("records"), list):
+        data["records"] = []
+    data.setdefault("version", "station-memory.v1")
+    return data
+
+
+def save_station_memory_data(data: dict) -> None:
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
+    data.setdefault("version", "station-memory.v1")
+    data.setdefault("records", [])
+    STATION_MEMORY_PATH.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+def station_memory_identity(record: dict) -> dict:
+    return record.get("identity") or {}
+
+
+def station_memory_context(record: dict) -> dict:
+    return record.get("context") or {}
+
+
+def station_memory_alias_values(record: dict) -> list[str]:
+    identity = station_memory_identity(record)
+    return [
+        identity.get("canonicalName") or "",
+        identity.get("displayName") or "",
+        *(identity.get("aliases") or []),
+    ]
+
+
+def station_memory_alias_set(record: dict) -> set[str]:
+    aliases: set[str] = set()
+    for value in station_memory_alias_values(record):
+        aliases.update(station_aliases(value))
+    return aliases
+
+
+def normalize_station_memory_record(payload: dict, existing: dict | None = None) -> dict:
+    project = payload.get("project") or {}
+    station = project.get("station") or payload.get("station") or {}
+    identity_payload = payload.get("identity") or {}
+    context_payload = payload.get("context") or {}
+    schematic_payload = payload.get("schematic") or {}
+    source_labels = payload.get("sourceLabels") or []
+    now = utc_now()
+
+    canonical_name = first_present(
+        identity_payload.get("canonicalName"),
+        payload.get("stationName"),
+        station.get("name"),
+        (existing or {}).get("identity", {}).get("canonicalName"),
+    )
+    if not canonical_name:
+        raise ValueError("stationName or identity.canonicalName is required")
+    display_name = first_present(identity_payload.get("displayName"), payload.get("displayName"), canonical_name)
+    aliases = [
+        canonical_name,
+        display_name,
+        *(identity_payload.get("aliases") or []),
+        *(payload.get("aliases") or []),
+    ]
+    aliases = list(dict.fromkeys(str(item).strip() for item in aliases if str(item or "").strip()))
+
+    context = {
+        "line": first_present(context_payload.get("line"), station.get("line"), (existing or {}).get("context", {}).get("line")) or "",
+        "todLevel": first_present(context_payload.get("todLevel"), station.get("todLevel"), (existing or {}).get("context", {}).get("todLevel")) or "",
+        "locationLevel": first_present(context_payload.get("locationLevel"), station.get("locationLevel"), (existing or {}).get("context", {}).get("locationLevel")) or "",
+        "stationType": first_present(context_payload.get("stationType"), station.get("stationType"), (existing or {}).get("context", {}).get("stationType")) or "",
+        "district": first_present(context_payload.get("district"), station.get("district"), (existing or {}).get("context", {}).get("district")) or "",
+        "dailyInbound": first_present(context_payload.get("dailyInbound"), station.get("dailyInbound"), (existing or {}).get("context", {}).get("dailyInbound")),
+        "nearbyExit": first_present(context_payload.get("nearbyExit"), station.get("nearbyExit"), (existing or {}).get("context", {}).get("nearbyExit")) or "",
+        "interfaceCondition": first_present(context_payload.get("interfaceCondition"), station.get("interfaceCondition"), (existing or {}).get("context", {}).get("interfaceCondition")) or "",
+    }
+
+    schematic = {
+        "stationOutlines": schematic_payload.get("stationOutlines") or (existing or {}).get("schematic", {}).get("stationOutlines") or [],
+        "exits": schematic_payload.get("exits") or (existing or {}).get("schematic", {}).get("exits") or [],
+        "assets": schematic_payload.get("assets") or (existing or {}).get("schematic", {}).get("assets") or [],
+    }
+
+    record_id = payload.get("id") or (existing or {}).get("id") or f"station-memory-{safe_slug(canonical_name, 'station')}-{uuid.uuid4().hex[:8]}"
+    version = int((existing or {}).get("version") or 0) + 1
+    return {
+        "id": record_id,
+        "version": version,
+        "identity": {
+            "canonicalName": canonical_name,
+            "displayName": display_name,
+            "aliases": aliases,
+        },
+        "context": context,
+        "schematic": schematic,
+        "notes": payload.get("notes") or (existing or {}).get("notes") or [],
+        "fieldSources": payload.get("fieldSources") or (existing or {}).get("fieldSources") or {},
+        "owner": payload.get("owner") or (existing or {}).get("owner") or current_owner_metadata("station_memory"),
+        "provenance": {
+            **((existing or {}).get("provenance") or {}),
+            **(payload.get("provenance") or {}),
+            "sourceLabels": source_labels,
+            "createdFromProjectId": payload.get("createdFromProjectId") or project.get("id") or (existing or {}).get("provenance", {}).get("createdFromProjectId") or "",
+            "operatorIntent": payload.get("operatorIntent") or "save_station_memory",
+        },
+        "createdAt": (existing or {}).get("createdAt") or now,
+        "updatedAt": now,
+    }
+
+
+def admin_outline_memory_records() -> list[dict]:
+    records = []
+    for item in load_admin_station_outline_data().get("records", []):
+        station_name = item.get("stationName") or ""
+        outline = item.get("outline") or {}
+        records.append({
+            "id": f"memory-admin-{item.get('id')}",
+            "version": 1,
+            "virtual": True,
+            "identity": {
+                "canonicalName": station_name,
+                "displayName": station_name,
+                "aliases": station_aliases(station_name),
+            },
+            "context": {},
+            "schematic": {
+                "stationOutlines": [{
+                    **outline,
+                    "source": {
+                        "kind": "admin_station_outline",
+                        "recordId": item.get("id"),
+                        "stationName": station_name,
+                        "source": item.get("source") or {},
+                    },
+                }],
+                "exits": [],
+                "assets": [],
+            },
+            "notes": [],
+            "fieldSources": {},
+            "owner": {
+                "ownerId": "administrator",
+                "ownerType": "administrator",
+                "accountMode": "shared_local_json",
+                "scope": "station-memory",
+                "action": "admin_station_outline",
+            },
+            "provenance": {
+                "sourceLabels": ["administrator station outline"],
+                "createdFromProjectId": "",
+                "operatorIntent": "mapped_admin_station_outline",
+            },
+            "createdAt": item.get("createdAt") or "",
+            "updatedAt": item.get("updatedAt") or "",
+        })
+    return records
+
+
+def list_station_memory_records(station_name: str | None = None) -> list[dict]:
+    records = list(load_station_memory_data().get("records", []))
+    existing_ids = {item.get("id") for item in records}
+    records.extend(item for item in admin_outline_memory_records() if item.get("id") not in existing_ids)
+    if station_name:
+        query_aliases = set(station_aliases(station_name))
+        records = [
+            item for item in records
+            if query_aliases.intersection(station_memory_alias_set(item))
+        ]
+    return sorted(records, key=lambda item: item.get("updatedAt") or item.get("createdAt") or "", reverse=True)
+
+
+def lookup_station_memory_record(name: str | None) -> dict | None:
+    aliases = set(station_aliases(name))
+    for record in list_station_memory_records():
+        if aliases.intersection(station_memory_alias_set(record)):
+            return record
+    return None
+
+
+def save_station_memory_record(payload: dict) -> dict:
+    data = load_station_memory_data()
+    record_id = payload.get("id")
+    existing = next((item for item in data.get("records", []) if item.get("id") == record_id), None)
+    if not existing:
+        lookup_name = payload.get("stationName") or (payload.get("identity") or {}).get("canonicalName")
+        existing = next((
+            item for item in data.get("records", [])
+            if lookup_name and set(station_aliases(lookup_name)).intersection(station_memory_alias_set(item))
+        ), None)
+    record = normalize_station_memory_record(payload, existing)
+    data["records"] = [item for item in data.get("records", []) if item.get("id") != record["id"]]
+    data["records"].append(record)
+    save_station_memory_data(data)
+    return record
+
+
+def station_memory_snapshot(record: dict, applied_fields: list[str]) -> dict:
+    context = station_memory_context(record)
+    schematic = record.get("schematic") or {}
+    return {
+        "sourceMemoryId": record.get("id"),
+        "sourceVersion": record.get("version") or 1,
+        "appliedAt": utc_now(),
+        "appliedFields": applied_fields,
+        "context": context,
+        "schematicSummary": {
+            "stationOutlineCount": len(schematic.get("stationOutlines") or []),
+            "exitCount": len(schematic.get("exits") or []),
+            "assetCount": len(schematic.get("assets") or []),
+        },
+    }
+
+
+def apply_station_memory_to_project(project: dict | None, record: dict, force: bool = True) -> dict:
+    project = json.loads(json.dumps(project or {}, ensure_ascii=False))
+    station = project.setdefault("station", {})
+    identity = station_memory_identity(record)
+    context = station_memory_context(record)
+    applied_fields = []
+    field_map = {
+        "name": identity.get("canonicalName"),
+        "line": context.get("line"),
+        "todLevel": context.get("todLevel"),
+        "locationLevel": context.get("locationLevel"),
+        "stationType": context.get("stationType"),
+        "district": context.get("district"),
+        "dailyInbound": context.get("dailyInbound"),
+        "nearbyExit": context.get("nearbyExit"),
+        "interfaceCondition": context.get("interfaceCondition"),
+    }
+    for key, value in field_map.items():
+        if value in (None, "", []):
+            continue
+        if force or station.get(key) in (None, "", []):
+            station[key] = value
+            applied_fields.append(f"station.{key}")
+    project["stationMemorySnapshot"] = station_memory_snapshot(record, applied_fields)
+    return project
+
+
+def apply_station_memory_to_geometry(geometry: dict | None, record: dict) -> dict:
+    geometry = json.loads(json.dumps(geometry or {}, ensure_ascii=False))
+    schematic = record.get("schematic") or {}
+    outlines = []
+    for outline in schematic.get("stationOutlines") or []:
+        outlines.append({
+            **outline,
+            "source": {
+                **(outline.get("source") or {}),
+                "kind": (outline.get("source") or {}).get("kind") or "station_memory",
+                "memoryId": record.get("id"),
+                "memoryVersion": record.get("version") or 1,
+                "snapshotAt": utc_now(),
+            },
+        })
+    if outlines:
+        existing = geometry.get("stationOutlines") or []
+        geometry["stationOutlines"] = [*outlines, *[
+            item for item in existing
+            if (item.get("source") or {}).get("memoryId") != record.get("id")
+        ]]
+        first = outlines[0]
+        geometry["station"] = {
+            **(geometry.get("station") or {}),
+            "path": first.get("path") or [],
+            "body": first.get("path") or [],
+        }
+    return geometry
+
+
+def apply_station_memory_payload(payload: dict) -> dict:
+    memory_id = payload.get("memoryId") or payload.get("id")
+    station_name = payload.get("stationName") or ((payload.get("project") or {}).get("station") or {}).get("name")
+    records = list_station_memory_records(station_name)
+    if memory_id:
+        records = [item for item in list_station_memory_records() if item.get("id") == memory_id]
+    if not records:
+        raise ValueError("station memory record not found")
+    record = records[0]
+    force = bool(payload.get("force", True))
+    project = apply_station_memory_to_project(payload.get("project") or {}, record, force)
+    geometry = apply_station_memory_to_geometry(payload.get("geometry") or {}, record)
+    return {
+        "ok": True,
+        "record": record,
+        "project": project,
+        "geometry": geometry,
+        "snapshot": project.get("stationMemorySnapshot"),
+    }
+
+
 def list_project_summaries() -> list[dict]:
     data = load_projects()
     summaries = []
@@ -328,6 +899,7 @@ def list_project_summaries() -> list[dict]:
             "level": result.get("level") or "",
             "score": result.get("score"),
             "recommendedType": ((result.get("recommendation") or {}).get("primary") or {}).get("name") or "",
+            "owner": item.get("owner") or project.get("owner") or {},
             "updatedAt": item.get("updatedAt"),
             "createdAt": item.get("createdAt")
         })
@@ -408,11 +980,78 @@ def classify_ridership(daily_inbound: float | int | None) -> str | None:
     return "lt_2500"
 
 
+def station_forecast_records(station_name: str | None, line: str | None = None) -> list[dict]:
+    records = lookup_station_context_list(RIDERSHIP_FORECAST_INDEX, station_name)
+    requested_lines = {
+        item.lstrip("0")
+        for item in re.split(r"[/、,，\s]+", str(line or ""))
+        if item.strip()
+    }
+    if requested_lines:
+        filtered = [
+            record for record in records
+            if str(record.get("line") or "").lstrip("0") in requested_lines
+        ]
+        if filtered:
+            return filtered
+    return records
+
+
+def forecast_station_rollup(records: list[dict]) -> dict:
+    horizons: dict[str, dict] = {}
+    source = RIDERSHIP_FORECAST.get("source") or {}
+    source_name = source.get("fileName") if isinstance(source, dict) else str(source or "")
+    source_name = source_name or "0528既有线路客流预测数据.xls"
+    lines = sorted({
+        str(record.get("line") or "").lstrip("0") or str(record.get("line") or "")
+        for record in records
+        if record.get("line") not in (None, "")
+    })
+    for record in records:
+        year = str(record.get("horizonYear") or record.get("year") or "")
+        if not year:
+            continue
+        bucket = horizons.setdefault(year, {
+            "horizonYear": int(year) if year.isdigit() else year,
+            "boardingTotal": 0,
+            "alightingTotal": 0,
+            "directions": [],
+        })
+        boarding = numeric_value(record.get("boarding"))
+        alighting = numeric_value(record.get("alighting"))
+        bucket["boardingTotal"] += boarding
+        bucket["alightingTotal"] += alighting
+        bucket["directions"].append({
+            "line": record.get("line"),
+            "directionLabel": record.get("directionLabel") or record.get("direction") or "",
+            "boarding": boarding,
+            "alighting": alighting,
+        })
+    rollups = []
+    for item in horizons.values():
+        item["boardingTotal"] = int(round(item["boardingTotal"]))
+        item["alightingTotal"] = int(round(item["alightingTotal"]))
+        rollups.append(item)
+    rollups.sort(key=lambda item: str(item.get("horizonYear")))
+    return {
+        "source": source_name,
+        "sourceMetadata": source if isinstance(source, dict) else {},
+        "unit": RIDERSHIP_FORECAST.get("unit") or "人次",
+        "count": len(records),
+        "lines": lines,
+        "horizons": rollups,
+        "records": records,
+    }
+
+
 def resolve_station_context(station: dict) -> dict:
     station_name = station.get("name")
+    memory_record = lookup_station_memory_record(station_name)
+    memory_context = (memory_record or {}).get("context") or {}
     ridership_record = lookup_station_context(RIDERSHIP_INDEX, station_name)
     operations_record = lookup_station_context(OPERATIONS_INDEX, station_name)
     amenities_record = lookup_station_context(AMENITIES_INDEX, station_name)
+    forecast_records = station_forecast_records(station_name, station.get("line"))
 
     input_daily = station.get("dailyInbound")
     try:
@@ -427,6 +1066,13 @@ def resolve_station_context(station: dict) -> dict:
             daily_source = f"每站每月日均进站.xlsx：{ridership_record.get('latestMonth') or '最新月'}日均进站"
         else:
             daily_source = "使用方输入：日均客流"
+    elif memory_context.get("dailyInbound") not in (None, ""):
+        try:
+            daily_inbound = float(memory_context["dailyInbound"])
+            daily_source = "station memory"
+        except (TypeError, ValueError):
+            daily_inbound = None
+            daily_source = ""
     elif ridership_record and ridership_record.get("latestDailyInbound") is not None:
         daily_inbound = float(ridership_record["latestDailyInbound"])
         daily_source = f"每站每月日均进站.xlsx：{ridership_record.get('latestMonth') or '最新月'}日均进站"
@@ -437,7 +1083,9 @@ def resolve_station_context(station: dict) -> dict:
     return {
         "dailyInbound": daily_inbound,
         "dailyInboundSource": daily_source,
+        "memory": memory_record,
         "ridership": ridership_record,
+        "ridershipForecast": forecast_station_rollup(forecast_records) if forecast_records else None,
         "operations": operations_record,
         "amenities": amenities_record
     }
@@ -582,9 +1230,12 @@ def join_values(value) -> str:
 
 
 def station_context_records(name: str | None) -> dict:
+    forecast_records = station_forecast_records(name)
     return {
+        "memory": lookup_station_memory_record(name),
         "station": lookup_station_context(STATION_ALIAS_INDEX, name),
         "ridership": lookup_station_context(RIDERSHIP_INDEX, name),
+        "ridershipForecast": forecast_station_rollup(forecast_records) if forecast_records else None,
         "operations": lookup_station_context(OPERATIONS_INDEX, name),
         "amenities": lookup_station_context(AMENITIES_INDEX, name),
         "knowledge": lookup_station_context(STATION_KNOWLEDGE_LOOKUP, name),
@@ -592,14 +1243,21 @@ def station_context_records(name: str | None) -> dict:
 
 
 def canonical_station_name(name: str | None, records: dict) -> str:
+    memory = records.get("memory") or {}
+    memory_identity = memory.get("identity") or {}
     station = records.get("station") or {}
     ridership = records.get("ridership") or {}
+    forecast = records.get("ridershipForecast") or {}
     operations = records.get("operations") or {}
     amenities = records.get("amenities") or {}
     knowledge = records.get("knowledge") or {}
+    forecast_record = ((forecast.get("records") or [{}])[0] or {})
     return first_present(
         station.get("name"),
+        memory_identity.get("canonicalName"),
+        memory_identity.get("displayName"),
         ridership.get("stationName"),
+        forecast_record.get("stationName"),
         knowledge.get("name"),
         operations.get("name"),
         amenities.get("name"),
@@ -609,14 +1267,20 @@ def canonical_station_name(name: str | None, records: dict) -> str:
 
 def station_line_text(records: dict, overrides: dict | None = None) -> str:
     overrides = overrides or {}
+    memory = records.get("memory") or {}
+    memory_context = memory.get("context") or {}
     station = records.get("station") or {}
     ridership = records.get("ridership") or {}
+    forecast = records.get("ridershipForecast") or {}
     operations = records.get("operations") or {}
     amenities = records.get("amenities") or {}
+    forecast_lines = forecast.get("lines") or []
     return join_values(first_present(
         overrides.get("line"),
+        memory_context.get("line"),
         station.get("lines"),
         ridership.get("lines"),
+        forecast_lines,
         operations.get("lines"),
         amenities.get("lines"),
     ))
@@ -643,8 +1307,10 @@ def station_interface_summary(operations: dict | None, amenities: dict | None) -
 
 def station_sources(records: dict) -> list[dict]:
     labels = {
+        "memory": "station memory",
         "station": "TOD station preset",
         "ridership": "ridership workbook",
+        "ridershipForecast": "ridership forecast workbook",
         "operations": "station interface workbook",
         "amenities": "station amenity workbook",
         "knowledge": "station knowledge index",
@@ -659,34 +1325,46 @@ def station_sources(records: dict) -> list[dict]:
 def station_context_payload(name: str | None, overrides: dict | None = None) -> dict:
     records = station_context_records(name)
     resolved_name = canonical_station_name(name, records)
+    memory = records.get("memory") or {}
+    memory_context = memory.get("context") or {}
     station = records.get("station") or {}
     ridership = records.get("ridership") or {}
+    forecast = records.get("ridershipForecast") or {}
     operations = records.get("operations") or {}
     amenities = records.get("amenities") or {}
     overrides = overrides or {}
     line = station_line_text(records, overrides)
+    forecast_records = station_forecast_records(resolved_name or name, line)
+    if forecast_records:
+        records["ridershipForecast"] = forecast_station_rollup(forecast_records)
+        forecast = records["ridershipForecast"]
     context_input = {"name": resolved_name, **overrides}
     if line and not context_input.get("line"):
         context_input["line"] = line
+    if memory_context.get("stationType") and not context_input.get("stationType"):
+        context_input["stationType"] = memory_context.get("stationType")
     station_type = infer_transfer(context_input, station)
     suggested_fields = {
         "station.name": resolved_name,
         "station.line": line,
-        "station.todLevel": first_present(overrides.get("todLevel"), station.get("todLevel")) or "",
-        "station.locationLevel": first_present(overrides.get("locationLevel"), station.get("locationLevel")) or "",
+        "station.todLevel": first_present(overrides.get("todLevel"), memory_context.get("todLevel"), station.get("todLevel")) or "",
+        "station.locationLevel": first_present(overrides.get("locationLevel"), memory_context.get("locationLevel"), station.get("locationLevel")) or "",
         "station.stationType": station_type or "",
-        "station.dailyInbound": first_present(overrides.get("dailyInbound"), ridership.get("latestDailyInbound")) or "",
+        "station.dailyInbound": first_present(overrides.get("dailyInbound"), memory_context.get("dailyInbound"), ridership.get("latestDailyInbound")) or "",
         "station.district": first_present(
             overrides.get("district"),
+            memory_context.get("district"),
             (operations.get("districts") or [None])[0],
             amenities.get("district"),
         ) or "",
         "station.nearbyExit": first_present(
             overrides.get("nearbyExit"),
+            memory_context.get("nearbyExit"),
             ((amenities.get("sampleExits") or [{}])[0] or {}).get("exit"),
         ) or "",
         "station.interfaceCondition": first_present(
             overrides.get("interfaceCondition"),
+            memory_context.get("interfaceCondition"),
             station_interface_summary(operations, amenities),
         ) or "",
     }
@@ -703,10 +1381,14 @@ def station_context_payload(name: str | None, overrides: dict | None = None) -> 
 
 def iter_station_candidate_names() -> list[str]:
     names: list[str] = []
+    for record in list_station_memory_records():
+        names.extend(station_memory_alias_values(record))
     for station in STATIONS.get("stations", []):
         names.append(station.get("name", ""))
     for record in RIDERSHIP.get("records", []):
         names.append(record.get("stationName", ""))
+    for record in RIDERSHIP_FORECAST.get("records", []):
+        names.extend([record.get("stationName", ""), record.get("stationDisplayName", "")])
     for record in STATION_OPERATIONS.get("records", []):
         names.extend([record.get("name", ""), *record.get("aliases", []), *record.get("displayNames", [])])
     for record in STATION_AMENITIES.get("records", []):
@@ -725,6 +1407,8 @@ def iter_station_candidate_names() -> list[str]:
 
 def station_match_score(query: str, name: str, context: dict) -> int:
     aliases = station_aliases(name)
+    memory = context.get("memory") or {}
+    aliases.extend(station_memory_alias_values(memory))
     knowledge = context.get("knowledge") or {}
     aliases.extend(knowledge.get("aliases") or [])
     normalized_query = query.strip().lower()
@@ -741,6 +1425,8 @@ def station_match_score(query: str, name: str, context: dict) -> int:
             score = max(score, 520)
     if score:
         score += len(context.get("sources") or []) * 20
+        if context.get("memory"):
+            score += 80
         if context.get("station"):
             score += 30
     return score
@@ -1618,16 +2304,36 @@ def save_project_record(project: dict, research_options: dict | None = None) -> 
     result = (existing or {}).get("result")
     if not research_options.get("skipEvaluation"):
         result = evaluate_project(project, research_options)
+    owner = project.get("owner") or (existing or {}).get("owner") or current_owner_metadata("project")
+    project = {**project, "owner": owner}
     record = {
         "id": record_id,
         "project": project,
         "result": result,
+        "owner": owner,
         "createdAt": (existing or {}).get("createdAt") or now,
         "updatedAt": now
     }
     projects = [item for item in data.get("projects", []) if item.get("id") != record_id]
     projects.append(record)
     data["projects"] = projects
+    save_projects(data)
+    return record
+
+
+def migrate_project_owner(record_id: str, target_owner: dict | None = None) -> dict:
+    data = load_projects()
+    record = next((item for item in data.get("projects", []) if item.get("id") == record_id), None)
+    if not record:
+        raise ValueError("Project not found for ownership migration")
+    owner = migrate_owner_metadata(record, target_owner)
+    record["owner"] = owner
+    record.setdefault("ownerMigrations", [])
+    record["ownerMigrations"].append(owner["migration"])
+    project = record.get("project") or {}
+    project["owner"] = owner
+    record["project"] = project
+    record["updatedAt"] = utc_now()
     save_projects(data)
     return record
 
@@ -1676,35 +2382,47 @@ def resolve_export_result(payload: dict) -> dict:
     return evaluate_project(project, research_options)
 
 
+def require_export_artifact(path: Path | None, artifact_class: str) -> Path:
+    if not path:
+        raise RuntimeError(f"Export artifact failed: {artifact_class} was not generated")
+    if not path.exists() or path.stat().st_size <= 0:
+        raise RuntimeError(f"Export artifact failed: {artifact_class} is missing or empty")
+    return path
+
+
+def export_pdf_enabled() -> bool:
+    return truthy_env("INTERCONNECT_EXPORT_PDF") or truthy_env("EXPORT_PDF")
+
+
 def export_report_file(result: dict) -> dict:
     EXPORT_DIR.mkdir(parents=True, exist_ok=True)
     project = result.get("project") or {}
     slug = safe_slug(project.get("projectCode") or project.get("name"), "interconnect-report")
-    stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+    stamp = datetime.now().strftime("%Y%m%d-%H%M%S-%f")
 
     files = []
     snapshot_file = EXPORT_DIR / f"{slug}-{stamp}-evaluation-snapshot.json"
     snapshot_file.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
+    snapshot_file = require_export_artifact(snapshot_file, "evaluation-snapshot.json")
     report_docx = create_docx_report(result, slug, stamp)
+    report_docx = require_export_artifact(report_docx, "formal-report.docx")
     score_docx = create_score_detail_docx(result, slug, stamp)
+    files.append(file_info(report_docx))
+    files.append(file_info(snapshot_file))
     for docx_file in [report_docx, score_docx]:
         if not docx_file:
             continue
-        files.append(file_info(docx_file))
-        pdf_file = create_pdf_from_docx(docx_file)
-        if pdf_file:
-            files.append(file_info(pdf_file))
+        if docx_file != report_docx:
+            files.append(file_info(docx_file))
+        if export_pdf_enabled():
+            pdf_file = create_pdf_from_docx(docx_file)
+            if pdf_file:
+                files.append(file_info(pdf_file))
 
-    export = file_info(report_docx) if report_docx else {
-        "filename": "",
-        "path": "",
-        "relativePath": "",
-        "downloadUrl": "",
-        "contentType": "",
-        "size": 0,
-    }
+    export = file_info(report_docx)
     export["files"] = files
     export["snapshot"] = file_info(snapshot_file)
+    export["owner"] = project.get("owner") or current_owner_metadata("export")
     return export
 
 
@@ -1772,6 +2490,10 @@ def export_kind(path: Path) -> str:
         return "Word 报告"
     if name.endswith(".md"):
         return "Markdown 报告"
+    if path.parent.name == "generated-images" and name.endswith(".metadata.json"):
+        return "生成图元数据"
+    if path.parent.name == "generated-images":
+        return "生成图"
     if name.endswith(".json"):
         return "评估快照"
     if name.endswith("-score-detail.csv"):
@@ -1786,16 +2508,22 @@ def export_kind(path: Path) -> str:
 def list_export_files(limit: int = 40) -> list[dict]:
     if not EXPORT_DIR.exists():
         return []
+    candidate_paths = [path for path in EXPORT_DIR.iterdir()]
+    generated_dir = EXPORT_DIR / "generated-images"
+    if generated_dir.exists():
+        candidate_paths.extend(path for path in generated_dir.iterdir())
     files = [
-        path for path in EXPORT_DIR.iterdir()
+        path for path in candidate_paths
         if (
             path.is_file()
-            and path.suffix.lower() in {".docx", ".pdf"}
+            and path.suffix.lower() in {".docx", ".pdf", ".json", ".png", ".jpg", ".jpeg", ".webp", ".svg"}
             and (
                 path.name.lower().endswith("-formal-report.docx")
                 or path.name.lower().endswith("-formal-report.pdf")
                 or path.name.lower().endswith("-score-detail.docx")
                 or path.name.lower().endswith("-score-detail.pdf")
+                or path.name.lower().endswith("-evaluation-snapshot.json")
+                or path.parent.name == "generated-images"
             )
         )
     ]
@@ -1854,6 +2582,7 @@ def delivery_manifest_groups() -> list[dict]:
         ROOT / "tools" / "seed_station_projects.py",
         ROOT / "tools" / "verify_station_precheck.cjs",
         ROOT / "tools" / "verify_report_richness.cjs",
+        ROOT / "tools" / "verify_delivery_package.cjs",
         ROOT / "tools" / "verify_model_oriented_research.py",
         ROOT / "tools" / "verify_client_report.py",
     ])
@@ -2262,6 +2991,15 @@ class Handler(BaseHTTPRequestHandler):
             station_name = (params.get("station") or params.get("stationName") or [""])[0] or None
             self._json({"ok": True, "records": list_admin_station_outlines(station_name)})
             return
+        if route == "/api/station-memory":
+            params = parse_qs(parsed.query)
+            station_name = (params.get("station") or params.get("stationName") or params.get("q") or [""])[0] or None
+            self._json({
+                "ok": True,
+                "version": load_station_memory_data().get("version"),
+                "records": list_station_memory_records(station_name),
+            })
+            return
         if route == "/api/knowledge":
             self._json({
                 "ok": True,
@@ -2274,7 +3012,7 @@ class Handler(BaseHTTPRequestHandler):
                     "count": STATION_KNOWLEDGE_INDEX.get("count", 0),
                     "coverage": STATION_KNOWLEDGE_INDEX.get("coverage", {})
                 },
-                "sources": SOURCE_MANIFEST,
+                "sources": source_manifest_records(),
                 "unparsedSources": UNPARSED_SOURCES
             })
             return
@@ -2322,12 +3060,17 @@ class Handler(BaseHTTPRequestHandler):
                 "rules": RULES,
                 "stations": STATIONS,
                 "ridership": RIDERSHIP,
+                "ridershipForecast": RIDERSHIP_FORECAST,
+                "stationMemory": {
+                    "version": load_station_memory_data().get("version"),
+                    "records": list_station_memory_records(),
+                },
                 "stationOperations": STATION_OPERATIONS,
                 "stationAmenities": STATION_AMENITIES,
                 "inputSchema": INPUT_SCHEMA,
                 "pptRules": PPT_RULES,
                 "knowledgeCatalog": KNOWLEDGE_CATALOG,
-                "sourceManifest": SOURCE_MANIFEST,
+                "sourceManifest": source_manifest_records(),
                 "unparsedSources": UNPARSED_SOURCES,
                 "platformCapabilities": build_platform_capability_status(),
                 "demos": DEMOS,
@@ -2339,7 +3082,7 @@ class Handler(BaseHTTPRequestHandler):
             self._json({
                 "ok": True,
                 "catalog": KNOWLEDGE_CATALOG,
-                "sources": SOURCE_MANIFEST,
+                "sources": source_manifest_records(),
                 "unparsedSources": UNPARSED_SOURCES
             })
             return
@@ -2380,11 +3123,23 @@ class Handler(BaseHTTPRequestHandler):
         if route == "/api/schematic/export-png":
             self._export_schematic_png()
             return
-        if route in {"/api/generated-images", "/api/admin/station-outlines", "/api/admin/station-outlines/apply"}:
+        if route in {"/api/generated-images", "/api/admin/station-outlines", "/api/admin/station-outlines/apply", "/api/station-memory", "/api/station-memory/apply"}:
             try:
                 payload = self._read_json_body()
                 if route == "/api/generated-images":
-                    self._json(generated_image_placeholder(payload), status=HTTPStatus.NOT_IMPLEMENTED)
+                    result = generated_image_response(payload)
+                    status = HTTPStatus.OK
+                    if not result.get("ok"):
+                        code = (result.get("error") or {}).get("code")
+                        status = HTTPStatus.BAD_GATEWAY if code == "provider_failure" else HTTPStatus.NOT_IMPLEMENTED
+                    self._json(result, status=status)
+                    return
+                if route == "/api/station-memory":
+                    record = save_station_memory_record(payload)
+                    self._json({"ok": True, "record": record, "records": list_station_memory_records(record.get("identity", {}).get("canonicalName"))})
+                    return
+                if route == "/api/station-memory/apply":
+                    self._json(apply_station_memory_payload(payload))
                     return
                 if route == "/api/admin/station-outlines":
                     record = save_admin_station_outline(payload)
@@ -2400,7 +3155,7 @@ class Handler(BaseHTTPRequestHandler):
             except Exception as exc:  # noqa: BLE001
                 self._json({"ok": False, "error": str(exc)}, status=HTTPStatus.BAD_REQUEST)
                 return
-        if route not in {"/api/evaluate", "/api/projects", "/api/export"}:
+        if route not in {"/api/evaluate", "/api/projects", "/api/export", "/api/ownership/migrate"}:
             self.send_error(HTTPStatus.NOT_FOUND, "Not found")
             return
         try:
@@ -2414,6 +3169,10 @@ class Handler(BaseHTTPRequestHandler):
             if route == "/api/projects":
                 project, research_options = resolve_project_payload(payload)
                 record = save_project_record(project, research_options)
+                self._json({"ok": True, "record": record, "projects": list_project_summaries()})
+                return
+            if route == "/api/ownership/migrate":
+                record = migrate_project_owner(str(payload.get("projectId") or payload.get("id") or ""), payload.get("owner"))
                 self._json({"ok": True, "record": record, "projects": list_project_summaries()})
                 return
             result = resolve_export_result(payload)
@@ -2499,6 +3258,7 @@ class Handler(BaseHTTPRequestHandler):
             payload = self._read_json_body()
             if not isinstance(payload, dict) or "parcel" not in payload:
                 raise ValueError("geometry payload must include parcel")
+            payload["owner"] = payload.get("owner") or current_owner_metadata("schematic_geometry")
             SCHEMATIC_DIR.mkdir(parents=True, exist_ok=True)
             SCHEMATIC_GEOMETRY_PATH.write_text(
                 json.dumps(payload, ensure_ascii=False, indent=2),
@@ -2598,8 +3358,9 @@ class Handler(BaseHTTPRequestHandler):
 
 
 def main() -> None:
-    host = "0.0.0.0"
-    port = 8765
+    config = server_config()
+    host = config["host"]
+    port = config["port"]
     if "--host" in sys.argv:
         host = sys.argv[sys.argv.index("--host") + 1]
     if "--port" in sys.argv:

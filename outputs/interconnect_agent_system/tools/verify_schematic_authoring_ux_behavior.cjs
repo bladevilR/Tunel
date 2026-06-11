@@ -36,6 +36,17 @@ async function main() {
   const page = await browser.newPage({ viewport: { width: 1440, height: 920 }, deviceScaleFactor: 1 });
   await page.goto(new URL("/schematic/index.html", url).toString(), { waitUntil: "domcontentloaded", timeout: 30000 });
   await page.waitForSelector("#toggleDrawbarButton", { timeout: 10000 });
+  const drawingRuntime = await page.evaluate(() => {
+    const source = document.documentElement.innerHTML;
+    return {
+      hasPreviewState: source.includes("drawingPreviewPoint") && source.includes("drawingPreviewOverlay"),
+      hasMouseFollowPreview: source.includes('"pointermove", "mousemove", "touchmove"')
+        && source.includes("updateDrawingPreviewOverlay(state")
+        && source.includes("drawingPointerStart && Math.hypot")
+    };
+  });
+  assert.equal(drawingRuntime.hasPreviewState, true, "browser-loaded schematic should keep preview overlay state");
+  assert.equal(drawingRuntime.hasMouseFollowPreview, true, "browser-loaded schematic should update preview on mouse movement after first click");
   await assertLayout(page, "desktop");
 
   const visibleBefore = await page.locator(".drawbar button:visible").count();

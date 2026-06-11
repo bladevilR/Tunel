@@ -104,3 +104,11 @@ $env:NODE_PATH='C:\Users\R\.cache\codex-runtimes\codex-primary-runtime\dependenc
 ## 一期边界
 
 本版本按 PPT 的近期目标交付，聚焦文字评估报告和方案建议报告。CAD/DWG/BIM 读取、施工图审查、工程级平剖面图和三维空间推理属于远期能力，当前仅保留可视辅助和数据接口思路。
+
+## 报告导出 QA
+
+- `/api/export` 必须生成正式报告 DOCX 和 evaluation snapshot JSON；任一强制产物缺失时返回明确错误，前端显示失败信息并清空旧链接。
+- `/api/exports` 和前端“最近导出”应列出正式报告、评分明细和 evaluation snapshot，所有链接必须是 `/exports/...` served URL。
+- DOCX 检查至少覆盖 legacy 七个顶层章节、评分总览、推荐方案与备选方案、资料补齐/复核块，以及非空证据表格。
+- PDF 为可选运行时产物。只有设置 `INTERCONNECT_EXPORT_PDF=1` 或 `EXPORT_PDF=1` 且本机 Word/LibreOffice/PyMuPDF 可用时才尝试转换，避免浏览器导出被转换进程阻塞。
+- 客流、古城保护、安全和轨道保护相关文字必须引用已有数据或标为人工复核项，不得把缺失图层、条文或结论写成已核实事实。

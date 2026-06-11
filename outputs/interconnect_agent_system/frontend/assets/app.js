@@ -47,7 +47,14 @@ async function api(path, options = {}) {
     ...options
   });
   if (!response.ok) {
-    throw new Error(`API ${path} failed: ${response.status}`);
+    let detail = "";
+    try {
+      const payload = await response.json();
+      detail = typeof payload.error === "string" ? payload.error : (payload.error?.message || JSON.stringify(payload.error || payload));
+    } catch (error) {
+      detail = await response.text().catch(() => "");
+    }
+    throw new Error(detail || `API ${path} failed: ${response.status}`);
   }
   return response.json();
 }
@@ -176,6 +183,72 @@ function findRidership(stationName) {
   return (state.bootstrap.ridership?.records || []).find((item) => aliasMatches(stationName, [item.stationName]));
 }
 
+function findStationMemory(stationName) {
+  return (state.bootstrap.stationMemory?.records || []).find((item) => {
+    const identity = item.identity || {};
+    return aliasMatches(stationName, [identity.canonicalName, identity.displayName, ...(identity.aliases || [])]);
+  });
+}
+
+function splitLineTokens(value) {
+  return String(value || "")
+    .split(/[/,;|、，\s]+/)
+    .map((item) => item.trim().replace(/^0+/, ""))
+    .filter(Boolean);
+}
+
+function ridershipForecastRecords(stationName, line = "") {
+  const records = (state.bootstrap.ridershipForecast?.records || []).filter((item) => {
+    return aliasMatches(stationName, [item.stationName, item.stationDisplayName]);
+  });
+  const requestedLines = new Set(splitLineTokens(line));
+  if (!requestedLines.size) return records;
+  const filtered = records.filter((item) => requestedLines.has(String(item.line || "").replace(/^0+/, "")));
+  return filtered.length ? filtered : records;
+}
+
+function rollupRidershipForecast(records) {
+  if (!records.length) return null;
+  const payload = state.bootstrap.ridershipForecast || {};
+  const source = payload.source?.fileName || payload.source || "0528既有线路客流预测数据.xls";
+  const horizons = new Map();
+  for (const record of records) {
+    const key = String(record.horizonYear || record.year || "");
+    if (!key) continue;
+    if (!horizons.has(key)) {
+      horizons.set(key, {
+        horizonYear: Number.isFinite(Number(key)) ? Number(key) : key,
+        boardingTotal: 0,
+        alightingTotal: 0,
+        directions: []
+      });
+    }
+    const bucket = horizons.get(key);
+    const boarding = Number(record.boarding || 0);
+    const alighting = Number(record.alighting || 0);
+    bucket.boardingTotal += Number.isFinite(boarding) ? boarding : 0;
+    bucket.alightingTotal += Number.isFinite(alighting) ? alighting : 0;
+    bucket.directions.push({
+      line: record.line,
+      directionLabel: record.directionLabel || "",
+      boarding,
+      alighting
+    });
+  }
+  return {
+    source,
+    unit: payload.unit || "人次",
+    count: records.length,
+    lines: Array.from(new Set(records.map((item) => String(item.line || "").replace(/^0+/, "")).filter(Boolean))).sort(),
+    horizons: Array.from(horizons.values()).sort((a, b) => String(a.horizonYear).localeCompare(String(b.horizonYear), "zh-CN")),
+    records
+  };
+}
+
+function findRidershipForecast(stationName, line = "") {
+  return rollupRidershipForecast(ridershipForecastRecords(stationName, line));
+}
+
 function findStationOperations(stationName) {
   return (state.bootstrap.stationOperations?.records || []).find((item) => {
     return aliasMatches(stationName, [item.name, ...(item.aliases || []), ...(item.displayNames || [])]);
@@ -282,7 +355,7 @@ function normalizeFieldValue(input) {
 }
 
 function collectProject() {
-  const project = {};
+  const project = structuredClone(state.currentProject || {});
   for (const field of $$("#projectForm [name]")) {
     setNested(project, field.name, normalizeFieldValue(field));
   }
@@ -350,33 +423,40 @@ function bindStationAutofillOwnership() {
 
 function localStationContext(stationName) {
   const station = state.bootstrap.stations.stations.find((item) => aliasMatches(stationName, [item.name]));
+  const memory = findStationMemory(stationName);
+  const memoryContext = memory?.context || {};
   const ridership = findRidership(stationName);
   const operations = findStationOperations(stationName);
   const amenities = findStationAmenities(stationName);
-  const line = station?.lines || ridership?.lines || (operations?.lines || amenities?.lines || []).join("/");
+  const line = memoryContext.line || station?.lines || ridership?.lines || (operations?.lines || amenities?.lines || []).join("/");
+  const ridershipForecast = findRidershipForecast(stationName, line);
   const fields = {
-    "station.name": station?.name || stationName,
-    "station.todLevel": station?.todLevel || "",
-    "station.locationLevel": station?.locationLevel || "",
+    "station.name": memory?.identity?.canonicalName || station?.name || stationName,
+    "station.todLevel": memoryContext.todLevel || station?.todLevel || "",
+    "station.locationLevel": memoryContext.locationLevel || station?.locationLevel || "",
     "station.line": line || "",
-    "station.stationType": inferStationTypeFromLine(line, station?.name || stationName),
-    "station.dailyInbound": ridership?.latestDailyInbound ? Math.round(ridership.latestDailyInbound) : "",
-    "station.district": operations?.districts?.[0] || "",
-    "station.nearbyExit": amenities?.sampleExits?.[0]?.exit || "",
-    "station.interfaceCondition": ""
+    "station.stationType": memoryContext.stationType || inferStationTypeFromLine(line, station?.name || stationName),
+    "station.dailyInbound": memoryContext.dailyInbound || (ridership?.latestDailyInbound ? Math.round(ridership.latestDailyInbound) : ""),
+    "station.district": memoryContext.district || operations?.districts?.[0] || "",
+    "station.nearbyExit": memoryContext.nearbyExit || amenities?.sampleExits?.[0]?.exit || "",
+    "station.interfaceCondition": memoryContext.interfaceCondition || ""
   };
   if (operations) {
     const forms = operations.connectionForms?.length ? operations.connectionForms.join("、") : "暂无已登记联通形式";
     fields["station.interfaceCondition"] = `已识别出入口${operations.exitCount || 0}个；联通形式：${forms}；问题记录${operations.issueCount || 0}条。`;
   }
   return {
-    ok: Boolean(station || ridership || operations || amenities),
+    ok: Boolean(memory || station || ridership || ridershipForecast || operations || amenities),
     query: stationName,
     name: fields["station.name"],
     suggestedFields: fields,
+    memory,
+    ridershipForecast,
     sources: [
+      memory ? { key: "memory", label: "station memory", matched: true } : null,
       station ? { key: "station", label: "TOD station preset", matched: true } : null,
       ridership ? { key: "ridership", label: "ridership workbook", matched: true } : null,
+      ridershipForecast ? { key: "ridershipForecast", label: "ridership forecast workbook", matched: true } : null,
       operations ? { key: "operations", label: "station interface workbook", matched: true } : null,
       amenities ? { key: "amenities", label: "station amenity workbook", matched: true } : null
     ].filter(Boolean)
@@ -394,6 +474,102 @@ function applyStationContext(context, options = {}) {
   if (options.explicit) {
     const panel = $("#stationSearchResults");
     if (panel) panel.hidden = true;
+  }
+}
+
+function setStationMemoryStatus(message, mode = "info") {
+  const node = $("#stationMemoryStatus");
+  if (!node) return;
+  node.textContent = message || "";
+  node.dataset.mode = mode;
+}
+
+function stationMemoryPayloadFromProject(project) {
+  const station = project.station || {};
+  return {
+    stationName: station.name || "",
+    project,
+    identity: {
+      canonicalName: station.name || "",
+      displayName: station.name ? `${station.name}站` : "",
+      aliases: station.name ? stationAliases(station.name) : []
+    },
+    context: {
+      line: station.line || "",
+      todLevel: station.todLevel || "",
+      locationLevel: station.locationLevel || "",
+      stationType: station.stationType || "",
+      district: station.district || "",
+      dailyInbound: station.dailyInbound ?? null,
+      nearbyExit: station.nearbyExit || "",
+      interfaceCondition: station.interfaceCondition || ""
+    },
+    sourceLabels: (state.selectedStationContext?.sources || []).map((item) => item.label),
+    operatorIntent: "save_station_memory"
+  };
+}
+
+async function saveStationMemory() {
+  const project = collectProject();
+  if (!project.station?.name) {
+    setStationMemoryStatus("先选择站点", "error");
+    return;
+  }
+  const button = $("#saveStationMemoryBtn");
+  const originalText = button.textContent;
+  button.disabled = true;
+  button.textContent = "保存中";
+  try {
+    const response = await api("/api/station-memory", {
+      method: "POST",
+      body: JSON.stringify(stationMemoryPayloadFromProject(project))
+    });
+    state.bootstrap.stationMemory = {
+      ...(state.bootstrap.stationMemory || {}),
+      records: response.records || [response.record]
+    };
+    state.selectedStationContext = {
+      ...(state.selectedStationContext || {}),
+      memory: response.record
+    };
+    setStationMemoryStatus(`已保存：${response.record.identity?.canonicalName || project.station.name}`, "ok");
+  } catch (error) {
+    setStationMemoryStatus(`保存失败：${error.message}`, "error");
+  } finally {
+    button.disabled = false;
+    button.textContent = originalText;
+  }
+}
+
+async function applyStationMemory() {
+  const project = collectProject();
+  const stationName = project.station?.name || state.selectedStationContext?.name || "";
+  if (!stationName) {
+    setStationMemoryStatus("先选择站点", "error");
+    return;
+  }
+  const button = $("#applyStationMemoryBtn");
+  const originalText = button.textContent;
+  button.disabled = true;
+  button.textContent = "应用中";
+  try {
+    const response = await api("/api/station-memory/apply", {
+      method: "POST",
+      body: JSON.stringify({
+        stationName,
+        memoryId: state.selectedStationContext?.memory?.id,
+        project,
+        force: true
+      })
+    });
+    fillProject(response.project);
+    state.selectedStationContext = await fetchStationContext(response.project.station?.name || stationName);
+    setStationMemoryStatus(`已应用版本 ${response.snapshot?.sourceVersion || ""}`, "ok");
+  } catch (error) {
+    setStationMemoryStatus(`应用失败：${error.message}`, "error");
+  } finally {
+    button.disabled = false;
+    button.textContent = originalText;
   }
 }
 
@@ -823,12 +999,37 @@ function compactNearby(amenities) {
   return values.slice(0, 5).join("、") || "待补齐";
 }
 
+function formatForecastRidership(forecast) {
+  const horizons = forecast?.horizons || [];
+  if (!horizons.length) {
+    return {
+      value: "待补齐",
+      source: "未匹配预测客流"
+    };
+  }
+  const summary = horizons.slice(0, 2).map((item) => {
+    const year = item.horizonYear || "远期";
+    const boarding = formatNumber(Math.round(Number(item.boardingTotal || 0)));
+    const alighting = formatNumber(Math.round(Number(item.alightingTotal || 0)));
+    return `${year}年 上${boarding}/下${alighting}`;
+  }).join("；");
+  const lines = (forecast.lines || []).length ? `${forecast.lines.join("/")}号线 · ` : "";
+  return {
+    value: summary,
+    source: `${lines}${forecast.source || "0528既有线路客流预测数据.xls"} · 全日预测${forecast.unit ? `（${forecast.unit}）` : ""}`
+  };
+}
+
 function renderStationContext(result) {
   const context = result.stationContext || {};
   const operations = context.operations || {};
   const amenities = context.amenities || {};
+  const memory = context.memory || {};
+  const forecast = formatForecastRidership(context.ridershipForecast);
   $("#stationContextPanel").innerHTML = `
-    <div><span>客流</span><strong>${context.dailyInbound ? `${Math.round(context.dailyInbound)} 人次/日` : "待补齐"}</strong><small>${escapeHtml(context.dailyInboundSource || "")}</small></div>
+    <div><span>现状客流</span><strong>${context.dailyInbound ? `${Math.round(context.dailyInbound)} 人次/日` : "待补齐"}</strong><small>${escapeHtml(context.dailyInboundSource || "")}</small></div>
+    <div class="wide"><span>预测客流</span><strong>${escapeHtml(forecast.value)}</strong><small>${escapeHtml(forecast.source)}</small></div>
+    <div class="wide"><span>站点记忆</span><strong>${memory.id ? `版本 ${escapeHtml(memory.version || 1)}` : "暂无记录"}</strong><small>${escapeHtml((memory.provenance?.sourceLabels || []).join("、") || "可保存当前修正")}</small></div>
     <div><span>出入口</span><strong>${operations.exitCount ?? amenities.exitRows ?? "--"} 个</strong><small>接口 ${operations.interfaceCount ?? "--"} 个</small></div>
     <div><span>开放状态</span><strong>${amenities.openExitCount ?? "--"}/${amenities.exitRows ?? "--"}</strong><small>运营管理 ${amenities.managedExitCount ?? "--"} 个</small></div>
     <div><span>联通形式</span><strong>${escapeHtml((operations.connectionForms || []).join("、") || "待补齐")}</strong><small>${escapeHtml((operations.priorityLabels || []).join("、"))}</small></div>
@@ -879,8 +1080,10 @@ function capabilityModeLabel(mode) {
   const labels = {
     cache: "本地缓存",
     live: "实时可用",
+    configured: "已配置",
     failed: "已降级",
     not_configured: "未配置",
+    local_anonymous: "本地匿名",
     unverified: "未验证"
   };
   return labels[mode] || mode || "未知";
@@ -1119,6 +1322,10 @@ function buildDeliveryStatusGroups() {
   const unparsedCount = unparsedSources().filter((item) => item.parseStatus !== "ignored").length;
   const projectGapCount = actionableGaps.filter((item) => item.type === "项目字段" || item.type === "评分字段").length;
   const materialGapCount = actionableGaps.filter((item) => item.type === "资料").length;
+  const platform = state.bootstrap?.platformCapabilities || {};
+  const generatedImage = platform.generatedImage || {};
+  const accounts = platform.accounts || {};
+  const deployment = platform.deployment || {};
 
   return [
     {
@@ -1140,6 +1347,17 @@ function buildDeliveryStatusGroups() {
       tone: "warn",
       summary: `当前项目共有 ${formatNumber(actionableGaps.length)} 项建议补充，其中项目字段 ${formatNumber(projectGapCount)} 项，支撑资料 ${formatNumber(materialGapCount)} 项。`,
       items: actionableGaps.slice(0, 3).map((item) => `${item.name}：${item.action || item.message}`)
+    },
+    {
+      key: "platform",
+      title: "平台能力",
+      count: [generatedImage.enabled, accounts.enabled, deployment.validation?.ok].filter(Boolean).length,
+      tone: deployment.validation?.ok === false ? "warn" : "muted",
+      summary: `生成图 ${capabilityModeLabel(generatedImage.mode)}，账号 ${capabilityModeLabel(accounts.mode)}，服务 ${deployment.host || "--"}:${deployment.port || "--"}。`,
+      items: [
+        `生成图 provider：${generatedImage.provider || "disabled"}`,
+        `导出目录：${deployment.exportDir || "exports"}`
+      ]
     },
     {
       key: "manual",
@@ -1231,7 +1449,7 @@ function renderModelJudgement(result = state.currentResult) {
     <strong>规则基线：${escapeHtml(difference.ruleLevel || result.level)} / ${escapeHtml(difference.ruleRecommendedType || result.recommendation?.primary?.name || "")}</strong>
     <span>模型结论：${escapeHtml(difference.modelLevel || judgement.level)} / ${escapeHtml(difference.modelRecommendedType || judgement.recommendedType)}</span>
     <p>${escapeHtml(difference.reason || judgement.overrideReason || "模型结论与规则基线一致。")}</p>
-    <div>${labels.map((label) => `<b>${escapeHtml(label)}</b>`).join("")}</div>
+    <span>复核标签：${labels.map((label) => `<b>${escapeHtml(label)}</b>`).join("")}</span>
   `;
   renderModelList($("#modelRiskList"), judgement.riskItems || [], "model-risk-item");
   renderModelList($("#modelFundingList"), judgement.fundingRequests || [], "model-funding-item");
@@ -1641,41 +1859,47 @@ function exportDownloadUrl(item = {}) {
 }
 
 async function exportReport() {
-  if (!state.currentResult) await runEvaluation();
-  const project = state.currentResult?.project || state.currentProject || collectProject();
-  const options = researchOptions();
-  const body = Object.keys(options).length ? { project, researchOptions: options } : { project };
-  const response = await api("/api/export", {
-    method: "POST",
-    body: JSON.stringify(body)
-  });
-  const files = response.export.files || [];
-  $("#exportPathValue").textContent = files.length ? `${files.length} 个文件已生成` : response.export.relativePath;
-  $("#exportFiles").innerHTML = files.map((item) => {
-    const href = item.downloadUrl || exportDownloadUrl(item);
-    return `<a href="${href}" title="${escapeHtml(item.relativePath)}">${escapeHtml(item.filename)}</a>`;
-  }).join("");
-  await refreshExports();
+  try {
+    if (!state.currentResult) await runEvaluation();
+    const project = state.currentResult?.project || state.currentProject || collectProject();
+    const options = researchOptions();
+    const body = Object.keys(options).length ? { project, researchOptions: options } : { project };
+    const response = await api("/api/export", {
+      method: "POST",
+      body: JSON.stringify(body)
+    });
+    const files = response.export.files || [];
+    $("#exportPathValue").textContent = files.length ? `${files.length} 个文件已生成` : response.export.relativePath;
+    $("#exportFiles").innerHTML = files.map((item) => {
+      const href = item.downloadUrl || exportDownloadUrl(item);
+      return `<a href="${href}" title="${escapeHtml(item.relativePath)}">${escapeHtml(item.filename)}</a>`;
+    }).join("");
+    await refreshExports();
 
-  const first = files.find((item) => item.filename.endsWith("-formal-report.docx")) || files[0];
-  if (first) {
-    const link = document.createElement("a");
-    link.href = first.downloadUrl || exportDownloadUrl(first);
-    link.download = first.filename;
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-  } else {
-    const markdown = buildMarkdown(state.currentResult);
-    const blob = new Blob([markdown], { type: "text/markdown;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = response.export.filename;
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    URL.revokeObjectURL(url);
+    const first = files.find((item) => item.filename.endsWith("-formal-report.docx")) || files[0];
+    if (first) {
+      const link = document.createElement("a");
+      link.href = first.downloadUrl || exportDownloadUrl(first);
+      link.download = first.filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } else {
+      const markdown = buildMarkdown(state.currentResult);
+      const blob = new Blob([markdown], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = response.export.filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+  } catch (error) {
+    $("#exportPathValue").textContent = `导出失败：${error.message}`;
+    $("#exportFiles").innerHTML = "";
+    throw error;
   }
 }
 
@@ -1735,6 +1959,8 @@ function bindEvents() {
   });
   $("#saveProjectBtn").addEventListener("click", saveProject);
   $("#deleteProjectBtn").addEventListener("click", deleteCurrentProject);
+  $("#saveStationMemoryBtn").addEventListener("click", saveStationMemory);
+  $("#applyStationMemoryBtn").addEventListener("click", applyStationMemory);
   $("#exportProjectIntakeBtn").addEventListener("click", exportProjectIntake);
   $("#importProjectIntakeBtn").addEventListener("click", () => $("#importProjectIntakeFile").click());
   $("#importProjectIntakeFile").addEventListener("change", (event) => importProjectIntakeFile(event.target.files?.[0]));

@@ -1,0 +1,1728 @@
+{
+  "project": {
+    "name": "Imported Core Browser Project",
+    "projectCode": "CORE-BROWSER-IMPORT",
+    "station": {
+      "name": "乐桥",
+      "district": "姑苏区",
+      "line": "1/4",
+      "todLevel": "城市级TOD",
+      "locationLevel": "city",
+      "stationType": "current_transfer",
+      "dailyInbound": 16193.37,
+      "nearbyExit": "1号出入口",
+      "interfaceCondition": "已识别出入口9个；接口1个；联通形式：地下通道；开放出入口8/8个；运营管理6个"
+    },
+    "attachments": "",
+    "parcel": {
+      "quadrant": "",
+      "location": "",
+      "distanceBand": "",
+      "landUse": "",
+      "buildingArea": null,
+      "siteArea": null,
+      "developmentIntensity": "",
+      "undergroundSpace": "",
+      "landUseText": "",
+      "functionalFormat": "",
+      "undergroundDescription": "",
+      "planningIndicators": "",
+      "functionalDemand": "",
+      "constraints": ""
+    }
+  },
+  "score": 2.3149,
+  "scorePercent": 56.74,
+  "scoreScale": {
+    "rawMax": 4.0795,
+    "normalizedMax": 100,
+    "gradingBasis": "scorePercent = rawScore / rawMax * 100; 20260507反馈暂按80分以上必连、60-80分尽连、60分以下可连",
+    "feedbackDate": "2026-05-07"
+  },
+  "level": "可连地块",
+  "policy": "鼓励、建议联通；结合项目诉求、建设条件和成本效益确定实施方式。",
+  "stationContext": {
+    "dailyInbound": 16193.37,
+    "dailyInboundSource": "每站每月日均进站.xlsx：2025-11日均进站",
+    "memory": null,
+    "ridership": {
+      "stationName": "乐桥",
+      "lines": "01、04",
+      "latestMonth": "2025-11",
+      "latestDailyInbound": 16193.37,
+      "averageDailyInbound": 17113.33,
+      "monthCount": 11,
+      "monthly": [
+        {
+          "month": "2025-01",
+          "inboundTotal": 515770.0,
+          "dailyInbound": 16637.74
+        },
+        {
+          "month": "2025-02",
+          "inboundTotal": 476599.0,
+          "dailyInbound": 17021.39
+        },
+        {
+          "month": "2025-03",
+          "inboundTotal": 563735.0,
+          "dailyInbound": 18185.0
+        },
+        {
+          "month": "2025-04",
+          "inboundTotal": 555019.0,
+          "dailyInbound": 18500.63
+        },
+        {
+          "month": "2025-05",
+          "inboundTotal": 563208.0,
+          "dailyInbound": 18168.0
+        },
+        {
+          "month": "2025-06",
+          "inboundTotal": 485556.0,
+          "dailyInbound": 16185.2
+        },
+        {
+          "month": "2025-07",
+          "inboundTotal": 565000.0,
+          "dailyInbound": 18225.81
+        },
+        {
+          "month": "2025-08",
+          "inboundTotal": 591216.0,
+          "dailyInbound": 19071.48
+        },
+        {
+          "month": "2025-09",
+          "inboundTotal": 408724.0,
+          "dailyInbound": 13624.13
+        },
+        {
+          "month": "2025-10",
+          "inboundTotal": 509449.0,
+          "dailyInbound": 16433.84
+        },
+        {
+          "month": "2025-11",
+          "inboundTotal": 485801.0,
+          "dailyInbound": 16193.37
+        }
+      ]
+    },
+    "ridershipForecast": {
+      "source": "0528既有线路客流预测数据.xls",
+      "sourceMetadata": {
+        "fileName": "0528既有线路客流预测数据.xls",
+        "canonicalFileName": "0528既有线路客流预测数据.xls",
+        "format": "legacy-xls",
+        "reader": "PowerShell ACE/OLEDB",
+        "sizeBytes": 79872,
+        "sha256": "5d0e5f921335207ce1057ed67f2d892082e3e9c03b9aad599af9ba3475f8790a"
+      },
+      "unit": "人次",
+      "count": 4,
+      "lines": [
+        "4"
+      ],
+      "horizons": [
+        {
+          "horizonYear": 2026,
+          "boardingTotal": 58996,
+          "alightingTotal": 57706,
+          "directions": [
+            {
+              "line": "4",
+              "directionLabel": "由北向南",
+              "boarding": 34711.0,
+              "alighting": 23463.0
+            },
+            {
+              "line": "4",
+              "directionLabel": "由南向北",
+              "boarding": 24285.0,
+              "alighting": 34243.0
+            }
+          ]
+        },
+        {
+          "horizonYear": 2041,
+          "boardingTotal": 53691,
+          "alightingTotal": 51611,
+          "directions": [
+            {
+              "line": "4",
+              "directionLabel": "由北向南",
+              "boarding": 28367.0,
+              "alighting": 24720.0
+            },
+            {
+              "line": "4",
+              "directionLabel": "由南向北",
+              "boarding": 25324.0,
+              "alighting": 26891.0
+            }
+          ]
+        }
+      ],
+      "records": [
+        {
+          "line": "4",
+          "lineLabel": "4号线",
+          "stationName": "乐桥",
+          "horizonLabel": "近期",
+          "horizonYear": 2026,
+          "directionLabel": "由北向南",
+          "boarding": 34711,
+          "alighting": 23463,
+          "sourceSheet": "4号线",
+          "source": "0528既有线路客流预测数据.xls"
+        },
+        {
+          "line": "4",
+          "lineLabel": "4号线",
+          "stationName": "乐桥",
+          "horizonLabel": "近期",
+          "horizonYear": 2026,
+          "directionLabel": "由南向北",
+          "boarding": 24285,
+          "alighting": 34243,
+          "sourceSheet": "4号线",
+          "source": "0528既有线路客流预测数据.xls"
+        },
+        {
+          "line": "4",
+          "lineLabel": "4号线",
+          "stationName": "乐桥",
+          "horizonLabel": "远期",
+          "horizonYear": 2041,
+          "directionLabel": "由北向南",
+          "boarding": 28367,
+          "alighting": 24720,
+          "sourceSheet": "4号线",
+          "source": "0528既有线路客流预测数据.xls"
+        },
+        {
+          "line": "4",
+          "lineLabel": "4号线",
+          "stationName": "乐桥",
+          "horizonLabel": "远期",
+          "horizonYear": 2041,
+          "directionLabel": "由南向北",
+          "boarding": 25324,
+          "alighting": 26891,
+          "sourceSheet": "4号线",
+          "source": "0528既有线路客流预测数据.xls"
+        }
+      ]
+    },
+    "operations": {
+      "name": "乐桥",
+      "displayNames": [
+        "乐桥站",
+        "人民路站（乐桥）"
+      ],
+      "aliases": [
+        "乐桥",
+        "乐桥站",
+        "人民路",
+        "人民路站",
+        "人民路站（乐桥）"
+      ],
+      "lines": [
+        "1/4号线",
+        "1\\4号线"
+      ],
+      "districts": [
+        "姑苏区"
+      ],
+      "types": [
+        "大空间出入口",
+        "详见4号线",
+        "车站出入口"
+      ],
+      "connectionForms": [
+        "地下通道"
+      ],
+      "statusCounts": {
+        "已开通": 9,
+        "建设中": 0,
+        "已建设未开通": 0,
+        "未建设未开通": 0
+      },
+      "issueCount": 0,
+      "priorityLabels": [],
+      "details": [
+        {
+          "line": "1/4号线",
+          "displayStationName": "乐桥站",
+          "district": "姑苏区",
+          "type": "车站出入口",
+          "part": "1号口",
+          "parcel": "乐桥广场（公园）",
+          "connectionForm": "/",
+          "developmentProgress": "已建地块",
+          "status": "已开通",
+          "problem": "",
+          "priority": ""
+        },
+        {
+          "line": "1/4号线",
+          "displayStationName": "乐桥站",
+          "district": "姑苏区",
+          "type": "车站出入口",
+          "part": "5号口",
+          "parcel": "全季酒店、住建局",
+          "connectionForm": "/",
+          "developmentProgress": "已建地块",
+          "status": "已开通",
+          "problem": "",
+          "priority": ""
+        },
+        {
+          "line": "1/4号线",
+          "displayStationName": "乐桥站",
+          "district": "姑苏区",
+          "type": "车站出入口",
+          "part": "6号口",
+          "parcel": "文物商店",
+          "connectionForm": "/",
+          "developmentProgress": "已建地块",
+          "status": "已开通",
+          "problem": "",
+          "priority": ""
+        },
+        {
+          "line": "1/4号线",
+          "displayStationName": "乐桥站",
+          "district": "姑苏区",
+          "type": "车站出入口",
+          "part": "7号口",
+          "parcel": "文物商店",
+          "connectionForm": "/",
+          "developmentProgress": "已建地块",
+          "status": "已开通",
+          "problem": "",
+          "priority": ""
+        },
+        {
+          "line": "1/4号线",
+          "displayStationName": "乐桥站",
+          "district": "姑苏区",
+          "type": "车站出入口",
+          "part": "8号口",
+          "parcel": "老城区商住混合",
+          "connectionForm": "/",
+          "developmentProgress": "已建地块",
+          "status": "已开通",
+          "problem": "",
+          "priority": ""
+        },
+        {
+          "line": "1/4号线",
+          "displayStationName": "乐桥站",
+          "district": "姑苏区",
+          "type": "大空间出入口",
+          "part": "2号口",
+          "parcel": "乐桥广场（公园）",
+          "connectionForm": "/",
+          "developmentProgress": "已建地块",
+          "status": "已开通",
+          "problem": "",
+          "priority": ""
+        },
+        {
+          "line": "1/4号线",
+          "displayStationName": "乐桥站",
+          "district": "姑苏区",
+          "type": "大空间出入口",
+          "part": "2号口旁",
+          "parcel": "广场车库",
+          "connectionForm": "地下通道",
+          "developmentProgress": "",
+          "status": "已开通",
+          "problem": "",
+          "priority": ""
+        },
+        {
+          "line": "1/4号线",
+          "displayStationName": "乐桥站",
+          "district": "姑苏区",
+          "type": "大空间出入口",
+          "part": "3号口",
+          "parcel": "姑苏分局交警大队",
+          "connectionForm": "/",
+          "developmentProgress": "已建地块",
+          "status": "已开通",
+          "problem": "",
+          "priority": ""
+        },
+        {
+          "line": "1/4号线",
+          "displayStationName": "乐桥站",
+          "district": "姑苏区",
+          "type": "大空间出入口",
+          "part": "4号口",
+          "parcel": "老城区商住混合",
+          "connectionForm": "/",
+          "developmentProgress": "已建地块",
+          "status": "已开通",
+          "problem": "",
+          "priority": ""
+        }
+      ],
+      "exitCount": 9,
+      "exitParts": [
+        "1号口",
+        "2号口",
+        "2号口旁",
+        "3号口",
+        "4号口",
+        "5号口",
+        "6号口",
+        "7号口",
+        "8号口"
+      ],
+      "interfaceCount": 1
+    },
+    "amenities": {
+      "name": "乐桥",
+      "displayNames": [
+        "乐桥站"
+      ],
+      "aliases": [
+        "乐桥",
+        "乐桥站"
+      ],
+      "lines": [
+        "4号线"
+      ],
+      "exitRows": 8,
+      "openExitCount": 8,
+      "closedExitCount": 0,
+      "managedExitCount": 6,
+      "owners": [
+        "资产经营",
+        "运营公司"
+      ],
+      "nearby": {
+        "schools": [
+          "苏州市第一中学",
+          "苏州市草桥实验小学"
+        ],
+        "hubs": [
+          "中国农业银行、中国工商银行、苏州自来水有限公司",
+          "中国建设银行(苏州市干将支行营业部)、宁波银行苏州分行、苏州市体育局、苏州市地震局、苏州市老干部活动中心",
+          "乐桥皮肤专科",
+          "交通银行(平江支行)",
+          "光大银行",
+          "市立医院",
+          "苏州银行、牙博士口腔"
+        ],
+        "residential": [
+          "泰富苑、乐怡苑"
+        ],
+        "commercial": [
+          "国涛商务大厦",
+          "怡园",
+          "柠檬町商业街",
+          "美罗",
+          "苏州文物商店、友通数码港"
+        ],
+        "other": []
+      },
+      "mobility": {
+        "publicBike": [],
+        "sharedBike": [],
+        "parkAndRide": [],
+        "bikeAndRide": [],
+        "busTransfer": [
+          "乐桥；150；18；2路、8路、9路、32路、40路西线、60路北线、60路南线、200路北线、202路、501路、900路北线、900路南线、923路、980路东线、980路西线、9003路社区巴士、9027路乐龄友好公交、夜2路",
+          "2；1；20；乐桥；150；18；2路、8路、9路、32路、40路西线、60路北线、60路南线、200路北线、202路、501路、900路北线、900路南线、923路、980路东线、980路西线、9003路社区巴士、9027路乐龄友好公交、夜2路"
+        ]
+      },
+      "sampleExits": [
+        {
+          "line": "4号线",
+          "exit": "1号出入口",
+          "isOpen": "是",
+          "owner": "运营公司",
+          "isManaged": "是"
+        },
+        {
+          "line": "4号线",
+          "exit": "2号出入口",
+          "isOpen": "是",
+          "owner": "资产经营",
+          "isManaged": "否"
+        },
+        {
+          "line": "4号线",
+          "exit": "3号出入口（柠檬町商业通道）",
+          "isOpen": "是",
+          "owner": "资产经营",
+          "isManaged": "否"
+        },
+        {
+          "line": "4号线",
+          "exit": "4号口",
+          "isOpen": "是",
+          "owner": "运营公司",
+          "isManaged": "是"
+        },
+        {
+          "line": "4号线",
+          "exit": "5号口",
+          "isOpen": "是",
+          "owner": "运营公司",
+          "isManaged": "是"
+        },
+        {
+          "line": "4号线",
+          "exit": "6号口",
+          "isOpen": "是",
+          "owner": "运营公司",
+          "isManaged": "是"
+        },
+        {
+          "line": "4号线",
+          "exit": "7号口",
+          "isOpen": "是",
+          "owner": "运营公司",
+          "isManaged": "是"
+        },
+        {
+          "line": "4号线",
+          "exit": "8号口",
+          "isOpen": "是",
+          "owner": "运营公司",
+          "isManaged": "是"
+        }
+      ]
+    }
+  },
+  "provisional": true,
+  "dataCompleteness": {
+    "done": 3,
+    "total": 6,
+    "ratio": 0.5
+  },
+  "dimensions": [
+    {
+      "id": "function",
+      "name": "功能属性",
+      "weight": 0.4188,
+      "score": 0.4188,
+      "factors": [
+        {
+          "factorId": "land_use",
+          "name": "用地功能",
+          "value": null,
+          "label": "正式地块资料待补齐，暂按保守 1 分试算",
+          "score": 1,
+          "weight": 0.0795,
+          "weightedScore": 0.0795,
+          "assumed": true,
+          "source": "缺正式地块用地性质；周边配套/地块名称仅作预评估线索"
+        },
+        {
+          "factorId": "development_intensity",
+          "name": "开发强度",
+          "value": null,
+          "label": "正式地块资料待补齐，暂按保守 1 分试算",
+          "score": 1,
+          "weight": 0.3393,
+          "weightedScore": 0.3393,
+          "assumed": true,
+          "source": "缺建筑面积/容积率/开发强度正式指标"
+        }
+      ]
+    },
+    {
+      "id": "location",
+      "name": "区位属性",
+      "weight": 0.1407,
+      "score": 0.5628,
+      "factors": [
+        {
+          "factorId": "location_level",
+          "name": "区位能级",
+          "value": "city",
+          "label": "城市级中心",
+          "score": 4,
+          "weight": 0.1407,
+          "weightedScore": 0.5628,
+          "assumed": false,
+          "source": "现有输入/预设数据"
+        }
+      ]
+    },
+    {
+      "id": "transport",
+      "name": "交通属性",
+      "weight": 0.2976,
+      "score": 1.1904,
+      "factors": [
+        {
+          "factorId": "ridership",
+          "name": "出行客流",
+          "value": "gt_9000",
+          "label": "日均进站量 9000 以上",
+          "score": 4,
+          "weight": 0.2535,
+          "weightedScore": 1.014,
+          "assumed": false,
+          "source": "每站每月日均进站.xlsx：2025-11日均进站"
+        },
+        {
+          "factorId": "transfer",
+          "name": "高效换乘",
+          "value": "current_transfer",
+          "label": "现状换乘站",
+          "score": 4,
+          "weight": 0.0441,
+          "weightedScore": 0.1764,
+          "assumed": false,
+          "source": "现有输入/预设数据"
+        }
+      ]
+    },
+    {
+      "id": "underground",
+      "name": "地下属性",
+      "weight": 0.1429,
+      "score": 0.1429,
+      "factors": [
+        {
+          "factorId": "underground_space",
+          "name": "地下空间",
+          "value": null,
+          "label": "正式地块资料待补齐，暂按保守 1 分试算",
+          "score": 1,
+          "weight": 0.1429,
+          "weightedScore": 0.1429,
+          "assumed": true,
+          "source": "有联通形式线索，缺地块地下空间正式条件"
+        }
+      ]
+    }
+  ],
+  "missing": [
+    {
+      "factorId": "land_use",
+      "name": "用地功能",
+      "message": "未提供具体地块用地性质；运营表中的地块名称和周边配套已作为背景线索入库，但不能等同正式用地功能评分。"
+    },
+    {
+      "factorId": "development_intensity",
+      "name": "开发强度",
+      "message": "未提供建筑面积、用地面积、容积率或开发强度分档，当前按保守 1 分临时试算。"
+    },
+    {
+      "factorId": "underground_space",
+      "name": "地下空间",
+      "message": "运营表已识别联通形式：地下通道；但未提供地块地下空间功能、开放属性和接口标高，暂不作为地下空间因子正式赋值。"
+    }
+  ],
+  "recommendation": {
+    "primary": {
+      "id": "underground_main",
+      "name": "地下主通道",
+      "category": "地下联通",
+      "priority": 1,
+      "bestFor": [
+        "必连地块",
+        "尽连地块",
+        "商业公服",
+        "交通枢纽",
+        "地下公共空间"
+      ],
+      "avoidWhen": [
+        "无地下空间",
+        "接口条件不足",
+        "历史保护或地下遗址限制未论证"
+      ],
+      "parameters": [
+        "通行功能净宽不小于 5.0m，净高不小于 3.0m。",
+        "通行兼休憩或商业功能净高不小于 3.5m。",
+        "路径宜短直，减少多次弯折，节点处设置集散空间。",
+        "与车站非付费区、地块地下公共空间、防火分隔和运营界面一体化设计。"
+      ]
+    },
+    "alternatives": [
+      {
+        "id": "underground_secondary",
+        "name": "地下次通道",
+        "category": "地下联通",
+        "priority": 2,
+        "bestFor": [
+          "尽连地块",
+          "可连地块",
+          "停车接驳",
+          "接口预留"
+        ],
+        "avoidWhen": [
+          "地下空间缺失",
+          "工程经济性明显不足"
+        ],
+        "parameters": [
+          "以通行为主，宜控制商业性植入。",
+          "优先衔接站厅非付费区和地块地下一层公共流线。",
+          "需同步落实防火、排烟、防水、无障碍和导向标识。"
+        ]
+      },
+      {
+        "id": "weather_corridor",
+        "name": "风雨连廊",
+        "category": "地面联通",
+        "priority": 2,
+        "bestFor": [
+          "居住类",
+          "学校医院",
+          "青年公寓",
+          "社区公服",
+          "无地下公共空间"
+        ],
+        "avoidWhen": [
+          "人行道净宽不足",
+          "风貌管控严格且未论证"
+        ],
+        "parameters": [
+          "适用于地面接驳需求强、地下连通工程经济性不足的场景。",
+          "应保障人行道剩余通行净宽和无障碍通行。",
+          "需与车站出入口集散空间、地块主入口和标识系统连续衔接。",
+          "结构、排水、照明和城市风貌应同步控制。"
+        ]
+      }
+    ],
+    "rule": {
+      "id": "station_precheck_underground_main",
+      "when": "站点级预评估：城市级TOD、换乘站且客流强度高，但具体地块用地和地下空间资料待补齐",
+      "primary": "underground_main",
+      "alternatives": [
+        "underground_secondary",
+        "weather_corridor"
+      ],
+      "reason": "站点能级、换乘属性和客流强度均较高，预评估阶段应优先预控地下主通道接口；待地块用地性质、地下空间和权属边界补齐后复核。"
+    }
+  },
+  "researchPlan": {
+    "generatedAt": "2026-06-06T07:27:22Z",
+    "strategy": "实时优先；联网或模型失败时使用本地知识库与五类标杆案例缓存兜底。",
+    "benchmarkCase": {
+      "id": "station-乐桥",
+      "label": "城市级换乘高客流标杆",
+      "station": "乐桥",
+      "scenario": "城市级TOD、换乘和高客流站点需要优先识别地下接口、客流组织和古城风貌约束。",
+      "dimensions": [
+        "换乘客流",
+        "城市级TOD",
+        "地下通道",
+        "古城风貌",
+        "人流集散"
+      ],
+      "queries": [
+        "乐桥站 换乘 客流 地下通道",
+        "苏州 乐桥 站城融合"
+      ],
+      "matched": true
+    },
+    "questions": [
+      {
+        "id": "station_role",
+        "question": "乐桥在TOD等级、线路换乘、客流和片区功能中承担什么角色？",
+        "evidenceTypes": [
+          "station_index",
+          "ridership",
+          "tod_plan",
+          "live_search"
+        ],
+        "priority": "high"
+      },
+      {
+        "id": "surrounding_functions",
+        "question": "周边商业、公服、居住、学校、医院、枢纽等服务对象是否形成稳定联通需求？",
+        "evidenceTypes": [
+          "station_amenities",
+          "live_search",
+          "benchmark_cache"
+        ],
+        "priority": "high"
+      },
+      {
+        "id": "interface_feasibility",
+        "question": "车站非付费区、出入口、地块地下室和竖向标高是否支持推荐联通方式？",
+        "evidenceTypes": [
+          "station_interface",
+          "design_guidance",
+          "project_input"
+        ],
+        "priority": "high"
+      },
+      {
+        "id": "scheme_benchmark",
+        "question": "当前项目与“城市级换乘高客流标杆”相比，哪些维度应借鉴、哪些条件需复核？",
+        "evidenceTypes": [
+          "benchmark_cache",
+          "local_knowledge"
+        ],
+        "priority": "medium"
+      },
+      {
+        "id": "risk_constraints",
+        "question": "消防疏散、运营界面、管线权属、风貌景观和建设时序有哪些不确定性？",
+        "evidenceTypes": [
+          "design_guidance",
+          "live_search",
+          "manual_review"
+        ],
+        "priority": "medium"
+      },
+      {
+        "id": "data_gap_impact",
+        "question": "正式提资缺项会如何影响评分等级、方案优先级和实施建议？",
+        "evidenceTypes": [
+          "project_input",
+          "rule_engine",
+          "missing_items"
+        ],
+        "priority": "high"
+      }
+    ],
+    "dimensions": [
+      {
+        "id": "city_interface",
+        "name": "城市界面与站城融合",
+        "focus": "站点与地块、道路、公共空间之间是否形成连续开放界面。"
+      },
+      {
+        "id": "walking_accessibility",
+        "name": "慢行可达与无障碍连续性",
+        "focus": "步行距离、过街阻隔、风雨遮蔽、无障碍和导向是否完整。"
+      },
+      {
+        "id": "service_population",
+        "name": "服务对象与功能复合",
+        "focus": "商业、公服、居住、学校、医院、枢纽等人群需求是否稳定。"
+      },
+      {
+        "id": "engineering_interface",
+        "name": "工程接口与竖向条件",
+        "focus": "站厅非付费区、地下室、标高、防水、结构和管线条件是否支持落地。"
+      },
+      {
+        "id": "operation_management",
+        "name": "运营管理与安全边界",
+        "focus": "消防、疏散、运营分界、开放时段、安防和维护责任是否清晰。"
+      },
+      {
+        "id": "implementation_timing",
+        "name": "实施时序与投资协同",
+        "focus": "近期接驳、中期接口预留、远期一体化开发的协同路径是否清楚。"
+      },
+      {
+        "id": "benchmark_换乘客流",
+        "name": "换乘客流",
+        "focus": "来自城市级换乘高客流标杆的专项观察维度。"
+      },
+      {
+        "id": "benchmark_城市级tod",
+        "name": "城市级TOD",
+        "focus": "来自城市级换乘高客流标杆的专项观察维度。"
+      },
+      {
+        "id": "benchmark_地下通道",
+        "name": "地下通道",
+        "focus": "来自城市级换乘高客流标杆的专项观察维度。"
+      },
+      {
+        "id": "benchmark_古城风貌",
+        "name": "古城风貌",
+        "focus": "来自城市级换乘高客流标杆的专项观察维度。"
+      },
+      {
+        "id": "benchmark_人流集散",
+        "name": "人流集散",
+        "focus": "来自城市级换乘高客流标杆的专项观察维度。"
+      }
+    ],
+    "tasks": [
+      {
+        "id": "project_input",
+        "name": "读取项目正式输入与缺项",
+        "channel": "rule_engine",
+        "required": true
+      },
+      {
+        "id": "local_knowledge",
+        "name": "检索本地规则、设计导则、站点和运营资料",
+        "channel": "local_cache",
+        "required": true
+      },
+      {
+        "id": "benchmark_cache",
+        "name": "匹配五类标杆案例知识包",
+        "channel": "local_cache",
+        "required": true
+      },
+      {
+        "id": "independent_search",
+        "name": "调用独立搜索接口获取实时外部证据",
+        "channel": "live_search",
+        "required": false
+      },
+      {
+        "id": "model_web_search",
+        "name": "如模型具备联网能力，补充模型侧外搜观点",
+        "channel": "model_web",
+        "required": false
+      },
+      {
+        "id": "model_assessment",
+        "name": "模型或本地兜底生成动态维度研判",
+        "channel": "llm_or_fallback",
+        "required": true
+      }
+    ],
+    "missingSensitiveFactors": [
+      "用地功能",
+      "开发强度",
+      "地下空间"
+    ]
+  },
+  "evidencePack": {
+    "generatedAt": "2026-06-06T07:27:23Z",
+    "mode": "offline_cache",
+    "benchmarkCase": {
+      "id": "station-乐桥",
+      "label": "城市级换乘高客流标杆",
+      "station": "乐桥",
+      "scenario": "城市级TOD、换乘和高客流站点需要优先识别地下接口、客流组织和古城风貌约束。",
+      "dimensions": [
+        "换乘客流",
+        "城市级TOD",
+        "地下通道",
+        "古城风貌",
+        "人流集散"
+      ],
+      "queries": [
+        "乐桥站 换乘 客流 地下通道",
+        "苏州 乐桥 站城融合"
+      ],
+      "matched": true
+    },
+    "priorityRule": "项目正式输入/规则源 > 本地标杆缓存 > 独立搜索 > 模型联网低置信补充",
+    "items": [
+      {
+        "id": "local-knowledge-2",
+        "type": "local_search",
+        "source": "（核心工作思路，最优先）互联互通智能体研发工作方案0318.pptx",
+        "title": "（核心工作思路，最优先）互联互通智能体研发工作方案0318.pptx / 第4页",
+        "summary": "苏州市轨道交通线网 TOD 综合开发专项规划 依据苏州市 TOD 重点片区布局和分级分类规划，对站点周边联通必要性进行初步评估。 01 站点周边地块联通必要性多维度评价体系 从用地的功能、区位、交通与地下属性 4 个维度为相关评价因子赋值，生成可量化的联通必要性评估。 02 苏州市轨道交通站城融合设计导则 从城市设计层面出发，围绕功能、交通、空间一体化三个维度，提出总体设计引导。 03 轨道站点出入口周边空间一体化设计指引 从建筑设计层面出发，阐述地面联通、地下联通、高架联通三类联通形式的需求场景，提供具体设计指引...",
+        "query": "地下公共联通 空间 设计",
+        "confidence": 0.86,
+        "cached": true,
+        "priority": 550,
+        "collectedAt": "2026-06-06T07:27:23Z"
+      },
+      {
+        "id": "local-knowledge-1",
+        "type": "local_search",
+        "source": "20231128苏州市轨道交通站城融合设计导则.pdf",
+        "title": "20231128苏州市轨道交通站城融合设计导则.pdf / 第5页",
+        "summary": "5 1.4 适用范围 本导则适用苏州市域内轨道交通场站及周边土地综合开发的规划、建设、使用和管理 相关工作。包括地下站、高架站、高架区间、车辆基地等多种站点形式。 苏州市2035年轨道线网 线路 个数 长度(公里) 站点名称 1号线 24 25.7 木渎、金枫路、汾湖路、玉山路、狮子山、塔园路、滨河路、西环路、 桐泾北路、广济南路（1#2）、养育巷、乐桥（1#4）、临顿路、相门、 东环路、中央公园、星海广场、东方之门（1#3）、文化博览中心、 时代广场、星湖街、南施街、星塘街（1#5）、钟南街 2号线 35 42....",
+        "query": "苏州 乐桥 站城融合",
+        "confidence": 0.86,
+        "cached": true,
+        "priority": 525,
+        "collectedAt": "2026-06-06T07:27:23Z"
+      },
+      {
+        "id": "local-knowledge-3",
+        "type": "local_search",
+        "source": "20231128苏州市轨道交通站城融合设计导则.pdf",
+        "title": "20231128苏州市轨道交通站城融合设计导则.pdf / 第3页",
+        "summary": "3 1.2 工作依据 明确要求开展轨道交通场站综合开发利用研究， 及每条线路的轨道交通选线专项规划 三个层面指引：城市层面规划引导、线路层面规划 引导、站点层面规划设计引导 其他相关标准、规范、规划 •《江苏省城市规划管理技术规定（2019 年版）》 •《苏州市城乡规划若干强制性内容的规 定》（2013年） •《苏州市国土空间总体规划（2021- 2035）》 •《苏州古城控制性详细规划》 •《苏州市总体城市设计》 •《导向导则设计标准》（苏州） •《建筑设计指南及标准图》（苏州） •《苏州市轨道交通标志系统设计指...",
+        "query": "地下公共联通 空间 设计",
+        "confidence": 0.86,
+        "cached": true,
+        "priority": 505,
+        "collectedAt": "2026-06-06T07:27:23Z"
+      },
+      {
+        "id": "local-knowledge-4",
+        "type": "local_search",
+        "source": "苏州轨道交通站点周边地下公共联通空间设计细则-结题评审修改稿.docx",
+        "title": "苏州轨道交通站点周边地下公共联通空间设计细则-结题评审修改稿.docx / 表格 1",
+        "summary": "周边地下空间类型 | 轨道站点周边区位 | 轨道站点周边区位 | 轨道站点周边区位 | 轨道站点周边区位 | 轨道站点周边区位 | 轨道站点周边区位 周边地下空间类型 | 城市重点地下空间；建设区 | 城市重点地下空间；建设区 | 片区重点地下空间；建设区 | 片区重点地下空间；建设区 | 主要节点地下空间；建设区 | 主要节点地下空间；建设区 周边地下空间类型 | 核心；开发区 | 规划；引导区 | 核心；开发区 | 规划；引导区 | 核心；开发区 | 规划；引导区 商业 | ● | ◎ | ● | ○ | ◎...",
+        "query": "地下公共联通 空间 设计",
+        "confidence": 0.86,
+        "cached": true,
+        "priority": 495,
+        "collectedAt": "2026-06-06T07:27:23Z"
+      },
+      {
+        "id": "local-knowledge-5",
+        "type": "local_search",
+        "source": "苏州轨道交通4号线清树湾站东南象限青年公寓地块与车站互联互通必要性评估与设计方案报告.docx",
+        "title": "苏州轨道交通4号线清树湾站东南象限青年公寓地块与车站互联互通必要性评估与设计方案报告.docx / 段落 50",
+        "summary": "整体设计思路：以车站3号出入口集散广场为起点，沿迎春南路东侧人行道设置封闭式风雨连廊，主线终点衔接地块北侧公寓主入口，同步设置支线衔接地块西侧社区商业主出入口，实现车站与地块的全天候步行接驳；连廊设计兼顾苏州本地气候特征、无障碍通行要求与城市风貌协调性，不占用机动车道、不阻断人行道通行，同步完善导向标识、休憩设施与便民配套，兼顾通勤效率与商业引流需求。",
+        "query": "风雨连廊 无障碍 导向",
+        "confidence": 0.86,
+        "cached": true,
+        "priority": 365,
+        "collectedAt": "2026-06-06T07:27:23Z"
+      },
+      {
+        "id": "local-knowledge-6",
+        "type": "local_search",
+        "source": "苏州轨道交通4号线清树湾站东南象限青年公寓地块与车站互联互通必要性评估与设计方案报告.docx",
+        "title": "苏州轨道交通4号线清树湾站东南象限青年公寓地块与车站互联互通必要性评估与设计方案报告.docx / 段落 56",
+        "summary": "不新增建构筑物，仅对车站3号出入口至地块主入口、商业出入口的现有步行道进行优化提升，包括路面翻新、防滑处理、无障碍坡道完善、沿线导向标识系统加密、夜间照明提升等，满足基础步行接驳需求。该方案实施成本最低、周期最短，适用于项目建设资金有限、暂不具备连廊实施条件的场景，需同步预留远期风雨连廊建设条件。",
+        "query": "风雨连廊 无障碍 导向",
+        "confidence": 0.86,
+        "cached": true,
+        "priority": 365,
+        "collectedAt": "2026-06-06T07:27:23Z"
+      },
+      {
+        "id": "local-knowledge-7",
+        "type": "local_search",
+        "source": "苏州轨道交通6号线金家堰站东北象限邻里中心地块与车站互联互通必要性评估与设计方案报告.docx",
+        "title": "苏州轨道交通6号线金家堰站东北象限邻里中心地块与车站互联互通必要性评估与设计方案报告.docx / 段落 55",
+        "summary": "以车站3号出入口集散广场为起点，沿金堰路东侧人行道设置封闭式风雨连廊，终点衔接地块西侧主出入口，总长度控制在100m以内，连廊净宽不小于4m，配套无障碍设计、休憩设施与导向标识。该方案建设成本低、审批流程简单、施工周期短，可实现全天候步行接驳，适用于项目地下空间暂不具备连通条件的场景，需同步预留远期地下连通接口。",
+        "query": "风雨连廊 无障碍 导向",
+        "confidence": 0.86,
+        "cached": true,
+        "priority": 365,
+        "collectedAt": "2026-06-06T07:27:23Z"
+      },
+      {
+        "id": "rule-score",
+        "type": "rule_fact",
+        "source": "评价因子赋值明细表.xlsx / 后端规则引擎",
+        "title": "规则评分与等级",
+        "summary": "综合评分、百分制得分、必连/尽连/可连等级和推荐方式由规则引擎计算，模型不得改写。",
+        "confidence": 1.0,
+        "cached": true,
+        "priority": 100,
+        "collectedAt": "2026-06-06T07:27:23Z"
+      },
+      {
+        "id": "station-ridership",
+        "type": "local_knowledge",
+        "source": "每站每月日均进站.xlsx：2025-11日均进站",
+        "title": "乐桥客流线索",
+        "summary": "日均进站约16193.37，用于判断交通需求和路径组织强度。",
+        "confidence": 0.92,
+        "cached": true,
+        "priority": 92,
+        "collectedAt": "2026-06-06T07:27:23Z"
+      },
+      {
+        "id": "station-interface",
+        "type": "local_knowledge",
+        "source": "苏州地铁运营站点出入口、联通接口情况梳理统计表20260128.xlsx",
+        "title": "乐桥出入口与联通接口",
+        "summary": "识别出入口9个，联通形式地下通道，问题记录0条。",
+        "confidence": 0.9,
+        "cached": true,
+        "priority": 90,
+        "collectedAt": "2026-06-06T07:27:23Z"
+      },
+      {
+        "id": "recommendation-rule",
+        "type": "rule_fact",
+        "source": "design_rules.json",
+        "title": "推荐方式：地下主通道",
+        "summary": "站点能级、换乘属性和客流强度均较高，预评估阶段应优先预控地下主通道接口；待地块用地性质、地下空间和权属边界补齐后复核。",
+        "confidence": 0.9,
+        "cached": true,
+        "priority": 88,
+        "collectedAt": "2026-06-06T07:27:23Z"
+      },
+      {
+        "id": "station-amenities",
+        "type": "local_knowledge",
+        "source": "运营公司车站出入口开放及周边配套统计表202604.xlsx",
+        "title": "乐桥周边配套",
+        "summary": "schools:苏州市第一中学、苏州市草桥实验小学；hubs:中国农业银行、中国工商银行、苏州自来水有限公司、中国建设银行(苏州市干将支行营业部)、宁波银行苏州分行、苏州市体育局、苏州市地震局、苏州市老干部活动中心、乐桥皮肤专科；residential:泰富苑、乐怡苑；commercial:国涛商务大厦、怡园、柠檬町商业街",
+        "confidence": 0.86,
+        "cached": true,
+        "priority": 86,
+        "collectedAt": "2026-06-06T07:27:23Z"
+      },
+      {
+        "id": "missing-impact",
+        "type": "risk",
+        "source": "项目提资缺项",
+        "title": "资料缺项影响",
+        "summary": "当前3项资料缺口会影响评分复核和方案深化，报告需标注预评估性质。",
+        "confidence": 0.95,
+        "cached": true,
+        "priority": 85,
+        "collectedAt": "2026-06-06T07:27:23Z"
+      },
+      {
+        "id": "benchmark-station-乐桥",
+        "type": "benchmark_cache",
+        "source": "五类标杆案例知识包",
+        "title": "城市级换乘高客流标杆",
+        "summary": "城市级TOD、换乘和高客流站点需要优先识别地下接口、客流组织和古城风貌约束。",
+        "confidence": 0.84,
+        "cached": true,
+        "priority": 82,
+        "collectedAt": "2026-06-06T07:27:23Z"
+      },
+      {
+        "id": "dimension-function",
+        "type": "rule_dimension",
+        "source": "后端四维评分明细",
+        "title": "功能属性维度",
+        "summary": "得分0.4188；临时试算因子：用地功能、开发强度。",
+        "confidence": 0.68,
+        "cached": true,
+        "priority": 80,
+        "collectedAt": "2026-06-06T07:27:23Z"
+      },
+      {
+        "id": "dimension-location",
+        "type": "rule_dimension",
+        "source": "后端四维评分明细",
+        "title": "区位属性维度",
+        "summary": "得分0.5628；临时试算因子：无。",
+        "confidence": 0.88,
+        "cached": true,
+        "priority": 80,
+        "collectedAt": "2026-06-06T07:27:23Z"
+      },
+      {
+        "id": "dimension-transport",
+        "type": "rule_dimension",
+        "source": "后端四维评分明细",
+        "title": "交通属性维度",
+        "summary": "得分1.1904；临时试算因子：无。",
+        "confidence": 0.88,
+        "cached": true,
+        "priority": 80,
+        "collectedAt": "2026-06-06T07:27:23Z"
+      },
+      {
+        "id": "dimension-underground",
+        "type": "rule_dimension",
+        "source": "后端四维评分明细",
+        "title": "地下属性维度",
+        "summary": "得分0.1429；临时试算因子：地下空间。",
+        "confidence": 0.68,
+        "cached": true,
+        "priority": 80,
+        "collectedAt": "2026-06-06T07:27:23Z"
+      },
+      {
+        "id": "benchmark-station-乐桥-1",
+        "type": "benchmark_dimension",
+        "source": "五类标杆案例知识包",
+        "title": "换乘客流",
+        "summary": "作为城市级换乘高客流标杆的专项研判维度，用于补足固定评分维度之外的模型观察。",
+        "confidence": 0.78,
+        "cached": true,
+        "priority": 70,
+        "collectedAt": "2026-06-06T07:27:23Z"
+      },
+      {
+        "id": "benchmark-station-乐桥-2",
+        "type": "benchmark_dimension",
+        "source": "五类标杆案例知识包",
+        "title": "城市级TOD",
+        "summary": "作为城市级换乘高客流标杆的专项研判维度，用于补足固定评分维度之外的模型观察。",
+        "confidence": 0.78,
+        "cached": true,
+        "priority": 70,
+        "collectedAt": "2026-06-06T07:27:23Z"
+      },
+      {
+        "id": "benchmark-station-乐桥-3",
+        "type": "benchmark_dimension",
+        "source": "五类标杆案例知识包",
+        "title": "地下通道",
+        "summary": "作为城市级换乘高客流标杆的专项研判维度，用于补足固定评分维度之外的模型观察。",
+        "confidence": 0.78,
+        "cached": true,
+        "priority": 70,
+        "collectedAt": "2026-06-06T07:27:23Z"
+      },
+      {
+        "id": "benchmark-station-乐桥-4",
+        "type": "benchmark_dimension",
+        "source": "五类标杆案例知识包",
+        "title": "古城风貌",
+        "summary": "作为城市级换乘高客流标杆的专项研判维度，用于补足固定评分维度之外的模型观察。",
+        "confidence": 0.78,
+        "cached": true,
+        "priority": 70,
+        "collectedAt": "2026-06-06T07:27:23Z"
+      },
+      {
+        "id": "benchmark-station-乐桥-5",
+        "type": "benchmark_dimension",
+        "source": "五类标杆案例知识包",
+        "title": "人流集散",
+        "summary": "作为城市级换乘高客流标杆的专项研判维度，用于补足固定评分维度之外的模型观察。",
+        "confidence": 0.78,
+        "cached": true,
+        "priority": 70,
+        "collectedAt": "2026-06-06T07:27:23Z"
+      }
+    ],
+    "summary": {
+      "total": 23,
+      "cached": 23,
+      "live": 0
+    }
+  },
+  "modelAssessment": {
+    "generatedAt": "2026-06-06T07:27:23Z",
+    "provider": "awaiting_model_or_user_consent",
+    "status": "awaiting_offline_fallback_consent",
+    "fallbackUsed": false,
+    "immutableFacts": {
+      "score": 2.3149,
+      "scorePercent": 56.74,
+      "level": "可连地块",
+      "policy": "鼓励、建议联通；结合项目诉求、建设条件和成本效益确定实施方式。",
+      "primaryRecommendation": "地下主通道",
+      "ruleReason": "站点能级、换乘属性和客流强度均较高，预评估阶段应优先预控地下主通道接口；待地块用地性质、地下空间和权属边界补齐后复核。"
+    },
+    "summary": "尚未连接可用模型。系统已准备研究计划和本地证据包，但不会自动使用离线兜底生成综合研判。",
+    "dynamicDimensions": [],
+    "risks": [],
+    "uncertainties": [
+      "未检测到可用模型或模型调用失败。",
+      "需要用户确认后，才会使用本地知识库和五类标杆案例缓存生成离线兜底研判。"
+    ],
+    "reviewQuestions": [
+      "是否连接模型后重新运行评估？",
+      "是否确认使用离线兜底，由本地资料提供研判弹药？"
+    ],
+    "confidence": 0,
+    "preparedEvidenceRefs": [
+      "local-knowledge-2",
+      "local-knowledge-1",
+      "local-knowledge-3",
+      "local-knowledge-4",
+      "local-knowledge-5",
+      "local-knowledge-6",
+      "local-knowledge-7",
+      "rule-score"
+    ],
+    "benchmarkCase": {
+      "id": "station-乐桥",
+      "label": "城市级换乘高客流标杆",
+      "station": "乐桥",
+      "scenario": "城市级TOD、换乘和高客流站点需要优先识别地下接口、客流组织和古城风貌约束。",
+      "dimensions": [
+        "换乘客流",
+        "城市级TOD",
+        "地下通道",
+        "古城风貌",
+        "人流集散"
+      ],
+      "queries": [
+        "乐桥站 换乘 客流 地下通道",
+        "苏州 乐桥 站城融合"
+      ],
+      "matched": true
+    }
+  },
+  "modelJudgement": {
+    "status": "fallback_written",
+    "level": "可连地块",
+    "recommendedType": "地下主通道",
+    "confidence": 0.05,
+    "reason": "尚未连接可用模型。系统已准备研究计划和本地证据包，但不会自动使用离线兜底生成综合研判。",
+    "overrideReason": "模型以规则评分为基线，结合站点上下文、案例经验和资料缺口形成最终判断。",
+    "evidenceRefs": [],
+    "riskItems": [
+      {
+        "id": "risk-missing-land_use",
+        "title": "用地功能",
+        "detail": "未提供具体地块用地性质；运营表中的地块名称和周边配套已作为背景线索入库，但不能等同正式用地功能评分。",
+        "severity": "高",
+        "reviewLabel": "缺项影响较大"
+      },
+      {
+        "id": "risk-missing-development_intensity",
+        "title": "开发强度",
+        "detail": "未提供建筑面积、用地面积、容积率或开发强度分档，当前按保守 1 分临时试算。",
+        "severity": "高",
+        "reviewLabel": "缺项影响较大"
+      },
+      {
+        "id": "risk-missing-underground_space",
+        "title": "地下空间",
+        "detail": "运营表已识别联通形式：地下通道；但未提供地块地下空间功能、开放属性和接口标高，暂不作为地下空间因子正式赋值。",
+        "severity": "高",
+        "reviewLabel": "缺项影响较大"
+      }
+    ],
+    "fundingRequests": [
+      {
+        "id": "funding-1",
+        "title": "用地功能",
+        "priority": "高",
+        "reason": "未提供具体地块用地性质；运营表中的地块名称和周边配套已作为背景线索入库，但不能等同正式用地功能评分。",
+        "reviewLabel": "需客户补资"
+      },
+      {
+        "id": "funding-2",
+        "title": "开发强度",
+        "priority": "高",
+        "reason": "未提供建筑面积、用地面积、容积率或开发强度分档，当前按保守 1 分临时试算。",
+        "reviewLabel": "需客户补资"
+      },
+      {
+        "id": "funding-3",
+        "title": "地下空间",
+        "priority": "中",
+        "reason": "运营表已识别联通形式：地下通道；但未提供地块地下空间功能、开放属性和接口标高，暂不作为地下空间因子正式赋值。",
+        "reviewLabel": "需客户补资"
+      }
+    ],
+    "reviewQuestions": [
+      "是否连接模型后重新运行评估？",
+      "是否确认使用离线兜底，由本地资料提供研判弹药？"
+    ]
+  },
+  "modelRuleDifference": {
+    "status": "aligned",
+    "ruleLevel": "可连地块",
+    "modelLevel": "可连地块",
+    "ruleRecommendedType": "地下主通道",
+    "modelRecommendedType": "地下主通道",
+    "reason": "模型结论与规则基线一致。",
+    "reviewLabels": [
+      "依据充分",
+      "依据不足"
+    ]
+  },
+  "modelQuality": {
+    "factHonesty": "review",
+    "evidenceCoverage": "sufficient",
+    "labels": [
+      "缺项影响较大",
+      "依据不足"
+    ],
+    "missingCount": 3,
+    "evidenceCount": 23
+  },
+  "diagramBrief": {
+    "diagramId": "D-001",
+    "diagramType": "recommended_connection_path",
+    "title": "推荐联通路径示意",
+    "summary": "表达乐桥与Imported Core Browser Project之间的地下主通道关系，并标注主要风险与待复核界面。",
+    "nodes": [
+      {
+        "id": "station",
+        "label": "乐桥",
+        "type": "station",
+        "x": 110,
+        "y": 160,
+        "level": "B1"
+      },
+      {
+        "id": "parcel",
+        "label": "Imported Core Browser Project",
+        "type": "parcel",
+        "x": 430,
+        "y": 160,
+        "level": "B1"
+      }
+    ],
+    "edges": [
+      {
+        "id": "path-1",
+        "from": "station",
+        "to": "parcel",
+        "type": "recommended",
+        "label": "地下主通道"
+      }
+    ],
+    "annotations": [
+      {
+        "id": "risk-1",
+        "text": "接口标高、消防分区、产权界面需复核",
+        "anchorTo": "path-1"
+      }
+    ],
+    "exports": [
+      "svg",
+      "png",
+      "docx"
+    ]
+  },
+  "reportModes": [
+    {
+      "id": "client_formal",
+      "name": "客户正式版",
+      "tone": "正式、稳健、可审阅",
+      "focus": "结论、依据、风险、补资和实施建议",
+      "sectionDensity": "medium",
+      "qualityLabels": [
+        "缺项影响较大",
+        "依据不足"
+      ]
+    },
+    {
+      "id": "expert_appendix",
+      "name": "专家附录版",
+      "tone": "证据完整、规则透明、便于复核",
+      "focus": "规则基线、模型差异、证据引用和复核问题",
+      "sectionDensity": "high",
+      "qualityLabels": [
+        "依据充分",
+        "依据不足"
+      ]
+    },
+    {
+      "id": "leadership_brief",
+      "name": "领导汇报版",
+      "tone": "一页一结论、一页一风险、一页一行动",
+      "focus": "模型结论、推荐方案、关键风险和下一步动作",
+      "sectionDensity": "low",
+      "qualityLabels": [
+        "可汇报",
+        "缺项影响较大",
+        "依据不足"
+      ]
+    }
+  ],
+  "capabilityStatus": {
+    "generatedAt": "2026-06-06T07:27:23Z",
+    "strategy": "分层增强：规则与本地缓存保下限，独立搜索和模型联网争上限。",
+    "localCache": {
+      "available": true,
+      "mode": "cache",
+      "evidenceCount": 23,
+      "reason": ""
+    },
+    "independentSearch": {
+      "available": false,
+      "mode": "not_configured",
+      "reason": "SEARCH_API_URL 或 SEARCH_API_KEY 未配置"
+    },
+    "llm": {
+      "available": false,
+      "mode": "not_configured",
+      "reason": "未配置可用模型：请设置 ANTHROPIC_API_KEY + ANTHROPIC_MODEL，或继续使用 LLM_BASE_URL、LLM_API_KEY、LLM_MODEL"
+    },
+    "modelWebSearch": {
+      "available": false,
+      "mode": "not_configured",
+      "evidenceCount": 0,
+      "reason": "未获得可复核的模型联网证据"
+    },
+    "liveEvidenceCount": 0,
+    "requiresOfflineFallbackConsent": true,
+    "offlineFallbackAuthorized": false,
+    "fallbackReason": "尚未连接可用模型，等待用户确认是否使用离线兜底。"
+  },
+  "clientReport": [
+    {
+      "title": "客户报告生成提示",
+      "content": "当前尚未连接可用模型。系统已完成规则评分、资料检索和研究问题准备，但不会自动生成完整顾问式成果报告。请连接模型后重新运行评估，或在页面提示中确认使用离线兜底，由本地知识库和五类标杆案例生成客户报告初稿。"
+    }
+  ],
+  "clientReportMode": "awaiting_model_or_fallback_consent",
+  "llmReviewContext": {
+    "purpose": "供模型在规则基线、项目事实和证据材料基础上做最终综合研判，可在说明理由和复核标签后覆盖规则结论。",
+    "guardrails": [
+      "可以覆盖规则等级或推荐方式，但必须保留规则基线、覆盖理由、证据引用和人工复核标签。",
+      "正式地块资料缺失时必须标注预评估性质，不得把站点周边线索当作地块正式输入。",
+      "引用资料应说明来源和用途；无法确认的工程条件应进入补齐项或风险项。",
+      "输出需区分近期可实施措施、中期深化设计和远期一体化预留。"
+    ],
+    "projectFacts": {
+      "name": "Imported Core Browser Project",
+      "station": "乐桥",
+      "score": 2.3149,
+      "scorePercent": 56.74,
+      "level": "可连地块",
+      "policy": "鼓励、建议联通；结合项目诉求、建设条件和成本效益确定实施方式。",
+      "primaryRecommendation": "地下主通道",
+      "ruleReason": "站点能级、换乘属性和客流强度均较高，预评估阶段应优先预控地下主通道接口；待地块用地性质、地下空间和权属边界补齐后复核。",
+      "missingItems": [
+        "未提供具体地块用地性质；运营表中的地块名称和周边配套已作为背景线索入库，但不能等同正式用地功能评分。",
+        "未提供建筑面积、用地面积、容积率或开发强度分档，当前按保守 1 分临时试算。",
+        "运营表已识别联通形式：地下通道；但未提供地块地下空间功能、开放属性和接口标高，暂不作为地下空间因子正式赋值。"
+      ]
+    },
+    "referenceBasis": [
+      {
+        "source": "互联互通智能体研发工作方案0318.pptx",
+        "use": "确定近期目标、评价到报告的工作流、规则优先级和试点交付边界。",
+        "status": "PPT规则源，优先于早期示例报告。"
+      },
+      {
+        "source": "评价因子赋值明细表.xlsx",
+        "use": "确定功能、区位、交通、地下四类维度、因子权重和选项赋值。",
+        "status": "当前评分计算的直接依据。"
+      },
+      {
+        "source": "20260507反馈",
+        "use": "确认评分口径以Excel/PPT为准，早期样例报告仅作章节和表达参考。",
+        "status": "验收口径确认。"
+      },
+      {
+        "source": "车站TOD级别划分整理.xlsx",
+        "use": "提供乐桥的TOD级别、线路和区位能级。",
+        "status": "站点级预评估依据。"
+      },
+      {
+        "source": "每站每月日均进站.xlsx",
+        "use": "提供站点日均进站客流，用于交通属性中的出行客流因子。",
+        "status": "每站每月日均进站.xlsx：2025-11日均进站"
+      },
+      {
+        "source": "苏州地铁运营站点出入口、联通接口情况梳理统计表20260128.xlsx",
+        "use": "提供出入口、接口、联通形式、开发进度和推进问题线索。",
+        "status": "用于站点上下文和推荐规则分层，不替代正式地块资料。"
+      },
+      {
+        "source": "运营公司车站出入口开放及周边配套统计表202604.xlsx",
+        "use": "提供出入口开放、运营管理、周边学校/商业/住宅/公共设施等配套线索。",
+        "status": "用于周边服务对象判断和资料补齐提示。"
+      },
+      {
+        "source": "苏州轨道交通站点周边地下公共联通空间设计细则-结题评审修改稿.docx",
+        "use": "作为地下联通空间、接口、无障碍、消防、运营界面等设计控制要求的知识库来源。",
+        "status": "设计建议引用源，具体条款需在深化阶段人工复核。"
+      },
+      {
+        "source": "项目提资资料",
+        "use": "补齐用地性质、建筑面积/容积率、地下空间功能、接口标高、权属边界和专项约束。",
+        "status": "当前仍有3项正式评分或项目资料待补齐。"
+      }
+    ],
+    "dimensionJudgement": [
+      {
+        "id": "function",
+        "name": "功能属性",
+        "weight": 0.4188,
+        "score": 0.4188,
+        "factorEvidence": [
+          "用地功能=正式地块资料待补齐，暂按保守 1 分试算，1分，权重0.0795，加权0.0795，来源：缺正式地块用地性质；周边配套/地块名称仅作预评估线索，状态：临时试算",
+          "开发强度=正式地块资料待补齐，暂按保守 1 分试算，1分，权重0.3393，加权0.3393，来源：缺建筑面积/容积率/开发强度正式指标，状态：临时试算"
+        ],
+        "interpretation": "功能属性含用地功能；开发强度临时试算，结论需随资料补齐复核。"
+      },
+      {
+        "id": "location",
+        "name": "区位属性",
+        "weight": 0.1407,
+        "score": 0.5628,
+        "factorEvidence": [
+          "区位能级=城市级中心，4分，权重0.1407，加权0.5628，来源：现有输入/预设数据，状态：已取值"
+        ],
+        "interpretation": "区位属性支撑度较强，对联通必要性形成正向贡献。"
+      },
+      {
+        "id": "transport",
+        "name": "交通属性",
+        "weight": 0.2976,
+        "score": 1.1904,
+        "factorEvidence": [
+          "出行客流=日均进站量 9000 以上，4分，权重0.2535，加权1.014，来源：每站每月日均进站.xlsx：2025-11日均进站，状态：已取值",
+          "高效换乘=现状换乘站，4分，权重0.0441，加权0.1764，来源：现有输入/预设数据，状态：已取值"
+        ],
+        "interpretation": "交通属性支撑度较强，对联通必要性形成正向贡献。"
+      },
+      {
+        "id": "underground",
+        "name": "地下属性",
+        "weight": 0.1429,
+        "score": 0.1429,
+        "factorEvidence": [
+          "地下空间=正式地块资料待补齐，暂按保守 1 分试算，1分，权重0.1429，加权0.1429，来源：有联通形式线索，缺地块地下空间正式条件，状态：临时试算"
+        ],
+        "interpretation": "地下属性含地下空间临时试算，结论需随资料补齐复核。"
+      }
+    ],
+    "schemeComparison": [
+      {
+        "role": "推荐方案",
+        "name": "地下主通道",
+        "category": "地下联通",
+        "reason": "站点能级、换乘属性和客流强度均较高，预评估阶段应优先预控地下主通道接口；待地块用地性质、地下空间和权属边界补齐后复核。",
+        "bestFor": [
+          "必连地块",
+          "尽连地块",
+          "商业公服",
+          "交通枢纽",
+          "地下公共空间"
+        ],
+        "avoidWhen": [
+          "无地下空间",
+          "接口条件不足",
+          "历史保护或地下遗址限制未论证"
+        ],
+        "technicalParameters": [
+          "通行功能净宽不小于 5.0m，净高不小于 3.0m。",
+          "通行兼休憩或商业功能净高不小于 3.5m。",
+          "路径宜短直，减少多次弯折，节点处设置集散空间。",
+          "与车站非付费区、地块地下公共空间、防火分隔和运营界面一体化设计。"
+        ]
+      },
+      {
+        "role": "备选方案1",
+        "name": "地下次通道",
+        "category": "地下联通",
+        "reason": "作为备选，用于接口、投资、交通组织或风貌约束变化时复核。",
+        "bestFor": [
+          "尽连地块",
+          "可连地块",
+          "停车接驳",
+          "接口预留"
+        ],
+        "avoidWhen": [
+          "地下空间缺失",
+          "工程经济性明显不足"
+        ],
+        "technicalParameters": [
+          "以通行为主，宜控制商业性植入。",
+          "优先衔接站厅非付费区和地块地下一层公共流线。",
+          "需同步落实防火、排烟、防水、无障碍和导向标识。"
+        ]
+      },
+      {
+        "role": "备选方案2",
+        "name": "风雨连廊",
+        "category": "地面联通",
+        "reason": "作为备选，用于接口、投资、交通组织或风貌约束变化时复核。",
+        "bestFor": [
+          "居住类",
+          "学校医院",
+          "青年公寓",
+          "社区公服",
+          "无地下公共空间"
+        ],
+        "avoidWhen": [
+          "人行道净宽不足",
+          "风貌管控严格且未论证"
+        ],
+        "technicalParameters": [
+          "适用于地面接驳需求强、地下连通工程经济性不足的场景。",
+          "应保障人行道剩余通行净宽和无障碍通行。",
+          "需与车站出入口集散空间、地块主入口和标识系统连续衔接。",
+          "结构、排水、照明和城市风貌应同步控制。"
+        ]
+      }
+    ],
+    "riskAndReviewPoints": [
+      {
+        "topic": "正式地块资料",
+        "point": "用地性质、建筑面积/容积率、地下空间功能缺失时，评分和推荐只能作为站点级预评估。",
+        "action": "补齐控规图则、规划条件、地块指标和地下空间说明后复核。"
+      },
+      {
+        "topic": "接口工程条件",
+        "point": "接口位置、标高、非付费区关系、结构边界和防水节点决定推荐方式能否落地。",
+        "action": "深化阶段需核对车站接口条件、地块地下室平面和竖向标高。"
+      },
+      {
+        "topic": "消防与疏散",
+        "point": "地下或封闭连通空间涉及防火分区、排烟、疏散距离、运营管理边界。",
+        "action": "方案比选时同步校核消防专项和运营分界。"
+      },
+      {
+        "topic": "无障碍与导向",
+        "point": "步行接驳应保证连续无障碍、夜间照明、导向识别和客流组织清晰。",
+        "action": "近期实施方案应先落实连续路径和标识系统。"
+      },
+      {
+        "topic": "权属与施工界面",
+        "point": "红线、产权、管线迁改、施工组织和费用分摊可能改变方案优先级。",
+        "action": "把权属边界、施工时序和投资责任纳入补齐清单。"
+      },
+      {
+        "topic": "补齐后结论漂移",
+        "point": "当前3项缺口按保守值试算，补齐后评分等级和推荐方式可能变化。",
+        "action": "保留本次预评估版本，补齐后生成复核版并对比分值变化。"
+      }
+    ],
+    "suggestedOutputSchema": [
+      "综合判断结论",
+      "主要依据与引用来源",
+      "推荐方案适用性说明",
+      "备选方案触发条件",
+      "风险与需补齐资料",
+      "近期/中期/远期实施建议",
+      "人工复核问题清单"
+    ]
+  },
+  "report": [
+    {
+      "title": "项目概况与资料边界",
+      "content": "Imported Core Browser Project对应站点为乐桥，所属区划为姑苏区，地块位置为待补齐位置，圈层为待补齐。地块业态为待补齐，用地面积约待补齐平方米，建筑面积约待补齐平方米，规划指标为待补齐规划指标。邻近出入口为1号出入口，日均客流为16193 人次/日（每站每月日均进站.xlsx：2025-11日均进站）。站点侧已识别出入口 9 个，联通形式 地下通道，问题记录 0 条。运营公司202604资料显示，站点出入口开放 8/8 个，运营管理 6 个；周边配套包括学校：苏州市第一中学、苏州市草桥实验小学；交通/公益：中国农业银行、中国工商银行、苏州自来水有限公司、中国建设银行(苏州市干将支行营业部)、宁波银行苏州分行、苏州市体育局、苏州市地震局、苏州市老干部活动中心；住宅：泰富苑、乐怡苑；商业景点：国涛商务大厦、怡园。本段仅描述已入库事实和待补齐资料边界，不把周边配套线索直接等同为地块正式评分输入。"
+    },
+    {
+      "title": "评价口径与引用依据",
+      "content": "本次评价以PPT工作方案、评价因子赋值表和20260507反馈为主控口径，引用依据包括：互联互通智能体研发工作方案0318.pptx（确定近期目标、评价到报告的工作流、规则优先级和试点交付边界。）；评价因子赋值明细表.xlsx（确定功能、区位、交通、地下四类维度、因子权重和选项赋值。）；20260507反馈（确认评分口径以Excel/PPT为准，早期样例报告仅作章节和表达参考。）；车站TOD级别划分整理.xlsx（提供乐桥的TOD级别、线路和区位能级。）；每站每月日均进站.xlsx（提供站点日均进站客流，用于交通属性中的出行客流因子。）；苏州地铁运营站点出入口、联通接口情况梳理统计表20260128.xlsx（提供出入口、接口、联通形式、开发进度和推进问题线索。）；运营公司车站出入口开放及周边配套统计表202604.xlsx（提供出入口开放、运营管理、周边学校/商业/住宅/公共设施等配套线索。）；苏州轨道交通站点周边地下公共联通空间设计细则-结题评审修改稿.docx（作为地下联通空间、接口、无障碍、消防、运营界面等设计控制要求的知识库来源。）。其中评分因子、权重和等级阈值由结构化规则引擎计算；设计细则、运营资料和周边配套作为解释、比选、风险识别和补齐项提示依据。"
+    },
+    {
+      "title": "站点能级、客流与接口研判",
+      "content": "乐桥的区位能级为城市级TOD，线路/换乘信息为1/4，日均客流为16193 人次/日（每站每月日均进站.xlsx：2025-11日均进站）。客流记录覆盖至 2025-11，平均日均进站 17113.33 人次/日。站点侧已识别出入口 9 个，联通形式 地下通道，问题记录 0 条。这些信息用于判断站点侧联通需求、接口成熟度和近期实施抓手；若后续接入客流预测、客流方向、分时段拥挤度，可进一步细化为路径级方案建议。"
+    },
+    {
+      "title": "周边功能与服务对象研判",
+      "content": "运营公司202604资料和站点周边索引显示，周边配套包括学校：苏州市第一中学、苏州市草桥实验小学；交通/公益：中国农业银行、中国工商银行、苏州自来水有限公司、中国建设银行(苏州市干将支行营业部)、宁波银行苏州分行、苏州市体育局、苏州市地震局、苏州市老干部活动中心；住宅：泰富苑、乐怡苑；商业景点：国涛商务大厦、怡园。这些内容可辅助判断服务对象、全天候需求、导向标识和步行系统连续性，但仍需控规、规划条件和地块方案确认具体用地功能、开发强度和地下空间条件。"
+    },
+    {
+      "title": "多维度评分拆解",
+      "content": "本次按功能、区位、交通、地下四个维度进行参数化试算，维度得分为：功能属性 0.4188 分；区位属性 0.5628 分；交通属性 1.1904 分；地下属性 0.1429 分。维度解释为：功能属性：功能属性含用地功能；开发强度临时试算，结论需随资料补齐复核。；区位属性：区位属性支撑度较强，对联通必要性形成正向贡献。；交通属性：交通属性支撑度较强，对联通必要性形成正向贡献。；地下属性：地下属性含地下空间临时试算，结论需随资料补齐复核。。对临时试算因子，系统保留1分保守值并在待补齐项中说明原因，避免用推断数据替代正式资料。"
+    },
+    {
+      "title": "联通必要性评估结论",
+      "content": "原始加权分为 2.3149/4.0795，折算百分制为 56.74 分，按 20260507 反馈的 80/60 阈值判定为可连地块。鼓励、建议联通；结合项目诉求、建设条件和成本效益确定实施方式。客流记录覆盖至 2025-11，平均日均进站 17113.33 人次/日。该结论表示当前资料条件下的必要性等级；若后续补齐地块规模、地下空间或接口条件，系统应重新计算并输出差异说明。"
+    },
+    {
+      "title": "推荐方案与方案比选",
+      "content": "系统推荐采用地下主通道，推荐理由为：站点能级、换乘属性和客流强度均较高，预评估阶段应优先预控地下主通道接口；待地块用地性质、地下空间和权属边界补齐后复核。。备选方案包括地下次通道、风雨连廊。比选框架为：推荐方案地下主通道，适用：必连地块；尽连地块；商业公服；交通枢纽；地下公共空间，回避：无地下空间；接口条件不足；历史保护或地下遗址限制未论证；备选方案1地下次通道，适用：尽连地块；可连地块；停车接驳；接口预留，回避：地下空间缺失；工程经济性明显不足；备选方案2风雨连廊，适用：居住类；学校医院；青年公寓；社区公服；无地下公共空间，回避：人行道净宽不足；风貌管控严格且未论证。后续可按接口可达性、投资强度、施工影响、全天候服务、运营管理和城市风貌六类指标做专家复核。"
+    },
+    {
+      "title": "方案设计核心技术要求",
+      "content": "地下主通道属于地下联通方式。核心技术要求包括：通行功能净宽不小于 5.0m，净高不小于 3.0m。；通行兼休憩或商业功能净高不小于 3.5m。；路径宜短直，减少多次弯折，节点处设置集散空间。；与车站非付费区、地块地下公共空间、防火分隔和运营界面一体化设计。。深化设计还应明确通行净宽、净高、坡道/电梯、导向标识、照明、排水、防滑、运营管理界面和应急疏散组织。"
+    },
+    {
+      "title": "风险约束与专项复核",
+      "content": "重点风险和复核建议包括：正式地块资料：用地性质、建筑面积/容积率、地下空间功能缺失时，评分和推荐只能作为站点级预评估。建议：补齐控规图则、规划条件、地块指标和地下空间说明后复核。；接口工程条件：接口位置、标高、非付费区关系、结构边界和防水节点决定推荐方式能否落地。建议：深化阶段需核对车站接口条件、地块地下室平面和竖向标高。；消防与疏散：地下或封闭连通空间涉及防火分区、排烟、疏散距离、运营管理边界。建议：方案比选时同步校核消防专项和运营分界。；无障碍与导向：步行接驳应保证连续无障碍、夜间照明、导向识别和客流组织清晰。建议：近期实施方案应先落实连续路径和标识系统。；权属与施工界面：红线、产权、管线迁改、施工组织和费用分摊可能改变方案优先级。建议：把权属边界、施工时序和投资责任纳入补齐清单。；补齐后结论漂移：当前3项缺口按保守值试算，补齐后评分等级和推荐方式可能变化。建议：保留本次预评估版本，补齐后生成复核版并对比分值变化。。上述风险不直接否定推荐方案，但会影响方案层级、接口形式、建设时序和投资责任划分。"
+    },
+    {
+      "title": "智能研究计划与能力状态",
+      "content": "系统按“规则保底、实时研究、本地知识兜底、模型增强”的策略生成研究计划，当前能力状态为：本地缓存cache，独立搜索not_configured，模型not_configured，模型联网not_configured。匹配标杆案例为城市级换乘高客流标杆。本轮研究问题包括：乐桥在TOD等级、线路换乘、客流和片区功能中承担什么角色？；周边商业、公服、居住、学校、医院、枢纽等服务对象是否形成稳定联通需求？；车站非付费区、出入口、地块地下室和竖向标高是否支持推荐联通方式？；当前项目与“城市级换乘高客流标杆”相比，哪些维度应借鉴、哪些条件需复核？；消防疏散、运营界面、管线权属、风貌景观和建设时序有哪些不确定性？；正式提资缺项会如何影响评分等级、方案优先级和实施建议？。模型可用时以模型综合研判为主，本地资料作为证据弹药；未连接模型时需用户确认后才使用离线兜底。"
+    },
+    {
+      "title": "证据包与来源置信度",
+      "content": "本轮证据包模式为offline_cache，共收集23条证据，其中缓存23条、实时0条。代表性证据包括：（核心工作思路，最优先）互联互通智能体研发工作方案0318.pptx / 第4页（（核心工作思路，最优先）互联互通智能体研发工作方案0318.pptx，置信度0.86，缓存）；20231128苏州市轨道交通站城融合设计导则.pdf / 第5页（20231128苏州市轨道交通站城融合设计导则.pdf，置信度0.86，缓存）；20231128苏州市轨道交通站城融合设计导则.pdf / 第3页（20231128苏州市轨道交通站城融合设计导则.pdf，置信度0.86，缓存）；苏州轨道交通站点周边地下公共联通空间设计细则-结题评审修改稿.docx / 表格 1（苏州轨道交通站点周边地下公共联通空间设计细则-结题评审修改稿.docx，置信度0.86，缓存）；苏州轨道交通4号线清树湾站东南象限青年公寓地块与车站互联互通必要性评估与设计方案报告.docx / 段落 50（苏州轨道交通4号线清树湾站东南象限青年公寓地块与车站互联互通必要性评估与设计方案报告.docx，置信度0.86，缓存）；苏州轨道交通4号线清树湾站东南象限青年公寓地块与车站互联互通必要性评估与设计方案报告.docx / 段落 56（苏州轨道交通4号线清树湾站东南象限青年公寓地块与车站互联互通必要性评估与设计方案报告.docx，置信度0.86，缓存）；苏州轨道交通6号线金家堰站东北象限邻里中心地块与车站互联互通必要性评估与设计方案报告.docx / 段落 55（苏州轨道交通6号线金家堰站东北象限邻里中心地块与车站互联互通必要性评估与设计方案报告.docx，置信度0.86，缓存）；规则评分与等级（评价因子赋值明细表.xlsx / 后端规则引擎，置信度1.0，缓存）；乐桥客流线索（每站每月日均进站.xlsx：2025-11日均进站，置信度0.92，缓存）；乐桥出入口与联通接口（苏州地铁运营站点出入口、联通接口情况梳理统计表20260128.xlsx，置信度0.9，缓存）。证据优先级为项目正式输入/规则源、本地标杆缓存、独立搜索、模型联网低置信补充；未被印证的外部信息只作为复核线索。"
+    },
+    {
+      "title": "模型导向多维研判",
+      "content": "尚未连接可用模型。系统已准备研究计划和本地证据包，但不会自动使用离线兜底生成综合研判。动态维度研判包括：。不确定性包括：未检测到可用模型或模型调用失败。；需要用户确认后，才会使用本地知识库和五类标杆案例缓存生成离线兜底研判。。人工复核问题包括：是否连接模型后重新运行评估？；是否确认使用离线兜底，由本地资料提供研判弹药？。上述模型导向研判以模型为最终综合判断，规则评分作为基线和差异检查坐标保留。"
+    },
+    {
+      "title": "模型主导综合研判",
+      "content": "模型主结论为：可连地块，推荐方式为地下主通道。置信度约为0.05。判断理由：尚未连接可用模型。系统已准备研究计划和本地证据包，但不会自动使用离线兜底生成综合研判。差异状态：aligned；复核标签：依据充分；依据不足。"
+    },
+    {
+      "title": "资料补齐与复核路径",
+      "content": "资料完整性状态：未提供具体地块用地性质；运营表中的地块名称和周边配套已作为背景线索入库，但不能等同正式用地功能评分。；未提供建筑面积、用地面积、容积率或开发强度分档，当前按保守 1 分临时试算。；运营表已识别联通形式：地下通道；但未提供地块地下空间功能、开放属性和接口标高，暂不作为地下空间因子正式赋值。。建议在方案深化前补齐站点客流、接口标高、出入口位置、地下空间功能、建设时序和特殊约束条件。补齐后应重新运行评分，并输出补齐前后等级、推荐方式和关键因子变化。"
+    },
+    {
+      "title": "实施时序与协同建议",
+      "content": "近期建议先形成可落地的步行接驳、导向标识、接口预留和资料补齐清单；中期结合地块方案、地下空间和接口标高做工程可行性比选；远期在片区更新或地块开发同步阶段推动站城一体化连通、运营管理界面和投资责任机制。责任协同建议覆盖轨道运营、规划设计、地块开发主体、道路/市政/管线单位和消防审查单位。"
+    },
+    {
+      "title": "LLM综合判断框架",
+      "content": "后续接入其他LLM时，建议把本次后端结果作为规则基线、证据包和差异检查输入，LLM负责最终综合研判、方案复核和专家式建议。输入应包括项目事实、引用依据、四维评分拆解、推荐与备选方案、风险复核点和待补齐资料。建议输出结构为：综合判断结论、主要依据与引用来源、推荐方案适用性说明、备选方案触发条件、风险与需补齐资料、近期/中期/远期实施建议、人工复核问题清单。模型可以在明确说明理由、证据和复核标签的前提下覆盖规则等级或推荐方案；规则评分作为基线和差异检查坐标保留。模型不得把缺失资料补成确定事实；所有新增判断应标注依据、置信度和需人工确认的问题。"
+    }
+  ]
+}

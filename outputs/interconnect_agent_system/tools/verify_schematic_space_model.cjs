@@ -61,6 +61,10 @@ assert.deepEqual(
 );
 assert.equal(spaceModel.spaceTypeLabel(normalized.spaceType), "地下");
 assert.equal(spaceModel.floorSummary(normalized), "地上6层 / 地下2层");
+const undergroundDisplay = spaceModel.floorDisplay(normalized);
+assert.equal(undergroundDisplay.activeFloors, 2, "underground display should use underground floor count");
+assert.equal(undergroundDisplay.bandCount, 2, "two underground floors should render two floor bands");
+assert.equal(undergroundDisplay.label, "地下2层", "floor display label should name active underground floors");
 
 const overLimit = spaceModel.normalizeSpatialItem({
   spaceType: "ground",
@@ -68,6 +72,19 @@ const overLimit = spaceModel.normalizeSpatialItem({
   undergroundFloors: 2
 });
 assert.equal(overLimit.groundFloors, 30, "above-ground floors should be capped at 30");
+const overLimitDisplay = spaceModel.floorDisplay(overLimit);
+assert.equal(overLimitDisplay.activeFloors, 30, "floor display should preserve exact capped floor count");
+assert.equal(overLimitDisplay.bandCount, 10, "tall floor counts should render grouped floor bands");
+assert.equal(overLimitDisplay.groupSize, 3, "30 floors should group into ten three-floor bands");
+assert.equal(overLimitDisplay.grouped, true, "grouped flag should be true for tall floor counts");
+
+const zeroGround = spaceModel.floorDisplay({
+  spaceType: "ground",
+  groundFloors: 0,
+  undergroundFloors: 0
+});
+assert.equal(zeroGround.activeFloors, 0, "zero-floor items should keep exact active floor count");
+assert.equal(zeroGround.visualFloors, 1, "zero-floor items should still keep a minimal visual prism height");
 
 const legacyGeometry = JSON.parse(fs.readFileSync(path.join(fixtureRoot, "legacy_geometry.json"), "utf8"));
 const normalizedLegacy = spaceModel.normalizeGeometryV2(legacyGeometry);
@@ -89,6 +106,8 @@ assert.equal(normalizedV2.viewState.pitch, 42, "v2 view state should be preserve
 
 assert.match(html, /id="groundFloorsInput"[^>]*max="30"/, "ground floor input should cap at 30 floors");
 assert.match(html, /spaceModel\.normalizeGeometryV2\(geometry\)/, "schematic page should normalize geometry through the shared model");
+assert.match(html, /spaceModel\.floorDisplay\(item\)/, "schematic rendering should use shared floor display calculations");
+assert.match(html, /floorBands: options\.floorBands \?\? display\.bandCount/, "3D prism rendering should use actual floor band counts");
 assert.match(saveBlock, /ensureGeometryV2\(\)/, "saving should normalize geometry before POST");
 assert.match(saveBlock, /JSON\.stringify\(geometry\)/, "saving should persist normalized geometry");
 assert.doesNotMatch(html, /data-draw-tool="underground"/, "underground outline should not remain a separate drawing tool");

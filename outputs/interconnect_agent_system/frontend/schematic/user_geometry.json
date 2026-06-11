@@ -183,5 +183,13 @@
       ],
       "className": "building"
     }
-  ]
+  ],
+  "owner": {
+    "ownerId": "anon-4214e6989ab6",
+    "ownerType": "anonymous",
+    "accountMode": "local_anonymous",
+    "scope": "local-workstation",
+    "action": "schematic_geometry",
+    "recordedAt": "2026-06-06T07:27:30Z"
+  }
 }

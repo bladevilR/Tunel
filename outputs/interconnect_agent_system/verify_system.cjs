@@ -97,7 +97,7 @@ async function main() {
   await page.click("#exportBtn");
   await downloadPromise;
   await page.waitForFunction(() => {
-    return document.querySelectorAll("#exportFiles a").length >= 5;
+    return document.querySelectorAll("#exportFiles a").length >= 2;
   }, null, { timeout: 10000 });
 
   await page.click('[data-view-link="dashboard"]');
@@ -168,7 +168,7 @@ async function main() {
       && summary.hasRecommendation
       && !summary.legacyWordGapVisible
       && Boolean(summary.savedProject)
-      && summary.exportFileCount >= 5
+      && summary.exportFileCount >= 2
       && summary.knowledgeResultCount >= 1
       && summary.backlogCount >= 1
       && summary.exportHistoryCount >= 1

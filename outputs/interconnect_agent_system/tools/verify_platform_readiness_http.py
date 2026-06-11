@@ -66,6 +66,7 @@ def assert_capabilities(payload: dict) -> None:
     for key in ("generatedImage", "accounts", "adminStationOutlines", "deployment"):
         require(key in capabilities, f"missing capability {key}", capabilities)
         require("enabled" in capabilities[key], f"capability should expose enabled flag: {key}", capabilities[key])
+    require("validation" in capabilities.get("deployment", {}), "deployment capability should expose validation summary", capabilities.get("deployment"))
 
 
 def main() -> int:
@@ -86,6 +87,7 @@ def main() -> int:
         assert_capabilities(http_json(f"{base}/api/capabilities"))
         bootstrap = http_json(f"{base}/api/bootstrap")
         assert_capabilities(bootstrap)
+        require("stationMemory" in bootstrap, "bootstrap should expose station memory records", bootstrap.keys())
 
         identity = http_json(f"{base}/api/identity")
         require(identity.get("ok") is True, "identity endpoint should succeed", identity)
@@ -103,6 +105,9 @@ def main() -> int:
             "generated image endpoint should return structured not_configured",
             image_response,
         )
+
+        memory_response = http_json(f"{base}/api/station-memory?station=Platform%20Readiness%20HTTP%20Test%20Station")
+        require(memory_response.get("ok") is True, "station memory list endpoint should succeed", memory_response)
 
         station_name = "Platform Readiness HTTP Test Station"
         record_id = "admin-outline-http-test"

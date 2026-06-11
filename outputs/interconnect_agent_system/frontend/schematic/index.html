@@ -799,6 +799,7 @@
     let drawingPoints = [];
     let drawingPreviewPoint = null;
     let drawingOverlay = null;
+    let drawingPreviewOverlay = null;
     let selectedDrawObject = null;
     let isDrawingInteractionLocked = false;
     let buildingSerial = 0;
@@ -848,10 +849,7 @@
     }
 
     function activeFloorsFor(item) {
-      const normalized = normalizeSpatialItem(item);
-      return normalized.spaceType === "underground"
-        ? Math.max(1, normalized.undergroundFloors)
-        : Math.max(1, normalized.groundFloors);
+      return spaceModel.floorDisplay(item).visualFloors;
     }
 
     function recommendedSpaceType(record) {
@@ -1214,7 +1212,10 @@
         name: selected ? selected.name : "邻里中心",
         stroke: "#111827",
         fill: "#ffffff",
-        path: selected ? selected.path : []
+        path: selected ? selected.path : [],
+        spaceType: selected ? selected.spaceType : "ground",
+        groundFloors: selected ? selected.groundFloors : 4,
+        undergroundFloors: selected ? selected.undergroundFloors : 1
       };
     }
 
@@ -1358,6 +1359,52 @@
       ctx.restore();
     }
 
+    function pixelCentroid(points) {
+      if (!points || points.length === 0) {
+        return { x: 0, y: 0 };
+      }
+      const sum = points.reduce((acc, point) => ({
+        x: acc.x + point.x,
+        y: acc.y + point.y
+      }), { x: 0, y: 0 });
+      return {
+        x: sum.x / points.length,
+        y: sum.y / points.length
+      };
+    }
+
+    function drawPrismFloorLabel(ctx, points, options) {
+      if (!options.floorLabel) {
+        return;
+      }
+      const top = points.map((point) => ({
+        x: point.x + options.offsetX,
+        y: point.y + options.offsetY
+      }));
+      const center = pixelCentroid(top);
+      ctx.save();
+      ctx.font = "700 12px Microsoft YaHei, Arial, sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      const paddingX = 8;
+      const paddingY = 4;
+      const metrics = ctx.measureText(options.floorLabel);
+      const width = Math.ceil(metrics.width + paddingX * 2);
+      const height = 22;
+      const x = center.x - width / 2;
+      const y = center.y - height / 2 - 4;
+      ctx.fillStyle = "rgba(255, 255, 255, 0.88)";
+      ctx.strokeStyle = "rgba(17, 24, 39, 0.38)";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.roundRect(x, y, width, height, 6);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = options.floorLabelColor || "rgba(17, 24, 39, 0.86)";
+      ctx.fillText(options.floorLabel, center.x, y + height / 2 + paddingY * 0.08);
+      ctx.restore();
+    }
+
     function drawPrism(ctx, points, options) {
       if (!points || points.length < 3) {
         return;
@@ -1391,10 +1438,14 @@
       ctx.fill(topShape);
       ctx.stroke(topShape);
 
-      if (options.floorLines) {
+      if (options.floorLines || options.floorBands) {
+        const bandCount = Math.max(0, Math.round(options.floorBands || 0));
+        const grouped = Boolean(options.floorGrouped);
         ctx.strokeStyle = options.floorStroke;
-        ctx.lineWidth = 1.1;
-        for (let step = 0.25; step < 1; step += 0.25) {
+        ctx.lineWidth = grouped ? 1.35 : 1.1;
+        ctx.setLineDash(grouped ? [5, 5] : []);
+        for (let index = 1; index < bandCount; index += 1) {
+          const step = index / bandCount;
           ctx.beginPath();
           points.forEach((point, index) => {
             const x = point.x + options.offsetX * step;
@@ -1409,10 +1460,12 @@
           ctx.stroke();
         }
       }
+      drawPrismFloorLabel(ctx, points, options);
       ctx.restore();
     }
 
     function drawSpacePrism(ctx, points, item, options) {
+      const display = spaceModel.floorDisplay(item);
       const projection = spaceModel.volumeProjection({
         spaceType: item?.spaceType,
         angleDegrees: options.angleDegrees ?? modelExtrudeAngle,
@@ -1423,6 +1476,9 @@
         offsetX: projection.offsetX,
         offsetY: projection.offsetY,
         dash: projection.dashed ? [9, 6] : [],
+        floorBands: options.floorBands ?? display.bandCount,
+        floorGrouped: display.grouped,
+        floorLabel: options.floorLabel === false ? "" : (options.floorLabel || display.label),
         lineWidth: options.lineWidth || 2
       });
     }
@@ -1756,6 +1812,10 @@
       if (drawingOverlay) {
         map.remove(drawingOverlay);
         drawingOverlay = null;
+      }
+      if (drawingPreviewOverlay) {
+        map.remove(drawingPreviewOverlay);
+        drawingPreviewOverlay = null;
       }
     }
 
@@ -2365,22 +2425,20 @@
         return;
       }
       const style = drawStyle(activeDrawTool);
-      const previewPath = drawingPreviewPoint
-        ? [...drawingPoints, drawingPreviewPoint]
-        : drawingPoints;
-      if (activeDrawTool === "channel" || previewPath.length < 3) {
+      const committedPath = drawingPoints.slice();
+      if (activeDrawTool === "channel" || committedPath.length < 3) {
         drawingOverlay = new AMap.Polyline({
-          path: previewPath,
+          path: committedPath,
           strokeColor: style.strokeColor,
           strokeWeight: style.strokeWeight || 4,
-          strokeOpacity: 0.95,
+          strokeOpacity: 1,
           strokeStyle: style.strokeStyle || "solid",
           strokeDasharray: style.strokeDasharray,
           zIndex: 230
         });
       } else {
         drawingOverlay = new AMap.Polygon({
-          path: previewPath,
+          path: committedPath,
           strokeColor: style.strokeColor,
           strokeWeight: style.strokeWeight || 4,
           strokeOpacity: 1,
@@ -2392,6 +2450,31 @@
         });
       }
       state.map2d.add(drawingOverlay);
+      if (!drawingPreviewPoint) {
+        return;
+      }
+      const previewPath = activeDrawTool === "channel" || drawingPoints.length < 2
+        ? [drawingPoints[drawingPoints.length - 1], drawingPreviewPoint]
+        : [...drawingPoints, drawingPreviewPoint];
+      const previewCommon = {
+        path: previewPath,
+        strokeColor: style.strokeColor,
+        strokeWeight: Math.max(2, (style.strokeWeight || 4) - 1),
+        strokeOpacity: 0.70,
+        strokeStyle: "dashed",
+        strokeDasharray: [10, 8],
+        zIndex: 231
+      };
+      if (activeDrawTool === "channel" || previewPath.length < 3) {
+        drawingPreviewOverlay = new AMap.Polyline(previewCommon);
+      } else {
+        drawingPreviewOverlay = new AMap.Polygon({
+          ...previewCommon,
+          fillColor: style.fillColor || "#ffffff",
+          fillOpacity: Math.min(0.10, style.fillOpacity ?? 0.10)
+        });
+      }
+      state.map2d.add(drawingPreviewOverlay);
     }
 
     function updateDrawingPreviewOverlay(state, point = drawingPreviewPoint) {
@@ -3012,11 +3095,11 @@
         event.stopPropagation();
       };
       const rememberDrawingPointerMove = (event) => {
-        if (!activeDrawTool || !drawingPointerStart) {
+        if (!activeDrawTool) {
           return;
         }
         const point = drawingPointerPoint(event);
-        if (Math.hypot(point.x - drawingPointerStart.x, point.y - drawingPointerStart.y) > 4) {
+        if (drawingPointerStart && Math.hypot(point.x - drawingPointerStart.x, point.y - drawingPointerStart.y) > 4) {
           ignoreNextDrawingClick = true;
         }
         if (activeDrawTool && activeDrawTool !== "exit" && drawingPoints.length > 0) {
@@ -3024,8 +3107,10 @@
           const pixel = new AMap.Pixel(point.x - rect.left, point.y - rect.top);
           updateDrawingPreviewOverlay(state, lngLatToArray(map2d.containerToLngLat(pixel)));
         }
-        event.preventDefault();
-        event.stopPropagation();
+        if (drawingPointerStart || drawingPoints.length > 0) {
+          event.preventDefault();
+          event.stopPropagation();
+        }
       };
       ["pointerdown", "mousedown", "touchstart"].forEach((eventName) => {
         mapContainer.addEventListener(eventName, rememberDrawingPointerStart, { capture: true, passive: false });
@@ -3240,7 +3325,10 @@
         map2d,
         map3d,
         state,
-        geometry,
+        get geometry() {
+          ensureGeometryV2();
+          return geometry;
+        },
         saveUserGeometry,
         exportPng,
         getSelectedBuilding,

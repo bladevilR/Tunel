@@ -113,15 +113,17 @@ def main() -> None:
         "## 验证入口",
         "",
         "```powershell",
-        "$env:NODE_PATH='C:\\Users\\R\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\node_modules'",
+        "$env:NODE_PATH='C:\\Users\\R\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\node_modules\\.pnpm\\node_modules;C:\\Users\\R\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\node_modules'",
         "& 'C:\\Users\\R\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe' .\\verify_system.cjs",
         "& 'C:\\Users\\R\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe' .\\tools\\seed_station_projects.py",
         "& 'C:\\Users\\R\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe' .\\tools\\verify_station_precheck.cjs",
         "& 'C:\\Users\\R\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe' .\\tools\\verify_report_richness.cjs",
+        "& 'C:\\Users\\R\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe' .\\tools\\verify_delivery_package.cjs",
         "```",
         "",
     ])
-    TARGET.write_text("\n".join(lines), encoding="utf-8")
+    with TARGET.open("w", encoding="utf-8", newline="\n") as handle:
+        handle.write("\n".join(lines).rstrip() + "\n")
     print(TARGET.relative_to(ROOT).as_posix())
 
 

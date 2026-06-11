@@ -1,8 +1,6 @@
 ## Purpose
 Define schematic geometry authoring, multi-object editing, unified spatial items, 3D view control, and downloadable PNG export behavior.
-
 ## Requirements
-
 ### Requirement: Multi-object schematic geometry
 The system SHALL support multiple parcels, station outlines, channels, exits, and spatial items in one schematic project using stable object IDs.
 
@@ -26,11 +24,19 @@ The schematic page SHALL allow users to select and delete specific drawn parcels
 - **THEN** the drawing controls are hidden or minimized while the 2D and 3D map canvases remain usable
 
 ### Requirement: Live drawing guidance
-The schematic page SHALL show a temporary guide line or preview shape from the last confirmed point to the current mouse position while a drawing operation is active.
+The schematic page SHALL show a temporary guide line or preview shape from the last confirmed point to the current mouse position while a drawing operation is active, including after the mouse button has been released.
 
 #### Scenario: Preview second point before confirmation
-- **WHEN** a user has placed the first point of a line or polygon and moves the mouse before clicking the second point
-- **THEN** the page displays a temporary guide segment that becomes a solid committed segment only after the user confirms the point
+- **WHEN** a user has clicked the first point of a line or polygon and then moves the mouse without holding any button
+- **THEN** the page displays a temporary guide segment from the confirmed point to the current cursor position, and the segment becomes committed only after the user clicks the next point
+
+#### Scenario: Preview polygon closure while adding points
+- **WHEN** a user has placed at least two points for a polygon and moves the cursor before confirming the next point
+- **THEN** the page displays a temporary preview shape using the cursor position while keeping already confirmed edges visually stable
+
+#### Scenario: Clear preview after completion or cancel
+- **WHEN** a user completes, cancels, or switches away from the active drawing tool
+- **THEN** the temporary preview overlay is removed and no stale guide line remains on either map
 
 ### Requirement: Unified spatial item model
 Buildings, ground spaces, and underground spaces SHALL use one normalized spatial item model with `spaceType`, `groundFloors`, `undergroundFloors`, geometry path, and 3D rendering metadata.
@@ -42,6 +48,14 @@ Buildings, ground spaces, and underground spaces SHALL use one normalized spatia
 #### Scenario: Enforce floor limits
 - **WHEN** a user enters an above-ground floor count greater than 30
 - **THEN** the system clamps or rejects the value so the saved spatial item never exceeds 30 above-ground floors
+
+#### Scenario: Render floor count visibly
+- **WHEN** a spatial item has configured above-ground or underground floor counts and custom 3D blocks are visible
+- **THEN** the 3D overlay and exported PNG show clear layer bands or grouped floor markers plus a text label that matches the saved `groundFloors` and `undergroundFloors` values
+
+#### Scenario: Preserve floor values through save and export
+- **WHEN** a user edits floor counts, saves the schematic, reloads it, and exports PNG
+- **THEN** the reloaded inspector, saved geometry JSON, 3D overlay, and PNG export metadata all report the same floor values
 
 ### Requirement: Adjustable 3D view
 The schematic page SHALL allow users to adjust the 3D map pitch and rotation used for inspection and export.
@@ -60,3 +74,4 @@ The schematic PNG export SHALL create a served downloadable artifact and return 
 #### Scenario: PNG export fails
 - **WHEN** the export runtime cannot create the PNG
 - **THEN** the page shows a concise actionable error and no stale success link is displayed
+

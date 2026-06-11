@@ -224,6 +224,31 @@
     return `地上${normalized.groundFloors}层 / 地下${normalized.undergroundFloors}层`;
   }
 
+  function floorDisplay(item = {}, options = {}) {
+    const normalized = normalizeSpatialItem(item);
+    const activeFloors = normalizeSpaceType(normalized.spaceType) === "underground"
+      ? normalized.undergroundFloors
+      : normalized.groundFloors;
+    const maxBands = numberInRange(options.maxBands, 10, 1, 30);
+    const bandCount = activeFloors > 0 ? Math.min(activeFloors, maxBands) : 0;
+    const groupSize = bandCount > 0 ? Math.ceil(activeFloors / bandCount) : 0;
+    const typeLabel = spaceTypeLabel(normalized.spaceType);
+    return {
+      ...normalized,
+      typeLabel,
+      activeFloors,
+      visualFloors: Math.max(1, activeFloors),
+      bandCount,
+      groupSize,
+      grouped: groupSize > 1,
+      activeLabel: `${typeLabel}${activeFloors}层`,
+      summary: floorSummary(normalized),
+      label: groupSize > 1
+        ? `${typeLabel}${activeFloors}层（每${groupSize}层一线）`
+        : `${typeLabel}${activeFloors}层`
+    };
+  }
+
   function volumeProjection({ spaceType, angleDegrees = -58, height = 44 } = {}) {
     const kind = normalizeSpaceType(spaceType);
     const radians = (Number(angleDegrees) * Math.PI) / 180;
@@ -246,6 +271,7 @@
     normalizeGeometryV2,
     spaceTypeLabel,
     floorSummary,
+    floorDisplay,
     volumeProjection
   };
 });

@@ -25,6 +25,13 @@ def main() -> None:
     placeholder = server.generated_image_placeholder({"prompt": "station connection rendering"})
     assert_true(placeholder["ok"] is False, "image API placeholder should be disabled by default", placeholder)
     assert_true(placeholder["error"]["code"] == "not_configured", "image API should return structured not_configured error", placeholder)
+    disabled_response = server.generated_image_response({"prompt": "station connection rendering"})
+    assert_true(disabled_response["ok"] is False, "image API response should be disabled by default", disabled_response)
+    assert_true(disabled_response["error"]["code"] == "not_configured", "disabled image API response should be structured", disabled_response)
+
+    validation = server.validate_server_configuration()
+    assert_true("resolved" in validation, "server validation should expose resolved config", validation)
+    assert_true(validation["resolved"]["host"], "server validation should include host", validation)
 
     identity = server.local_identity_payload()
     assert_true(identity["identity"]["type"] == "anonymous", "local identity should be anonymous", identity)
@@ -53,7 +60,7 @@ def main() -> None:
     doc = ROOT / "docs" / "deployment_server_migration.md"
     assert_true(doc.exists() and doc.stat().st_size > 500, "deployment/server migration doc should exist", doc)
     text = doc.read_text(encoding="utf-8")
-    for term in ("HOST", "PORT", "data", "exports", "AMAP_JS_KEY", "OPENAI_API_KEY", "runtime"):
+    for term in ("INTERCONNECT_HOST", "INTERCONNECT_PORT", "data", "exports", "AMAP_JS_KEY", "OPENAI_API_KEY", "runtime", "GENERATED_IMAGE_PROVIDER"):
         assert_true(term in text, f"deployment doc missing term: {term}", text[:1200])
 
     print(json.dumps({"ok": True, "capabilities": capabilities}, ensure_ascii=False, indent=2))

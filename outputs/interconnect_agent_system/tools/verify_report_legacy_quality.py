@@ -48,6 +48,11 @@ def docx_text(path: Path) -> str:
     return text
 
 
+def docx_xml(path: Path) -> str:
+    with ZipFile(path) as archive:
+        return archive.read("word/document.xml").decode("utf-8")
+
+
 def main() -> None:
     project = next(item for item in DEMOS["cases"] if item["id"] == "jinjiayan-neighborhood-center")
     result = evaluate_project(project, {"allowOfflineFallback": True, "forceOfflineFallback": True})
@@ -68,21 +73,33 @@ def main() -> None:
     files = export.get("files") or []
     formal_docx = next((Path(item["path"]) for item in files if item["filename"].endswith("-formal-report.docx")), None)
     formal_pdf = next((Path(item["path"]) for item in files if item["filename"].endswith("-formal-report.pdf")), None)
+    snapshot = export.get("snapshot") or {}
     if not formal_docx or formal_docx.stat().st_size <= 0:
         fail("formal DOCX should be exported and non-empty", files)
-    if not formal_pdf or formal_pdf.stat().st_size <= 0:
-        fail("formal PDF should be exported and non-empty", files)
+    if not snapshot.get("filename", "").endswith("-evaluation-snapshot.json"):
+        fail("evaluation snapshot should be exported as mandatory evidence", export)
+    if not Path(snapshot.get("path", "")).exists() or Path(snapshot.get("path", "")).stat().st_size <= 0:
+        fail("evaluation snapshot should be non-empty", snapshot)
+    if formal_pdf and formal_pdf.stat().st_size <= 0:
+        fail("formal PDF should be non-empty when generated", files)
 
     exported_text = docx_text(formal_docx)
     for title in EXPECTED_TITLES:
         if title not in exported_text:
             fail(f"exported DOCX is missing section title: {title}", formal_docx)
+    for term in ["评分总览", "推荐方案与备选方案", "资料补齐"]:
+        if term not in exported_text:
+            fail(f"exported DOCX is missing required structural block: {term}", formal_docx)
+    xml = docx_xml(formal_docx)
+    if xml.count("<w:tbl") < 3:
+        fail("exported DOCX should include summary, dimension, and recommendation/evidence tables", formal_docx)
 
     print(json.dumps({
         "ok": True,
         "sectionCount": len(sections),
         "docx": str(formal_docx),
-        "pdf": str(formal_pdf),
+        "pdf": str(formal_pdf) if formal_pdf else None,
+        "snapshot": snapshot.get("filename"),
     }, ensure_ascii=False, indent=2))
 
 

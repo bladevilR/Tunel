@@ -21,6 +21,9 @@ const schematicExportBlock = schematicSource.slice(
 
 assert.match(exportReportBlock, /item\.downloadUrl/, "report export links should use backend downloadUrl metadata");
 assert.match(exportReportBlock, /first\.downloadUrl/, "auto-download should use backend downloadUrl metadata");
+assert.match(exportReportBlock, /catch \(error\)/, "report export should catch backend failures");
+assert.match(exportReportBlock, /导出失败：\$\{error\.message\}/, "report export should show backend failure messages");
+assert.match(exportReportBlock, /#exportFiles"\)\.innerHTML = ""/, "report export failure should clear stale file links");
 assert.match(exportHistoryBlock, /item\.downloadUrl/, "export history links should use backend downloadUrl metadata");
 assert.match(schematicExportBlock, /result\.export\.downloadUrl|result\.downloadUrl/, "schematic PNG success should use backend downloadUrl metadata");
 assert.doesNotMatch(schematicExportBlock, /outputPath\.split/, "schematic PNG UI should not derive links from absolute outputPath");

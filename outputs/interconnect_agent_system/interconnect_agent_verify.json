@@ -7,11 +7,11 @@
     "level": "尽连地块",
     "type": "地下主通道",
     "completeness": "6/6",
-    "projectCount": "256 个项目",
-    "savedProject": "金家堰邻里中心 / 尽连地块",
-    "exportPath": "5 个文件已生成",
-    "exportFileCount": 5,
-    "sectionCount": 1,
+    "projectCount": "260 个项目",
+    "savedProject": "金家堰邻里中心 / 未评估",
+    "exportPath": "3 个文件已生成",
+    "exportFileCount": 3,
+    "sectionCount": 7,
     "dimensionCount": 4,
     "knowledgeResultCount": 5,
     "backlogCount": 1,
@@ -23,7 +23,7 @@
   "apiChecks": {
     "sources": {
       "ok": true,
-      "count": 22,
+      "count": 23,
       "unparsed": 5
     },
     "exports": {
@@ -32,12 +32,12 @@
     },
     "deliveryManifest": {
       "ok": true,
-      "totalFiles": 49,
-      "totalSize": 8587116,
+      "totalFiles": 45,
+      "totalSize": 7903536,
       "groups": [
         {
           "id": "runtime",
-          "count": 10
+          "count": 11
         },
         {
           "id": "docs",
@@ -45,7 +45,7 @@
         },
         {
           "id": "screenshots",
-          "count": 5
+          "count": 0
         },
         {
           "id": "mockups",
@@ -60,7 +60,7 @@
     "deliveryPackage": {
       "ok": true,
       "contentType": "application/zip",
-      "size": 8045268,
+      "size": 7181762,
       "signature": "504b"
     },
     "exportHardening": {

@@ -1084,6 +1084,7 @@ def compact_station_context(station_context: dict) -> dict:
     operations = station_context.get("operations") or {}
     amenities = station_context.get("amenities") or {}
     ridership = station_context.get("ridership") or {}
+    forecast = station_context.get("ridershipForecast") or {}
     nearby = amenities.get("nearby") or {}
     nearby_values = []
     for values in nearby.values():
@@ -1093,6 +1094,7 @@ def compact_station_context(station_context: dict) -> dict:
         "dailyInbound": station_context.get("dailyInbound"),
         "dailyInboundSource": station_context.get("dailyInboundSource"),
         "averageDailyInbound": ridership.get("averageDailyInbound"),
+        "ridershipForecast": forecast,
         "exitCount": operations.get("exitCount"),
         "connectionForms": operations.get("connectionForms") or [],
         "issueCount": operations.get("issueCount") or 0,
@@ -1191,18 +1193,44 @@ def section_content(sections: list[dict], title_part: str) -> str:
     return ""
 
 
+def report_forecast_notice(station_context: dict) -> str:
+    forecast = station_context.get("ridershipForecast") or {}
+    horizons = forecast.get("horizons") or []
+    if not horizons:
+        return "预测客流：未匹配到0528既有线路客流预测数据，后续需补充远期全日客流、方向分布和高峰组织校核。"
+    source = forecast.get("source") or "0528既有线路客流预测数据.xls"
+    line_text = "/".join(str(item) for item in forecast.get("lines") or [] if item)
+    horizon_parts = []
+    for item in horizons[:3]:
+        year = item.get("horizonYear") or "远期"
+        boarding = item.get("boardingTotal")
+        alighting = item.get("alightingTotal")
+        horizon_parts.append(f"{year}年预测上车{boarding:.0f}人次、下车{alighting:.0f}人次")
+    direction = ""
+    first_direction = ((horizons[0].get("directions") or [{}])[0] or {}) if horizons else {}
+    if first_direction.get("directionLabel"):
+        direction = f"；方向样本：{first_direction.get('directionLabel')}"
+    line_clause = f"{line_text}号线" if line_text else "匹配线路"
+    return (
+        f"预测客流补充：已匹配{source}（{line_clause}），"
+        f"{'；'.join(horizon_parts)}{direction}。"
+        "该数据为未来全日客流预测，仅用于研判远期通道弹性、接口预留和客流方向组织，不作为当前实测日均进站值。"
+    )
+
+
 def report_ridership_notice(station_context: dict) -> str:
     daily = station_context.get("dailyInbound")
     source = station_context.get("dailyInboundSource") or "每站每月日均进站.xlsx"
+    forecast_notice = report_forecast_notice(station_context)
     if isinstance(daily, (int, float)):
         return (
             f"客流判断影响：已匹配{source}，日均进站约{daily:.0f}人次/日；该指标用于判断联通设施的服务强度、"
             "全天候接驳必要性、通道宽度弹性和高峰组织压力，但不单独决定是否联通，仍需与站点能级、周边功能、"
-            "接口成熟度和实施条件共同研判。"
+            f"接口成熟度和实施条件共同研判。{forecast_notice}"
         )
     return (
         "客流判断影响：现阶段未匹配到可直接引用的每站每月日均进站.xlsx记录，客流仅能作为待补齐项；"
-        "在正式决策前应补充站点客流、方向分布和高峰时段数据，再复核通道尺度和实施优先级。"
+        f"在正式决策前应补充站点客流、方向分布和高峰时段数据，再复核通道尺度和实施优先级。{forecast_notice}"
     )
 
 

@@ -1039,6 +1039,19 @@ label {
   line-height: 1.35;
 }
 
+.station-memory-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 0 14px 14px;
+}
+
+.station-memory-actions small {
+  color: var(--muted);
+  font-size: 12px;
+}
+
 .rec-title {
   display: flex;
   align-items: baseline;

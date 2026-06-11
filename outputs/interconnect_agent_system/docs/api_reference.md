@@ -18,6 +18,8 @@ http://127.0.0.1:8765
 - `rules`：联通方式库与推荐规则。
 - `stations`：TOD 站点库。
 - `ridership`：2025年月度日均进站客流库。
+- `ridershipForecast`：0528既有线路全日客流预测库，作为未来客流证据，不覆盖现状日均进站。
+- `stationMemory`：本地站点记忆库，包含别名、上下文修正和可复用站体轮廓摘要。
 - `stationOperations`：出入口、联通接口、建设状态和问题摘要。
 - `stationAmenities`：运营公司202604出入口开放与周边配套。
 - `inputSchema`：标准输入字段。
@@ -127,13 +129,25 @@ http://127.0.0.1:8765
 
 根据传入项目数据或 `projectId` 生成交付文件。后端会重新调用 `/api/evaluate` 同一套规则和模型主导研判链路计算评分、等级、推荐方式和报告章节；前端传入的历史 `result` 仅兼容旧调用中的 `result.project`，其中的评分和结论不会被采信。请求体同样支持 `researchOptions`。
 
-- JSON 评估快照，包含 `modelJudgement`、`modelRuleDifference`、`modelQuality`、`diagramBrief`、`reportModes` 和 `llmReviewContext`。
-- 正式报告 Word。
-- 正式报告 PDF（可转换时生成）。
+- JSON 评估快照，包含 `modelJudgement`、`modelRuleDifference`、`modelQuality`、`diagramBrief`、`reportModes` 和 `llmReviewContext`。该快照为强制产物，会出现在 `files[]` 和 `snapshot` 字段中。
+- 正式报告 Word。该 DOCX 为强制产物，生成失败时 `/api/export` 返回显式错误，不返回空下载链接。
+- 正式报告 PDF（设置 `INTERCONNECT_EXPORT_PDF=1` 或 `EXPORT_PDF=1` 且本机具备转换能力时生成）。
 - 评分明细 Word。
-- 评分明细 PDF（可转换时生成）。
+- 评分明细 PDF（设置 PDF 转换开关且可转换时生成）。
 
 响应中的 `files[].relativePath` 可通过 `/exports/...` 下载。
+
+## GET /api/station-memory
+
+返回本地站点记忆记录。可用 `station`、`stationName` 或 `q` 过滤站名/别名。管理员维护的站体轮廓会映射成只读虚拟 memory 记录，便于统一应用。
+
+## POST /api/station-memory
+
+保存站点记忆记录，包含 `identity`、`context`、`schematic`、`notes`、`fieldSources` 和 `provenance`。再次保存同一站点会递增 `version`。
+
+## POST /api/station-memory/apply
+
+将站点记忆显式应用到项目和可选 schematic geometry，并返回 `stationMemorySnapshot`，其中包含 `sourceMemoryId`、`sourceVersion`、`appliedAt` 和 `appliedFields`。未显式应用时，前端自动填充仍会保留用户手动覆盖字段。
 
 ## GET /exports/{filename}
 
@@ -144,14 +158,25 @@ http://127.0.0.1:8765
 ### GET /api/capabilities
 
 Returns explicit capability flags for generated images, accounts, administrator station outlines, and deployment/runtime status. Each item includes at least `enabled` and `mode`.
+`deployment.validation` reports resolved host/port, writable data/export paths, generated-image provider consistency, account mode, and optional PDF status.
 
 ### GET /api/identity
 
-Returns the local anonymous identity contract. This keeps saved local data usable before account login is introduced and provides a stable owner id for future migration.
+Returns the local anonymous identity contract by default. When `INTERCONNECT_ACCOUNT_MODE` is enabled, returns a local user owner record while preserving local-first usage.
 
 ### POST /api/generated-images
 
-Placeholder endpoint for future generated-image integration. When `GENERATED_IMAGE_API_ENABLED=1` and `OPENAI_API_KEY` are not configured, the endpoint returns a structured `not_configured` error.
+Generated-image endpoint with three structured states:
+
+- disabled: returns `not_configured` and does not affect schematic PNG export.
+- local provider: with `GENERATED_IMAGE_PROVIDER=local`, writes a served SVG artifact and metadata under `exports/generated-images/`.
+- provider failure: configured providers without an installed adapter return `provider_failure` and do not overwrite existing artifacts.
+
+Successful responses include `image.downloadUrl`, `metadataFile.downloadUrl`, provider metadata, and owner metadata.
+
+### POST /api/ownership/migrate
+
+Migrates a saved anonymous project to the active local account owner. The project id and history are retained, while `owner` and `ownerMigrations[]` record the previous owner and migration timestamp.
 
 ### GET /api/admin/station-outlines
 

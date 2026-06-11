@@ -33,18 +33,20 @@ def main() -> int:
 
     expected_suffixes = [
         "-formal-report.docx",
+        "-evaluation-snapshot.json",
         "-score-detail.docx",
     ]
     for suffix in expected_suffixes:
         if not any(name.endswith(suffix) for name in filenames):
             raise AssertionError(f"missing export ending with {suffix}: {filenames}")
 
-    forbidden = (".md", ".json", ".csv")
+    forbidden = (".md", ".csv")
     bad = [name for name in filenames if name.endswith(forbidden)]
     if bad:
         raise AssertionError(f"unexpected machine-readable exports returned: {bad}")
 
     assert_download_metadata(export)
+    assert_download_metadata(export.get("snapshot") or {})
     for item in files:
         assert_download_metadata(item)
         path = ROOT / item["relativePath"]

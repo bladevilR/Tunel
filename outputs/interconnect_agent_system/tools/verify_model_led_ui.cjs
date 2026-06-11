@@ -44,6 +44,8 @@ async function main() {
       && document.querySelector("#modelJudgementTitle").textContent.includes("模型建议");
   }, null, { timeout: 15000 });
 
+  await page.click('[data-view-link="dashboard"]');
+  await page.waitForFunction(() => document.querySelector(".view.active")?.id === "dashboard", null, { timeout: 5000 });
   await page.waitForFunction(() => {
     const text = document.body.innerText;
     return text.includes("模型主导研判")

@@ -55,6 +55,19 @@ def assert_file_metadata(item: dict) -> None:
         raise AssertionError(f"size should be positive: {item}")
 
 
+def assert_served_file(base: str, item: dict) -> None:
+    with urlopen(f"{base}{item['downloadUrl']}", timeout=20) as response:
+        data = response.read()
+        content_type = response.headers.get("Content-Type", "")
+    if not data:
+        raise AssertionError(f"served file is empty: {item}")
+    if len(data) != item["size"]:
+        raise AssertionError(f"served file size mismatch: {item['filename']} metadata={item['size']} actual={len(data)}")
+    expected_type = item.get("contentType") or ""
+    if expected_type and expected_type.split(";")[0] not in content_type:
+        raise AssertionError(f"served file content type mismatch: {item['filename']} expected={expected_type} actual={content_type}")
+
+
 def main() -> int:
     port = free_port()
     process = subprocess.Popen(
@@ -83,6 +96,7 @@ def main() -> int:
             raise AssertionError(f"export returned no files: {export_response}")
         for item in files:
             assert_file_metadata(item)
+            assert_served_file(base, item)
 
         history_response = http_json(f"{base}/api/exports")
         history = history_response.get("exports") or []
@@ -92,6 +106,7 @@ def main() -> int:
                 raise AssertionError(f"{item['filename']} missing from /api/exports history")
         for item in history[: len(files)]:
             assert_file_metadata(item)
+            assert_served_file(base, item)
     finally:
         process.terminate()
         try:

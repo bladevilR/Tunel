@@ -39,8 +39,12 @@ for (const shortcut of ["Escape", "Enter", "z", "Delete", "Backspace"]) {
 }
 
 assert.match(html, /let drawingPreviewPoint/, "drawing should track the current preview cursor point");
+assert.match(html, /let drawingPreviewOverlay/, "drawing should keep tentative preview geometry separate from committed geometry");
 assert.match(html, /function updateDrawingPreviewOverlay\(/, "drawing should render live preview overlays");
 assert.match(html, /updateDrawingPreviewOverlay\(state/, "pointer movement should refresh the live preview overlay");
+assert.match(html, /"pointermove", "mousemove", "touchmove"/, "drawing preview should listen to mouse movement after click");
+assert.match(html, /if \(!activeDrawTool\) \{[\s\S]*?return;[\s\S]*?const point = drawingPointerPoint\(event\);/, "pointer movement should not require pointerdown before computing preview point");
+assert.match(html, /drawingPointerStart && Math\.hypot/, "drag suppression should still be limited to actual pointer-drag gestures");
 
 assert.match(html, /function selectDrawObject\(/, "schematic should support selecting drawn objects");
 assert.match(html, /function deleteSelectedObject\(/, "schematic should support deleting the selected object");
