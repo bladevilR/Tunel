@@ -1,195 +1,353 @@
 {
   "meta": {
-    "name": "群力站通道示意图 2D/3D 同源校准",
+    "name": "金家堰 / 金家堰邻里中心 联通概念示意",
     "center": [
-      120.66618,
-      31.27908
+      120.76081,
+      31.294557
     ],
     "version": "2026-05-07-sync-a",
-    "linkedProjectId": "",
-    "stationName": ""
+    "stationCenter": [
+      120.759321,
+      31.293827
+    ],
+    "linkedProjectId": "jinjiayan-neighborhood-center",
+    "stationName": "金家堰"
   },
   "parcel": {
     "name": "地块红线",
     "stroke": "#e1262f",
     "fill": "#f8ed9a",
-    "path": []
+    "path": [],
+    "id": "parcel-1"
   },
   "underground": {
     "name": "地下轮廓（地下1层）",
     "stroke": "#176bd6",
-    "path": []
+    "path": [],
+    "id": "space-underground-1",
+    "spaceType": "underground",
+    "groundFloors": 0,
+    "undergroundFloors": 1,
+    "fill": "#ffffff",
+    "centerline": []
   },
   "proposedBuilding": {
-    "name": "建筑 2",
+    "id": "building-1",
+    "name": "金家堰邻里中心",
     "stroke": "#111827",
     "fill": "#ffffff",
     "path": [
       [
-        120.667059,
-        31.279271
+        120.760491,
+        31.294477
       ],
       [
-        120.668388,
-        31.279271
+        120.760991,
+        31.294477
       ],
       [
-        120.668388,
-        31.278136
+        120.760991,
+        31.294777
       ],
       [
-        120.667059,
-        31.278136
+        120.760491,
+        31.294777
       ]
-    ]
+    ],
+    "rotation": 0,
+    "extrudeAngle": -58,
+    "spaceType": "ground",
+    "groundFloors": 9,
+    "undergroundFloors": 11,
+    "centerline": []
   },
   "buildings": [
     {
       "id": "building-1",
-      "name": "建筑 1",
+      "name": "金家堰邻里中心",
       "stroke": "#111827",
       "fill": "#ffffff",
       "path": [
         [
-          120.664623,
-          31.280607
+          120.760491,
+          31.294477
         ],
         [
-          120.665731,
-          31.280607
+          120.760991,
+          31.294477
         ],
         [
-          120.665731,
-          31.279561
+          120.760991,
+          31.294777
         ],
         [
-          120.664623,
-          31.279561
+          120.760491,
+          31.294777
         ]
       ],
       "rotation": 0,
-      "extrudeAngle": -58
-    },
-    {
-      "id": "building-2",
-      "name": "建筑 2",
-      "stroke": "#111827",
-      "fill": "#ffffff",
-      "path": [
-        [
-          120.667059,
-          31.279271
-        ],
-        [
-          120.668388,
-          31.279271
-        ],
-        [
-          120.668388,
-          31.278136
-        ],
-        [
-          120.667059,
-          31.278136
-        ]
-      ],
-      "rotation": 0,
-      "extrudeAngle": -58
+      "extrudeAngle": -58,
+      "spaceType": "ground",
+      "groundFloors": 9,
+      "undergroundFloors": 11,
+      "centerline": []
     }
   ],
-  "selectedBuildingId": "building-2",
+  "selectedBuildingId": "building-1",
   "station": {
     "name": "群力地铁站",
     "stroke": "#7d3f98",
     "fill": "#8a58a5",
     "path": [],
     "body": [],
-    "exitName": "1号口",
+    "exitName": "1号出入口",
     "exitPoint": [
-      120.669717,
-      31.280229
-    ]
+      120.759651,
+      31.293987
+    ],
+    "id": "station-1",
+    "spaceType": "underground",
+    "groundFloors": 0,
+    "undergroundFloors": 2
   },
   "channel": {
-    "name": "地下通道（连接1号口）",
+    "name": "通道 1",
     "stroke": "#0b77bd",
     "fill": "#1d8ccf",
     "path": [
       [
-        120.669717,
-        31.280174
+        120.75963012440042,
+        31.29403788427401
       ],
       [
-        120.66908466151796,
-        31.28018438344743
+        120.76001178756457,
+        31.29419360078986
       ],
       [
-        120.66843319253117,
-        31.279239652988558
+        120.76028737038745,
+        31.294450520675078
       ],
       [
-        120.66834280746882,
-        31.279302347011445
+        120.76045640325225,
+        31.294536193495503
       ],
       [
-        120.66902033848206,
-        31.280273616552567
+        120.76050559674775,
+        31.294437806504497
       ],
       [
-        120.669717,
-        31.280283999999998
+        120.76035462961256,
+        31.29436347932492
+      ],
+      [
+        120.76007021243544,
+        31.294100399210137
+      ],
+      [
+        120.7596718755996,
+        31.29393611572599
       ]
     ],
     "centerline": [
       [
-        120.669717,
-        31.280229
+        120.759651,
+        31.293987
       ],
       [
-        120.6690525,
-        31.280229
+        120.760041,
+        31.294147
       ],
       [
-        120.668388,
-        31.279271
+        120.760321,
+        31.294407
+      ],
+      [
+        120.760481,
+        31.294487
       ]
-    ]
+    ],
+    "id": "channel-1",
+    "spaceType": "underground",
+    "groundFloors": 0,
+    "undergroundFloors": 1
   },
   "labels": [
     {
-      "id": "exit",
-      "text": "群力站 1号口",
+      "id": "parcel",
+      "text": "目标地块",
       "position": [
-        120.669717,
-        31.280229
+        120.760661,
+        31.294587
+      ],
+      "className": "parcel"
+    },
+    {
+      "id": "exit",
+      "text": "金家堰 1号出入口",
+      "position": [
+        120.759651,
+        31.293987
       ],
       "className": "exit"
     },
     {
-      "id": "building-1",
-      "text": "建筑 1<br>地上4层 / 地下1层",
+      "id": "parcel-2",
+      "text": "地块红线 2",
       "position": [
-        120.665177,
-        31.280084000000002
+        120.76073025000001,
+        31.2946295
       ],
-      "className": "building"
+      "className": "parcel"
     },
     {
-      "id": "building-2",
-      "text": "建筑 2<br>地上4层 / 地下1层",
+      "id": "building-1",
+      "text": "金家堰邻里中心<br>地上体块 · 地上9层 / 地下11层",
       "position": [
-        120.6677235,
-        31.278703500000002
+        120.760741,
+        31.294627
       ],
       "className": "building"
     }
   ],
+  "schemaVersion": "schematic-geometry.v2",
+  "viewState": {
+    "pitch": 75,
+    "rotation": -3,
+    "zoom": 20,
+    "center": [
+      120.76081,
+      31.294557
+    ]
+  },
+  "parcels": [
+    {
+      "name": "地块红线",
+      "stroke": "#e1262f",
+      "fill": "#f8ed9a",
+      "path": [],
+      "id": "parcel-1"
+    },
+    {
+      "id": "parcel-2",
+      "name": "地块红线 2",
+      "stroke": "#e1262f",
+      "fill": "#f8ed9a",
+      "path": [
+        [
+          120.760575,
+          31.294721
+        ],
+        [
+          120.760579,
+          31.294543
+        ],
+        [
+          120.760892,
+          31.294533
+        ],
+        [
+          120.760875,
+          31.294721
+        ]
+      ]
+    }
+  ],
+  "stationOutlines": [
+    {
+      "name": "群力地铁站",
+      "stroke": "#7d3f98",
+      "fill": "#8a58a5",
+      "path": [],
+      "body": [],
+      "exitName": "1号口",
+      "exitPoint": null,
+      "id": "station-1"
+    }
+  ],
+  "exits": [],
+  "channels": [
+    {
+      "name": "通道 1",
+      "stroke": "#0b77bd",
+      "fill": "#1d8ccf",
+      "path": [
+        [
+          120.75963012440042,
+          31.29403788427401
+        ],
+        [
+          120.76001178756457,
+          31.29419360078986
+        ],
+        [
+          120.76028737038745,
+          31.294450520675078
+        ],
+        [
+          120.76045640325225,
+          31.294536193495503
+        ],
+        [
+          120.76050559674775,
+          31.294437806504497
+        ],
+        [
+          120.76035462961256,
+          31.29436347932492
+        ],
+        [
+          120.76007021243544,
+          31.294100399210137
+        ],
+        [
+          120.7596718755996,
+          31.29393611572599
+        ]
+      ],
+      "centerline": [
+        [
+          120.759651,
+          31.293987
+        ],
+        [
+          120.760041,
+          31.294147
+        ],
+        [
+          120.760321,
+          31.294407
+        ],
+        [
+          120.760481,
+          31.294487
+        ]
+      ],
+      "id": "channel-1",
+      "spaceType": "underground",
+      "groundFloors": 0,
+      "undergroundFloors": 1
+    }
+  ],
+  "spatialItems": [
+    {
+      "name": "地下轮廓（地下1层）",
+      "stroke": "#176bd6",
+      "path": [],
+      "id": "space-underground-1",
+      "spaceType": "underground",
+      "groundFloors": 0,
+      "undergroundFloors": 1,
+      "fill": "#ffffff",
+      "centerline": []
+    }
+  ],
+  "selectedChannelId": "channel-1",
   "owner": {
     "ownerId": "anon-4214e6989ab6",
     "ownerType": "anonymous",
     "accountMode": "local_anonymous",
     "scope": "local-workstation",
     "action": "schematic_geometry",
-    "recordedAt": "2026-06-06T07:27:30Z"
+    "recordedAt": "2026-06-11T09:05:20Z"
   }
 }

@@ -2878,78 +2878,117 @@ def create_docx_report(result: dict, slug: str, stamp: str) -> Path | None:
     styles = doc.styles
     styles["Normal"].font.name = "Microsoft YaHei"
     styles["Normal"].font.size = Pt(10.5)
-    doc.add_heading(project.get("name") or "互联互通评估报告", 0)
-    doc.add_paragraph(f"地块编号：{project.get('projectCode') or '待补齐'}")
+
     raw_max = ((result.get("scoreScale") or {}).get("rawMax") or max_weighted_score())
-    doc.add_paragraph(f"综合评分（百分制）：{float(result.get('scorePercent') or 0):.2f}分")
-    doc.add_paragraph(f"原始加权分：{float(result.get('score') or 0):.4f} / {float(raw_max):.4f}")
-    doc.add_paragraph(f"联通等级：{result.get('level') or '待判定'}")
-    doc.add_paragraph(f"推荐方式：{primary}")
-    doc.add_paragraph(
-        f"数据完整度：{(result.get('dataCompleteness') or {}).get('done', 0)}/"
-        f"{(result.get('dataCompleteness') or {}).get('total', 0)}"
-    )
-
-    doc.add_heading("评分总览", level=1)
-    summary_table = doc.add_table(rows=1, cols=2)
-    summary_headers = summary_table.rows[0].cells
-    summary_headers[0].text = "项目"
-    summary_headers[1].text = "结果"
-    summary_items = [
-        ("综合评分（百分制）", f"{float(result.get('scorePercent') or 0):.2f}分"),
-        ("原始加权分", f"{float(result.get('score') or 0):.4f} / {float(raw_max):.4f}"),
-        ("联通等级", result.get("level") or "待判定"),
-        ("推荐方式", primary),
-        ("数据完整度", f"{(result.get('dataCompleteness') or {}).get('done', 0)}/{(result.get('dataCompleteness') or {}).get('total', 0)}"),
-    ]
-    for label, value in summary_items:
-        row = summary_table.add_row().cells
-        row[0].text = label
-        row[1].text = value
-
-    dimension_table = doc.add_table(rows=1, cols=5)
-    dimension_headers = dimension_table.rows[0].cells
-    dimension_headers[0].text = "评分维度"
-    dimension_headers[1].text = "加权得分"
-    dimension_headers[2].text = "主要因子取值"
-    dimension_headers[3].text = "来源依据"
-    dimension_headers[4].text = "说明"
-    for item in score_overview_rows(result):
-        row = dimension_table.add_row().cells
-        row[0].text = item["dimension"]
-        row[1].text = f"{item['score']:.4f}"
-        row[2].text = item["keyFactors"]
-        row[3].text = item["sourceBasis"]
-        row[4].text = item["note"]
-
     recommendation = result.get("recommendation") or {}
-    primary = recommendation.get("primary") or {}
+    primary_obj = recommendation.get("primary") or {}
     alternatives = recommendation.get("alternatives") or []
-    doc.add_heading("推荐方案与备选方案", level=1)
-    rec_table = doc.add_table(rows=1, cols=4)
-    rec_headers = rec_table.rows[0].cells
-    rec_headers[0].text = "类型"
-    rec_headers[1].text = "名称"
-    rec_headers[2].text = "类别"
-    rec_headers[3].text = "核心适用场景"
-    row = rec_table.add_row().cells
-    row[0].text = "推荐"
-    row[1].text = primary.get("name") or ""
-    row[2].text = primary.get("category") or ""
-    row[3].text = "、".join(primary.get("bestFor") or [])
-    for item in alternatives:
-        row = rec_table.add_row().cells
-        row[0].text = "备选"
-        row[1].text = item.get("name") or ""
-        row[2].text = item.get("category") or ""
-        row[3].text = "、".join(item.get("bestFor") or [])
+
+    # —— 封面元信息（对齐旧版：编制单位 / 编制日期 / 地块编号 / 对应站点）——
+    doc.add_heading(project.get("name") or "互联互通评估报告", 0)
+    station = project.get("station") or {}
+    station_name = str(station.get("name") or "").strip()
+    if station_name and not station_name.endswith("站"):
+        station_name += "站"
+    line = station.get("line")
+    station_full = (
+        f"苏州轨道交通{line}号线{station_name}" if line and station_name else (station_name or "待补齐")
+    )
+    report_month = "待补齐"
+    if len(str(stamp)) >= 8 and str(stamp)[:8].isdigit():
+        report_month = f"{str(stamp)[:4]}年{str(stamp)[4:6]}月"
+    doc.add_paragraph(f"报告编制单位：{project.get('reportOrg') or '苏州市轨道交通集团有限公司'}")
+    doc.add_paragraph(f"报告编制日期：{report_month}")
+    doc.add_paragraph(f"地块编号：{project.get('projectCode') or '待补齐'}")
+    doc.add_paragraph(f"对应站点：{station_full}")
 
     client_sections = result.get("clientReport") or result.get("report") or []
-    for index, section in enumerate(client_sections, 1):
-        doc.add_heading(f"{index}. {section.get('title')}", level=1)
-        doc.add_paragraph(section.get("content") or "")
-
     missing = result.get("missing") or []
+
+    # —— 目录 ——
+    toc_titles = [str(section.get("title") or "").strip() for section in client_sections if section.get("title")]
+    doc.add_heading("目录", level=1)
+    for idx, title in enumerate(toc_titles, 1):
+        doc.add_paragraph(f"{idx}  {title}")
+    if missing:
+        doc.add_paragraph(f"{len(toc_titles) + 1}  资料补齐与复核事项")
+    doc.add_page_break()
+
+    def render_score_overview() -> None:
+        # 评分总览归入“联通必要性评估结论”章节之下，对齐旧版 2.x 计算过程层次。
+        doc.add_heading("评分总览", level=2)
+        summary_table = doc.add_table(rows=1, cols=2)
+        summary_headers = summary_table.rows[0].cells
+        summary_headers[0].text = "项目"
+        summary_headers[1].text = "结果"
+        summary_items = [
+            ("综合评分（百分制）", f"{float(result.get('scorePercent') or 0):.2f}分"),
+            ("原始加权分", f"{float(result.get('score') or 0):.4f} / {float(raw_max):.4f}"),
+            ("联通等级", result.get("level") or "待判定"),
+            ("推荐方式", primary),
+            ("数据完整度", f"{(result.get('dataCompleteness') or {}).get('done', 0)}/{(result.get('dataCompleteness') or {}).get('total', 0)}"),
+        ]
+        for label, value in summary_items:
+            row = summary_table.add_row().cells
+            row[0].text = label
+            row[1].text = value
+
+        dimension_table = doc.add_table(rows=1, cols=5)
+        dimension_headers = dimension_table.rows[0].cells
+        dimension_headers[0].text = "评分维度"
+        dimension_headers[1].text = "加权得分"
+        dimension_headers[2].text = "主要因子取值"
+        dimension_headers[3].text = "来源依据"
+        dimension_headers[4].text = "说明"
+        for item in score_overview_rows(result):
+            row = dimension_table.add_row().cells
+            row[0].text = item["dimension"]
+            row[1].text = f"{item['score']:.4f}"
+            row[2].text = item["keyFactors"]
+            row[3].text = item["sourceBasis"]
+            row[4].text = item["note"]
+
+    def render_recommendation() -> None:
+        # 推荐与备选方案归入“联通方式比选与推荐方案”章节之下。
+        doc.add_heading("推荐方案与备选方案", level=2)
+        rec_table = doc.add_table(rows=1, cols=4)
+        rec_headers = rec_table.rows[0].cells
+        rec_headers[0].text = "类型"
+        rec_headers[1].text = "名称"
+        rec_headers[2].text = "类别"
+        rec_headers[3].text = "核心适用场景"
+        row = rec_table.add_row().cells
+        row[0].text = "推荐"
+        row[1].text = primary_obj.get("name") or ""
+        row[2].text = primary_obj.get("category") or ""
+        row[3].text = "、".join(primary_obj.get("bestFor") or [])
+        for item in alternatives:
+            row = rec_table.add_row().cells
+            row[0].text = "备选"
+            row[1].text = item.get("name") or ""
+            row[2].text = item.get("category") or ""
+            row[3].text = "、".join(item.get("bestFor") or [])
+
+    rendered_score = False
+    rendered_rec = False
+    for index, section in enumerate(client_sections, 1):
+        title = str(section.get("title") or "").strip()
+        doc.add_heading(f"{index} {title}", level=1)
+        content = str(section.get("content") or "")
+        blocks = [block.strip() for block in content.split("\n") if block.strip()] or [content]
+        for block in blocks:
+            doc.add_paragraph(block)
+        if not rendered_score and ("必要性" in title or "评估结论" in title):
+            render_score_overview()
+            rendered_score = True
+        if not rendered_rec and ("比选" in title or "推荐方案" in title):
+            render_recommendation()
+            rendered_rec = True
+    if not rendered_score:
+        render_score_overview()
+    if not rendered_rec:
+        render_recommendation()
+
     if missing:
         doc.add_heading("资料补齐与复核事项", level=1)
         table = doc.add_table(rows=1, cols=3)

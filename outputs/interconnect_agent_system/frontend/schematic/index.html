@@ -705,7 +705,7 @@
             <option value="underground">地下空间</option>
           </select>
           <input id="groundFloorsInput" type="number" min="0" max="30" value="4" aria-label="地上层数" title="地上层数" />
-          <input id="undergroundFloorsInput" type="number" min="0" max="12" value="1" aria-label="地下层数" title="地下层数" />
+          <input id="undergroundFloorsInput" type="number" min="0" max="30" value="1" aria-label="地下层数" title="地下层数" />
         </div>
         <button type="button" id="deleteSelectedObjectButton" class="danger">删除选中</button>
       </div>
@@ -800,10 +800,13 @@
     let drawingPreviewPoint = null;
     let drawingOverlay = null;
     let drawingPreviewOverlay = null;
+    let drawingVertexMarkers = [];
     let selectedDrawObject = null;
     let isDrawingInteractionLocked = false;
     let buildingSerial = 0;
     let channelSerial = 0;
+    let parcelSerial = 0;
+    let stationSerial = 0;
     let useCustomBuildingPrisms = true;
     let modelExtrudeAngle = -58;
     let modelExtrudeHeight = 44;
@@ -1181,6 +1184,20 @@
           undergroundFloors: 1
         }));
       });
+      if (!Array.isArray(geometry.parcels)) {
+        geometry.parcels = [];
+      }
+      if (!Array.isArray(geometry.stationOutlines)) {
+        geometry.stationOutlines = [];
+      }
+      parcelSerial = geometry.parcels.reduce((max, parcel) => {
+        const match = String(parcel.id || "").match(/parcel-(\d+)/);
+        return Math.max(max, match ? Number(match[1]) : 0);
+      }, 0);
+      stationSerial = geometry.stationOutlines.reduce((max, station) => {
+        const match = String(station.id || "").match(/station-(\d+)/);
+        return Math.max(max, match ? Number(match[1]) : 0);
+      }, 0);
       syncLegacyChannel();
       syncLegacyBuilding();
       syncBuildingLabels();
@@ -1510,8 +1527,14 @@
       const canvas = document.getElementById("overlay3d");
       const ctx = setupCanvas(canvas);
       ensureGeometryV2();
-      const parcel = projectPath(map, geometry.parcel.path || []);
-      const station = projectPath(map, geometry.station.body || []);
+      const parcels = geometry.parcels.map((parcel) => ({
+        data: parcel,
+        points: projectPath(map, parcel.path || [])
+      }));
+      const stations = geometry.stationOutlines.map((station) => ({
+        data: station,
+        points: projectPath(map, station.path || station.body || [])
+      }));
       const channels = geometry.channels.map((channel) => ({
         data: channel,
         footprint: channel.path && channel.path.length >= 3 ? projectPath(map, channel.path) : [],
@@ -1523,10 +1546,12 @@
         points: projectPath(map, building.path || [])
       }));
 
-      drawGroundPolygon(ctx, parcel, {
-        fill: "rgba(248, 237, 154, 0.20)",
-        stroke: geometry.parcel.stroke,
-        lineWidth: 5
+      parcels.forEach(({ data, points }) => {
+        drawGroundPolygon(ctx, points, {
+          fill: "rgba(248, 237, 154, 0.20)",
+          stroke: data.stroke || "#e1262f",
+          lineWidth: isSelectedDrawObject("parcel", data.id) ? 6 : 5
+        });
       });
 
       if (isConceptGeometry) {
@@ -1537,10 +1562,12 @@
             lineWidth: data.id === geometry.selectedBuildingId ? 1.6 : 1.2
           });
         });
-        drawGroundPolygon(ctx, station, {
-          fill: "rgba(138, 88, 165, 0.18)",
-          stroke: "rgba(94, 48, 119, 0.72)",
-          lineWidth: 2.2
+        stations.forEach(({ points }) => {
+          drawGroundPolygon(ctx, points, {
+            fill: "rgba(138, 88, 165, 0.18)",
+            stroke: "rgba(94, 48, 119, 0.72)",
+            lineWidth: 2.2
+          });
         });
         channels.forEach(({ line }) => {
           drawProjectedLine(ctx, line, {
@@ -1557,14 +1584,18 @@
           });
         });
       } else {
-        drawSpacePrism(ctx, station, geometry.station, {
-          angleDegrees: -58,
-          height: 22 + activeFloorsFor(geometry.station) * 4,
-          top: "rgba(188, 143, 210, 0.36)",
-          sideA: "rgba(117, 68, 145, 0.28)",
-          sideB: "rgba(154, 101, 177, 0.24)",
-          stroke: "rgba(94, 48, 119, 0.58)",
-          lineWidth: 1.7
+        stations.forEach(({ data, points }) => {
+          drawSpacePrism(ctx, points, data, {
+            angleDegrees: -58,
+            height: 22 + activeFloorsFor(data) * 4,
+            top: "rgba(188, 143, 210, 0.36)",
+            sideA: "rgba(117, 68, 145, 0.28)",
+            sideB: "rgba(154, 101, 177, 0.24)",
+            stroke: isSelectedDrawObject("station", data.id) ? "rgba(94, 48, 119, 0.92)" : "rgba(94, 48, 119, 0.58)",
+            floorLines: true,
+            floorStroke: "rgba(94, 48, 119, 0.22)",
+            lineWidth: isSelectedDrawObject("station", data.id) ? 2.4 : 1.7
+          });
         });
 
         channels.forEach(({ data, footprint, line }) => {
@@ -1817,6 +1848,25 @@
         map.remove(drawingPreviewOverlay);
         drawingPreviewOverlay = null;
       }
+      if (drawingVertexMarkers.length) {
+        map.remove(drawingVertexMarkers);
+        drawingVertexMarkers = [];
+      }
+    }
+
+    function addDrawingVertexMarkers(state) {
+      // 画线过程中把已落的点用编号圆点标出来，方便确认点位、配合撤销。
+      if (!state?.map2d || !drawingPoints.length) {
+        return;
+      }
+      drawingVertexMarkers = drawingPoints.map((point, index) => new AMap.Marker({
+        position: point,
+        content: `<div class="vertex">${index + 1}</div>`,
+        anchor: "center",
+        zIndex: 240,
+        clickable: false
+      }));
+      state.map2d.add(drawingVertexMarkers);
     }
 
     const toolNames = {
@@ -1927,6 +1977,7 @@
       if (deleteButton) deleteButton.disabled = !resolveSelectedDrawObject();
       updateSketchModeUi();
       updateSelectionInspector();
+      updateSpaceControls();
     }
 
     function isSelectedDrawObject(type, id) {
@@ -2000,13 +2051,14 @@
     function deleteSelectedObject(state) {
       const selected = resolveSelectedDrawObject();
       if (!selected) return false;
+      exitConceptGeometry();
       const object = findDrawObject(selected.type, selected.id);
       if (!object) return false;
       const removeById = (items) => items.filter((item) => item.id !== selected.id);
       if (selected.type === "parcel") {
         geometry.parcels = removeById(geometry.parcels);
         geometry.parcel = geometry.parcels[0] || { id: "parcel-1", name: "地块红线", path: [] };
-        geometry.labels = geometry.labels.filter((item) => item.id !== "parcel");
+        geometry.labels = geometry.labels.filter((item) => item.id !== selected.id && item.id !== "parcel");
       }
       if (selected.type === "station") {
         geometry.stationOutlines = removeById(geometry.stationOutlines);
@@ -2051,7 +2103,7 @@
           geometry.parcels = [];
         }
         geometry.parcel = geometry.parcels[0] || { id: "parcel-1", name: "地块红线", stroke: "#e1262f", fill: "#f8ed9a", path: [] };
-        geometry.labels = geometry.labels.filter((item) => item.id !== "parcel");
+        geometry.labels = geometry.labels.filter((item) => item.id !== (selected?.id) && item.id !== "parcel");
       }
       if (tool === "underground") {
         const selected = selectedDrawObject?.type === "spatialItem" ? findDrawObject("spatialItem", selectedDrawObject.id) : geometry.spatialItems.find((item) => item.spaceType === "underground");
@@ -2151,6 +2203,15 @@
       return getSelectedBuilding() || geometry.station || geometry.channel;
     }
 
+    function hasEditableSpatialTarget() {
+      const spatialTools = ["building", "station", "channel", "underground"];
+      if (activeDrawTool && spatialTools.includes(activeDrawTool)) {
+        return true;
+      }
+      const selected = resolveSelectedDrawObject();
+      return Boolean(selected && ["building", "station", "channel", "spatialItem"].includes(selected.type));
+    }
+
     function updateSpaceControls() {
       const target = selectedSpatialTarget();
       const typeSelect = document.getElementById("spaceTypeSelect");
@@ -2167,9 +2228,16 @@
       typeSelect.value = normalized.spaceType;
       groundInput.value = normalized.groundFloors;
       undergroundInput.value = normalized.undergroundFloors;
+      // 仅在“正在画体块类对象”或“已选中可编辑对象”时才允许改空间类型/层数，
+      // 否则禁用，避免在无选择状态下静默改到某个建筑。
+      const editable = hasEditableSpatialTarget();
+      [typeSelect, groundInput, undergroundInput].forEach((element) => {
+        element.disabled = !editable;
+      });
     }
 
     function applySpaceControlsToTarget(state) {
+      exitConceptGeometry();
       const target = selectedSpatialTarget();
       const typeSelect = document.getElementById("spaceTypeSelect");
       const groundInput = document.getElementById("groundFloorsInput");
@@ -2223,6 +2291,7 @@
     }
 
     function setModelPerspective(state, angle, height = modelExtrudeHeight) {
+      exitConceptGeometry();
       modelExtrudeAngle = Number(angle);
       modelExtrudeHeight = Math.max(18, Math.min(82, Number(height) || modelExtrudeHeight));
       renderCanvas3d(state.map3d);
@@ -2301,6 +2370,7 @@
         Number(((start[0] + end[0]) / 2).toFixed(8)),
         Number((start[1]).toFixed(8))
       ];
+      exitConceptGeometry();
       const channel = addChannel({
         centerline: [start, mid, [Number(end[0].toFixed(8)), Number(end[1].toFixed(8))]],
         spaceType: building.spaceType || currentSpaceType(),
@@ -2329,8 +2399,9 @@
         dragEnable: !locked,
         keyboardEnable: !locked,
         doubleClickZoom: !locked,
-        scrollWheel: !locked,
-        touchZoom: !locked
+        // 画图时仍允许缩放，方便对准要画的点位；只锁拖拽与双击缩放
+        scrollWheel: true,
+        touchZoom: true
       });
     }
 
@@ -2450,6 +2521,7 @@
         });
       }
       state.map2d.add(drawingOverlay);
+      addDrawingVertexMarkers(state);
       if (!drawingPreviewPoint) {
         return;
       }
@@ -2482,11 +2554,27 @@
       updateDrawingOverlay(state);
     }
 
+    function dedupeTrailingDrawingPoints() {
+      // 双击结束时浏览器会先派发两次 click，二者落在同一像素、转成同一经纬度，
+      // 导致图形末尾出现重复顶点。这里把尾部重合的点合并成一个。
+      const eps = 1e-7;
+      while (drawingPoints.length >= 2) {
+        const a = drawingPoints[drawingPoints.length - 1];
+        const b = drawingPoints[drawingPoints.length - 2];
+        if (Math.abs(a[0] - b[0]) <= eps && Math.abs(a[1] - b[1]) <= eps) {
+          drawingPoints.pop();
+        } else {
+          break;
+        }
+      }
+    }
+
     function finishManualDrawing(state) {
       const tool = activeDrawTool;
       if (!tool || tool === "exit") {
         return false;
       }
+      dedupeTrailingDrawingPoints();
       const minPoints = minPointsForTool(tool);
       if (drawingPoints.length < minPoints) {
         const message = `点数不足：${toolNames[tool]}至少需要 ${minPoints} 点，当前 ${drawingPoints.length} 点。`;
@@ -2503,22 +2591,31 @@
       return true;
     }
 
+    function exitConceptGeometry() {
+      // 用户一旦手动画图/编辑，或使用自建体块、拖拽透视，就退出自动概念示意模式，
+      // 否则 renderCanvas3d 会一直走概念分支：建筑画成扁平地块、忽略自建体块与透视方向。
+      if (document.body.dataset.conceptGeometry === "true") {
+        document.body.dataset.conceptGeometry = "false";
+      }
+    }
+
     function applyDrawPath(tool, path) {
       ensureGeometryV2();
+      exitConceptGeometry();
       if (tool === "parcel" && path.length >= 3) {
+        parcelSerial += 1;
         const parcel = {
-          ...(geometry.parcels[0] || geometry.parcel || {}),
-          id: geometry.parcels[0]?.id || geometry.parcel?.id || "parcel-1",
-          name: geometry.parcels[0]?.name || geometry.parcel?.name || "地块红线",
+          id: `parcel-${parcelSerial}`,
+          name: parcelSerial > 1 ? `地块红线 ${parcelSerial}` : "地块红线",
           stroke: "#e1262f",
           fill: "#f8ed9a",
           path
         };
-        geometry.parcels = [parcel, ...geometry.parcels.filter((item) => item.id !== parcel.id)];
+        geometry.parcels = [...geometry.parcels, parcel];
         geometry.parcel = { ...parcel };
         selectedDrawObject = { type: "parcel", id: parcel.id };
         lastSelectedTool = "parcel";
-        upsertLabel("parcel", "地块红线", centroid(path), "parcel");
+        upsertLabel(parcel.id, parcel.name, centroid(path), "parcel");
       }
       if (tool === "underground" && path.length >= 3) {
         const item = normalizeSpatialItem({
@@ -2559,23 +2656,21 @@
         syncBuildingLabels();
       }
       if (tool === "station" && path.length >= 3) {
-        const station = {
-          ...geometry.station,
-          id: geometry.stationOutlines[0]?.id || geometry.station?.id || "station-1",
-          name: geometry.station?.name || "站体",
+        stationSerial += 1;
+        const station = normalizeSpatialItem({
+          id: `station-${stationSerial}`,
+          name: stationSerial > 1 ? `站体 ${stationSerial}` : (geometry.station?.name || "站体"),
           stroke: "#7d3f98",
           fill: "#8a58a5",
-          path
-        };
-        geometry.stationOutlines = [station, ...geometry.stationOutlines.filter((item) => item.id !== station.id)];
-        Object.assign(geometry.station, normalizeSpatialItem({
-          ...station,
-          body: path,
           path,
+          body: path,
           spaceType: currentSpaceType(),
           groundFloors: document.getElementById("groundFloorsInput")?.value,
           undergroundFloors: document.getElementById("undergroundFloorsInput")?.value
-        }, { spaceType: "underground", groundFloors: 0, undergroundFloors: 2 }));
+        }, { spaceType: "underground", groundFloors: 0, undergroundFloors: 2 });
+        geometry.stationOutlines = [...geometry.stationOutlines, station];
+        // 活动站体镜像到 legacy station，供出入口/自动通道引用
+        Object.assign(geometry.station, station);
         selectedDrawObject = { type: "station", id: station.id };
         lastSelectedTool = "station";
       }
@@ -2593,7 +2688,15 @@
     }
 
     function moveExitLabel(position) {
-      upsertLabel("exit", "群力站 1号口", position, "exit");
+      const stationName = geometry.station?.name
+        || linkedProjectRecord?.project?.station?.name
+        || query.get("station")
+        || "";
+      const exitName = geometry.exits?.find((item) => item.id === "exit-1")?.name
+        || geometry.station?.exitName
+        || "1号口";
+      const text = [stationName, exitName].filter(Boolean).join(" ") || "1号口";
+      upsertLabel("exit", text, position, "exit");
     }
 
     function centroid(path) {
@@ -3024,6 +3127,8 @@
       document.getElementById("customModelToggle").addEventListener("click", () => {
         useCustomBuildingPrisms = !useCustomBuildingPrisms;
         document.getElementById("customModelToggle").setAttribute("aria-pressed", String(useCustomBuildingPrisms));
+        // 一旦使用自建体块开关，就脱离自动概念示意，进入手动 3D 体块控制，按钮才与画面一致。
+        exitConceptGeometry();
         renderCanvas3d(map3d);
         setWorkflowGuide(useCustomBuildingPrisms
           ? "已显示自建体块。若透视方向不对，点“拖拽透视”后在右侧 3D 图上拖动。"
@@ -3033,6 +3138,10 @@
       document.getElementById("perspectiveDragButton").addEventListener("click", () => {
         isPerspectiveDragMode = !isPerspectiveDragMode;
         document.getElementById("perspectiveDragButton").setAttribute("aria-pressed", String(isPerspectiveDragMode));
+        if (isPerspectiveDragMode) {
+          exitConceptGeometry();
+          renderCanvas3d(map3d);
+        }
         setWorkflowGuide(isPerspectiveDragMode
           ? "透视调整中：在右侧 3D 图上按住并拖动，拖动方向就是通道/自建体块的立体投影方向。"
           : "已退出透视调整。");
@@ -3054,6 +3163,7 @@
           return;
         }
         if (activeDrawTool === "exit") {
+          exitConceptGeometry();
           geometry.station.exitPoint = point;
           const exit = geometry.exits.find((item) => item.id === "exit-1") || { id: "exit-1", name: "1号口" };
           exit.point = point;
@@ -3069,12 +3179,21 @@
           setStatus("已接收 1 号口点位，2D/3D 预览已刷新。");
           return;
         }
+        // 闭合检测：多边形类工具（红线/站体/建筑）点回起点附近即自动收尾，不再越过起点继续画。
+        if (activeDrawTool !== "channel" && drawingPoints.length >= minPointsForTool(activeDrawTool)) {
+          const first = getPoint(map2d.lngLatToContainer(drawingPoints[0]));
+          const here = getPoint(map2d.lngLatToContainer(point));
+          if (Math.hypot(first.x - here.x, first.y - here.y) <= 12) {
+            finishManualDrawing(state);
+            return;
+          }
+        }
         drawingPoints.push(point);
         drawingPreviewPoint = null;
         updateLastDraw(activeDrawTool);
         updateDrawingOverlay(state);
         updateDrawingControls();
-        setWorkflowGuide(`正在画${toolNames[activeDrawTool]}：已取 ${drawingPoints.length} 点，至少需要 ${minPointsForTool(activeDrawTool)} 点。点错可撤销上一点；轮廓闭合后点“完成绘制”。`);
+        setWorkflowGuide(`正在画${toolNames[activeDrawTool]}：已取 ${drawingPoints.length} 点，至少需要 ${minPointsForTool(activeDrawTool)} 点。点错可撤销上一点；点回起点或双击即可闭合完成。`);
         setStatus(`已采集 ${drawingPoints.length} 个点，继续点击或点“完成绘制”。`);
       }
 

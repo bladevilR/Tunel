@@ -110,10 +110,22 @@ async function main() {
 
   await page.click('[data-view-link="assessment"]');
   await page.waitForFunction(() => {
-    return document.querySelector(".view.active")?.id === "assessment"
+    return document.querySelector(".view.active")?.id === "assessment";
+  }, null, { timeout: 10000 });
+  await page.waitForSelector("#evaluateBtn", { state: "attached", timeout: 5000 });
+  await page.waitForSelector("#scoreValue", { state: "attached", timeout: 5000 });
+  const assessmentNeedsRun = await page.evaluate(() => {
+    return (document.querySelector("#scoreValue")?.textContent || "").trim() === "--";
+  });
+  if (assessmentNeedsRun) {
+    await page.click("#evaluateBtn");
+  }
+  await page.waitForFunction(() => {
+    const activeView = document.querySelector(".view.active")?.id;
+    return ["assessment", "reporting"].includes(activeView)
       && document.querySelectorAll(".factor-line").length >= 6
       && document.querySelectorAll("#stationContextPanel > div").length >= 5;
-  }, null, { timeout: 10000 });
+  }, null, { timeout: 20000 });
 
   await page.click('[data-view-link="knowledge"]');
   await page.waitForSelector("#knowledgeSearchInput", { timeout: 5000 });

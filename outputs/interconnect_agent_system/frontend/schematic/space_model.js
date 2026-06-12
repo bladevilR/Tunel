@@ -10,6 +10,7 @@
   const SPACE_TYPES = new Set(["ground", "underground"]);
   const GEOMETRY_SCHEMA_VERSION = "schematic-geometry.v2";
   const MAX_GROUND_FLOORS = 30;
+  const MAX_UNDERGROUND_FLOORS = 30;
 
   function normalizeSpaceType(value) {
     return SPACE_TYPES.has(value) ? value : "ground";
@@ -26,7 +27,7 @@
       ...item,
       spaceType: normalizeSpaceType(item.spaceType || defaults.spaceType),
       groundFloors: numberInRange(item.groundFloors, defaults.groundFloors ?? 4, 0, MAX_GROUND_FLOORS),
-      undergroundFloors: numberInRange(item.undergroundFloors, defaults.undergroundFloors ?? 1, 0, 12)
+      undergroundFloors: numberInRange(item.undergroundFloors, defaults.undergroundFloors ?? 1, 0, MAX_UNDERGROUND_FLOORS)
     };
   }
 

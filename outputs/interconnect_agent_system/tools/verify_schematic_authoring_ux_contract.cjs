@@ -51,8 +51,8 @@ assert.match(html, /function deleteSelectedObject\(/, "schematic should support 
 for (const collection of ["parcels", "stationOutlines", "exits", "channels", "buildings", "spatialItems"]) {
   assert.match(html, new RegExp(`geometry\\.${collection}`), `delete/select should cover geometry.${collection}`);
 }
-assert.match(html, /geometry\.parcels = \[parcel, \.\.\.geometry\.parcels\.filter/, "drawing parcel should update the v2 parcel collection");
-assert.match(html, /geometry\.stationOutlines = \[station, \.\.\.geometry\.stationOutlines\.filter/, "drawing station should update the v2 station collection");
+assert.match(html, /geometry\.parcels = \[\.\.\.geometry\.parcels, parcel\]/, "drawing parcel should append to the v2 parcel collection");
+assert.match(html, /geometry\.stationOutlines = \[\.\.\.geometry\.stationOutlines, station\]/, "drawing station should append to the v2 station collection");
 assert.match(html, /selectedDrawObject = \{ type: "parcel", id: parcel\.id \}/, "new parcel should become selected");
 assert.match(html, /selectedDrawObject = \{ type: "station", id: station\.id \}/, "new station should become selected");
 
